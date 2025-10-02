@@ -1,8 +1,9 @@
 /**
  * Dashboard Island - Muuri Masonry Layout
  *
- * 4 draggable cards: Transcript, Summary, Action Items, Audio Recordings
- * Uses Muuri for drag-drop masonry layout
+ * 5 draggable cards in 3-column responsive masonry layout
+ * Topic Graph spans all 3 columns for prominence
+ * Based on SvelteKit conversation_mapper masonry implementation
  */
 
 import { useSignalEffect, useSignal } from "@preact/signals";
@@ -17,8 +18,7 @@ import EmojimapViz from "./EmojimapViz.tsx";
 export default function DashboardIsland() {
   const gridRef = useRef<HTMLDivElement>(null);
   const muuriRef = useRef<any>(null);
-  const draggedIndex = useSignal<number | null>(null);
-  const draggedItemId = useSignal<string | null>(null);
+  const boundContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Action items state
   const sortMode = useSignal<'manual' | 'assignee' | 'date'>('manual');
@@ -29,7 +29,7 @@ export default function DashboardIsland() {
   const newItemAssignee = useSignal('');
   const newItemDueDate = useSignal('');
 
-  // Initialize Muuri on mount
+  // Initialize Muuri on mount with proper 3-column configuration
   useEffect(() => {
     if (!gridRef.current) return;
 
@@ -40,12 +40,28 @@ export default function DashboardIsland() {
         // @ts-ignore - Muuri types not perfect with Deno
         const Muuri = (await import("muuri")).default;
 
+        // Create bounded container for dragging (like SvelteKit version)
+        const boundContainer = document.createElement('div');
+        boundContainer.style.position = 'absolute';
+        boundContainer.style.zIndex = '100';
+        boundContainer.style.pointerEvents = 'none';
+        boundContainer.classList.add('muuri-drag-container');
+        document.body.appendChild(boundContainer);
+        boundContainerRef.current = boundContainer;
+
         instance = new Muuri(gridRef.current, {
           items: '.dashboard-card',
+
+          // CRITICAL: Use grid-sizer for column width calculation
+          columnWidth: '.grid-sizer',
+
           layoutDuration: 200,
           layoutEasing: 'cubic-bezier(0.17, 0.67, 0.83, 0.67)',
           layoutOnInit: true,
+
+          // Drag settings
           dragEnabled: true,
+          dragContainer: boundContainer,
           dragHandle: '.card-handle',
           dragSort: true,
           dragStartPredicate: {
@@ -54,15 +70,41 @@ export default function DashboardIsland() {
           },
           dragRelease: {
             duration: 200,
-            easing: 'cubic-bezier(0.17, 0.67, 0.83, 0.67)'
+            easing: 'cubic-bezier(0.17, 0.67, 0.83, 0.67)',
+            useDragContainer: true
           },
+
+          // Layout settings
           layout: {
             fillGaps: false,
-            horizontal: false
+            horizontal: false,
+            alignRight: false,
+            alignBottom: false
           }
         });
 
         muuriRef.current = instance;
+
+        // Update drag container position on scroll/resize
+        const updateDragContainer = () => {
+          if (!gridRef.current || !boundContainer) return;
+          const rect = gridRef.current.getBoundingClientRect();
+          boundContainer.style.top = `${rect.top}px`;
+          boundContainer.style.left = `${rect.left}px`;
+          boundContainer.style.width = `${rect.width}px`;
+          boundContainer.style.height = `${rect.height}px`;
+        };
+
+        updateDragContainer();
+        window.addEventListener('resize', updateDragContainer);
+        window.addEventListener('scroll', updateDragContainer);
+
+        // Clean up listeners on destroy
+        instance._cleanup = () => {
+          window.removeEventListener('resize', updateDragContainer);
+          window.removeEventListener('scroll', updateDragContainer);
+        };
+
       } catch (error) {
         console.error('Failed to initialize Muuri:', error);
       }
@@ -72,7 +114,12 @@ export default function DashboardIsland() {
 
     return () => {
       if (instance) {
+        instance._cleanup?.();
         instance.destroy();
+      }
+      if (boundContainerRef.current) {
+        boundContainerRef.current.remove();
+        boundContainerRef.current = null;
       }
     };
   }, []);
@@ -81,7 +128,7 @@ export default function DashboardIsland() {
   useSignalEffect(() => {
     if (conversationData.value && muuriRef.current) {
       setTimeout(() => {
-        muuriRef.current?.layout();
+        muuriRef.current?.refreshItems().layout();
       }, 100);
     }
   });
@@ -204,42 +251,13 @@ export default function DashboardIsland() {
     sortMode.value = modes[(currentIndex + 1) % modes.length];
   }
 
-  // Handle drag start
-  function handleDragStart(index: number, itemId: string) {
-    draggedIndex.value = index;
-    draggedItemId.value = itemId;
-  }
-
-  // Handle drag over
-  function handleDragOver(e: DragEvent, index: number) {
-    e.preventDefault();
-    if (draggedIndex.value === null) return;
-
-    // Visual feedback - could add hover styles here
-  }
-
-  // Handle drop
-  function handleDrop(e: DragEvent, targetIndex: number) {
-    e.preventDefault();
-    if (draggedIndex.value === null || !conversationData.value) return;
-
-    const items = [...conversationData.value.actionItems];
-    const [movedItem] = items.splice(draggedIndex.value, 1);
-    items.splice(targetIndex, 0, movedItem);
-
-    conversationData.value = {
-      ...conversationData.value,
-      actionItems: items
-    };
-
-    draggedIndex.value = null;
-    draggedItemId.value = null;
-  }
-
   return (
     <div>
-      {/* Grid Container */}
+      {/* Muuri Grid Container */}
       <div ref={gridRef} class="relative min-h-screen">
+
+        {/* CRITICAL: Grid sizer for column width calculation - hidden but essential */}
+        <div class="grid-sizer w-full md:w-1/2 lg:w-1/3" style="visibility: hidden; height: 0; position: absolute;"></div>
 
         {/* Card 1: Transcript */}
         <div class="dashboard-card w-full md:w-1/2 lg:w-1/3 p-2">
@@ -307,14 +325,6 @@ export default function DashboardIsland() {
                       class={`flex items-start gap-2 text-sm p-2 rounded hover:bg-gray-50 transition-all ${
                         item.status === 'completed' ? 'opacity-60' : ''
                       }`}
-                      draggable={sortMode.value === 'manual'}
-                      onDragStart={() => handleDragStart(index, item.id)}
-                      onDragOver={(e) => handleDragOver(e, index)}
-                      onDrop={(e) => handleDrop(e, index)}
-                      style={{
-                        opacity: draggedIndex.value === index ? 0.5 : 1,
-                        cursor: sortMode.value === 'manual' ? 'move' : 'default'
-                      }}
                     >
                       <input
                         type="checkbox"
@@ -360,13 +370,13 @@ export default function DashboardIsland() {
           </div>
         </div>
 
-        {/* Card 4: Topic Graph */}
-        <div class="dashboard-card w-full md:w-1/2 lg:w-1/3 p-2">
+        {/* Card 4: Topic Graph - FULL WIDTH (spans all 3 columns) */}
+        <div class="dashboard-card w-full p-2">
           <div class="bg-white rounded-lg border-4 border-soft-blue shadow-brutal h-full">
             <div class="card-handle bg-soft-blue px-4 py-3 cursor-move border-b-4 border-blue-700">
-              <h3 class="font-bold text-white">🕸️ Topic Map</h3>
+              <h3 class="font-bold text-white">🕸️ Topic Network</h3>
             </div>
-            <div class="p-4 max-h-96 overflow-y-auto">
+            <div class="p-4" style="min-height: 500px;">
               <EmojimapViz />
             </div>
           </div>
