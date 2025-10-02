@@ -8,6 +8,7 @@ import * as $api_joke from "./routes/api/joke.ts";
 import * as $api_process from "./routes/api/process.ts";
 import * as $greet_name_ from "./routes/greet/[name].tsx";
 import * as $index from "./routes/index.tsx";
+import * as $CircularNetworkGraph from "./islands/CircularNetworkGraph.tsx";
 import * as $Counter from "./islands/Counter.tsx";
 import * as $DashboardIsland from "./islands/DashboardIsland.tsx";
 import * as $EmojimapViz from "./islands/EmojimapViz.tsx";
@@ -24,6 +25,7 @@ const manifest = {
     "./routes/index.tsx": $index,
   },
   islands: {
+    "./islands/CircularNetworkGraph.tsx": $CircularNetworkGraph,
     "./islands/Counter.tsx": $Counter,
     "./islands/DashboardIsland.tsx": $DashboardIsland,
     "./islands/EmojimapViz.tsx": $EmojimapViz,

@@ -32,6 +32,7 @@
     "tailwindcss": "npm:tailwindcss@^3.4.0",
     "muuri": "npm:muuri@^0.9.5",
     "@google/generative-ai": "npm:@google/generative-ai@^0.7.0",
+    "d3": "npm:d3@^7.9.0",
     "@core/": "./core/"
   },
   "compilerOptions": {
