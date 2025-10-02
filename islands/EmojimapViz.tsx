@@ -20,22 +20,18 @@ export default function EmojimapViz() {
   }
 
   return (
-    <div class="bg-white rounded-lg border-4 border-soft-blue shadow-brutal p-6">
-      <h2 class="text-2xl font-bold text-soft-blue mb-4">
-        🕸️ Topic Map
-      </h2>
-
+    <div>
       {/* Topic Nodes */}
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+      <div class="grid grid-cols-2 gap-3 mb-4">
         {nodes.value.map((node) => (
           <div
             key={node.id}
-            class="flex items-center gap-2 p-3 rounded-lg border-2 hover:border-purple-400 transition-all"
-            style={{ borderColor: node.color || '#ccc' }}
+            class="flex items-center gap-2 p-2 rounded-lg border-2 hover:shadow-md transition-all cursor-pointer"
+            style={{ borderColor: node.color || '#cbd5e0' }}
           >
-            <span class="text-3xl">{node.emoji}</span>
+            <span class="text-2xl">{node.emoji}</span>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold truncate">{node.label}</p>
+              <p class="text-xs font-semibold truncate">{node.label}</p>
             </div>
           </div>
         ))}
@@ -43,10 +39,9 @@ export default function EmojimapViz() {
 
       {/* Connections Summary */}
       {edges.value.length > 0 && (
-        <div class="border-t-2 border-gray-200 pt-4">
-          <p class="text-sm text-gray-600">
-            <strong>{nodes.value.length}</strong> topics connected by{' '}
-            <strong>{edges.value.length}</strong> relationships
+        <div class="border-t-2 border-gray-200 pt-3">
+          <p class="text-xs text-gray-600">
+            <strong>{nodes.value.length}</strong> topics · <strong>{edges.value.length}</strong> connections
           </p>
         </div>
       )}
