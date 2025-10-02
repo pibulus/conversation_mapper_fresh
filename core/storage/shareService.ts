@@ -59,11 +59,58 @@ function getUniqueShareId(): string {
 // ===================================================================
 
 /**
+ * Compress data for URL encoding
+ */
+function compressData(data: any): string {
+  try {
+    const jsonStr = JSON.stringify(data);
+    // Simple compression: convert to base64
+    return btoa(encodeURIComponent(jsonStr));
+  } catch (error) {
+    console.error("Failed to compress data:", error);
+    return "";
+  }
+}
+
+/**
+ * Decompress data from URL encoding
+ */
+export function decompressData(compressed: string): any {
+  try {
+    const jsonStr = decodeURIComponent(atob(compressed));
+    return JSON.parse(jsonStr);
+  } catch (error) {
+    console.error("Failed to decompress data:", error);
+    return null;
+  }
+}
+
+/**
  * Create a shareable link for a conversation
+ * Attempts URL-based sharing first, falls back to localStorage for large data
  */
 export function createShare(data: ConversationData, expiresInDays?: number): string {
   if (typeof window === "undefined") return "";
 
+  // Create minimal shareable data (exclude large audio blobs)
+  const shareableData = {
+    title: data.title,
+    summary: data.summary,
+    transcript: data.transcript,
+    actionItems: data.actionItems,
+    timestamp: data.timestamp || new Date().toISOString(),
+  };
+
+  // Try to compress for URL sharing
+  const compressed = compressData(shareableData);
+
+  // Check if data fits in URL (keep under 2000 chars for compatibility)
+  if (compressed && compressed.length < 2000) {
+    // Return compressed data as shareId for URL-based sharing
+    return `url:${compressed}`;
+  }
+
+  // Fallback to localStorage for large data
   const shareId = getUniqueShareId();
   const shares = getAllShares();
 
@@ -89,15 +136,42 @@ export function getShareUrl(shareId: string): string {
   if (typeof window === "undefined") return "";
 
   const baseUrl = window.location.origin;
+
+  // Check if it's a URL-based share (compressed data)
+  if (shareId.startsWith("url:")) {
+    const data = shareId.slice(4); // Remove "url:" prefix
+    return `${baseUrl}/shared?data=${encodeURIComponent(data)}`;
+  }
+
+  // Regular localStorage-based share
   return `${baseUrl}/shared/${shareId}`;
 }
 
 /**
- * Load a shared conversation by ID
+ * Load a shared conversation by ID or from URL data
  */
 export function loadSharedConversation(shareId: string): SharedConversation | null {
   if (typeof window === "undefined") return null;
 
+  // Check if it's URL-based data
+  if (shareId.startsWith("data:")) {
+    const compressed = shareId.slice(5); // Remove "data:" prefix
+    const data = decompressData(compressed);
+
+    if (data) {
+      return {
+        ...data,
+        shareId: "url-share",
+        sharedAt: new Date().toISOString(),
+        conversation: {
+          id: `shared_${Date.now()}`,
+          ...data
+        }
+      } as SharedConversation;
+    }
+  }
+
+  // Regular localStorage-based share
   const shares = getAllShares();
   const shared = shares[shareId];
 

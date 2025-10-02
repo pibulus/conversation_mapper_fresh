@@ -1,6 +1,7 @@
 import UploadIsland from "../islands/UploadIsland.tsx";
 import DashboardIsland from "../islands/DashboardIsland.tsx";
 import ConversationList from "../islands/ConversationList.tsx";
+import MobileHistoryMenu from "../islands/MobileHistoryMenu.tsx";
 
 export default function Home() {
   return (
@@ -23,6 +24,9 @@ export default function Home() {
         <aside class="hidden md:block w-80 flex-shrink-0 overflow-hidden">
           <ConversationList />
         </aside>
+
+        {/* Mobile History Menu - Floating Button + Drawer */}
+        <MobileHistoryMenu />
 
         {/* Right Content Area */}
         <main class="flex-1 overflow-y-auto px-4 md:px-6 py-8">

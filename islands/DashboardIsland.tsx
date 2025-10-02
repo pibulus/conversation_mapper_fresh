@@ -30,6 +30,11 @@ export default function DashboardIsland() {
   const newItemDescription = useSignal('');
   const newItemAssignee = useSignal('');
   const newItemDueDate = useSignal('');
+  const searchQuery = useSignal('');
+  const showAssigneeDropdown = useSignal(false);
+
+  // Common assignee names (can be customized)
+  const commonAssignees = ['Me', 'Team Lead', 'Developer', 'Designer', 'QA', 'Product Manager', 'Client'];
 
   // Initialize Muuri only on tablet/desktop (>= 768px)
   useEffect(() => {
@@ -205,10 +210,22 @@ export default function DashboardIsland() {
 
   const { conversation, transcript, actionItems, nodes, summary } = conversationData.value;
 
-  // Sort action items
+  // Filter and sort action items
   const sortedActionItems = (() => {
-    const completed = actionItems.filter(item => item.status === 'completed');
-    const pending = actionItems.filter(item => item.status === 'pending');
+    let filteredItems = [...actionItems];
+
+    // Apply search filter
+    if (searchQuery.value) {
+      const query = searchQuery.value.toLowerCase();
+      filteredItems = filteredItems.filter(item =>
+        item.description.toLowerCase().includes(query) ||
+        item.assignee?.toLowerCase().includes(query) ||
+        item.due_date?.includes(query)
+      );
+    }
+
+    const completed = filteredItems.filter(item => item.status === 'completed');
+    const pending = filteredItems.filter(item => item.status === 'pending');
 
     const sortGroup = (items: typeof actionItems) => {
       if (sortMode.value === 'assignee') {
@@ -378,7 +395,17 @@ export default function DashboardIsland() {
                 </button>
               </div>
             </div>
-            <div class="p-4 max-h-96 overflow-y-auto">
+            {/* Search bar */}
+            <div class="px-4 pt-3 pb-1">
+              <input
+                type="text"
+                value={searchQuery.value}
+                onInput={(e) => searchQuery.value = (e.target as HTMLInputElement).value}
+                placeholder="🔍 Search items..."
+                class="w-full text-xs border-2 border-gray-200 rounded px-2 py-1 focus:border-green-400 focus:outline-none"
+              />
+            </div>
+            <div class="p-4 pt-2 max-h-96 overflow-y-auto">
               {sortedActionItems.length === 0 ? (
                 <p class="text-sm text-gray-500">No action items found</p>
               ) : (
@@ -419,11 +446,31 @@ export default function DashboardIsland() {
                             {item.description}
                           </p>
                         )}
-                        {item.assignee && (
-                          <p class="text-xs text-gray-600">👤 {item.assignee}</p>
-                        )}
-                        {item.due_date && (
-                          <p class="text-xs text-gray-600">📅 {item.due_date}</p>
+                        {(item.assignee || item.due_date) && (
+                          <div class="flex flex-wrap gap-2 mt-1">
+                            {item.assignee && (
+                              <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+                                👤 {item.assignee}
+                              </span>
+                            )}
+                            {item.due_date && (
+                              <span class={`text-xs px-2 py-0.5 rounded ${
+                                new Date(item.due_date) < new Date()
+                                  ? 'bg-red-100 text-red-700'
+                                  : new Date(item.due_date) < new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+                                  ? 'bg-yellow-100 text-yellow-700'
+                                  : 'bg-gray-100 text-gray-700'
+                              }`}>
+                                📅 {new Date(item.due_date).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: item.due_date.split('-')[0] !== new Date().getFullYear().toString()
+                                    ? 'numeric'
+                                    : undefined
+                                })}
+                              </span>
+                            )}
+                          </div>
                         )}
                       </div>
                     </li>
@@ -495,15 +542,43 @@ export default function DashboardIsland() {
                 />
               </div>
 
-              <div>
+              <div class="relative">
                 <label class="text-sm font-semibold">Assignee</label>
-                <input
-                  type="text"
-                  value={newItemAssignee.value}
-                  onInput={(e) => newItemAssignee.value = (e.target as HTMLInputElement).value}
-                  placeholder="Who's responsible?"
-                  class="w-full border-2 border-gray-300 rounded px-3 py-2 text-sm"
-                />
+                <div class="relative">
+                  <input
+                    type="text"
+                    value={newItemAssignee.value}
+                    onInput={(e) => newItemAssignee.value = (e.target as HTMLInputElement).value}
+                    onFocus={() => showAssigneeDropdown.value = true}
+                    onBlur={() => setTimeout(() => showAssigneeDropdown.value = false, 200)}
+                    placeholder="Who's responsible?"
+                    class="w-full border-2 border-gray-300 rounded px-3 py-2 text-sm pr-8"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => showAssigneeDropdown.value = !showAssigneeDropdown.value}
+                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  >
+                    ▼
+                  </button>
+                </div>
+                {showAssigneeDropdown.value && (
+                  <div class="absolute z-10 w-full mt-1 bg-white border-2 border-gray-300 rounded shadow-lg max-h-40 overflow-y-auto">
+                    {commonAssignees.map((assignee) => (
+                      <button
+                        type="button"
+                        key={assignee}
+                        onClick={() => {
+                          newItemAssignee.value = assignee;
+                          showAssigneeDropdown.value = false;
+                        }}
+                        class="w-full text-left px-3 py-2 text-sm hover:bg-purple-100 border-b border-gray-100 last:border-none"
+                      >
+                        {assignee}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>

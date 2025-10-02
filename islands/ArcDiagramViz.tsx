@@ -5,7 +5,8 @@
  * with arcs representing relationships between topics
  */
 
-import { useEffect, useRef, useSignal } from "@preact/hooks";
+import { useEffect, useRef } from "preact/hooks";
+import { useSignal } from "@preact/signals";
 import * as d3 from "d3";
 import { conversationData } from "../signals/conversationStore.ts";
 
