@@ -9,7 +9,8 @@
 import { useSignalEffect, useSignal } from "@preact/signals";
 import { useEffect, useRef } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
-import EmojimapViz from "./EmojimapViz.tsx";
+import VisualizationSelector from "./VisualizationSelector.tsx";
+import ShareButton from "./ShareButton.tsx";
 
 // ===================================================================
 // COMPONENT
@@ -433,14 +434,14 @@ export default function DashboardIsland() {
           </div>
         </div>
 
-        {/* Card 4: Topic Graph - FULL WIDTH (spans all columns) */}
+        {/* Card 4: Topic Visualizations - FULL WIDTH (spans all columns) */}
         <div class="dashboard-card w-full p-2">
           <div class="bg-white rounded-lg border-4 border-soft-blue shadow-brutal h-full">
             <div class="card-handle bg-soft-blue px-4 py-3 cursor-move border-b-4 border-blue-700">
-              <h3 class="font-bold text-white">🕸️ Topic Network</h3>
+              <h3 class="font-bold text-white">📊 Topic Visualizations</h3>
             </div>
             <div class="p-4" style="min-height: 500px;">
-              <EmojimapViz />
+              <VisualizationSelector />
             </div>
           </div>
         </div>
@@ -457,6 +458,18 @@ export default function DashboardIsland() {
               ) : (
                 <p class="text-sm text-gray-500">No audio uploaded</p>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* Card 6: Share & Export */}
+        <div class="dashboard-card w-full md:w-1/2 lg:w-1/3 p-2">
+          <div class="bg-white rounded-lg border-4 border-purple-300 shadow-brutal h-full">
+            <div class="card-handle bg-purple-400 px-4 py-3 cursor-move border-b-4 border-purple-500">
+              <h3 class="font-bold text-white">🔗 Share & Export</h3>
+            </div>
+            <div class="p-4">
+              <ShareButton />
             </div>
           </div>
         </div>

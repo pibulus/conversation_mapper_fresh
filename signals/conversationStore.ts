@@ -2,9 +2,11 @@
  * Shared Conversation Store
  *
  * Global signals for sharing conversation data between islands
+ * Auto-saves to localStorage on updates
  */
 
-import { signal } from "@preact/signals";
+import { signal, effect } from "@preact/signals";
+import { debouncedSave } from "../core/storage/localStorage.ts";
 
 export interface ConversationData {
   conversation: {
@@ -36,7 +38,18 @@ export interface ConversationData {
     status: 'pending' | 'completed';
   }>;
   statusUpdates: Array<any>;
+  summary?: string;
 }
 
 // Global conversation data signal
 export const conversationData = signal<ConversationData | null>(null);
+
+// Auto-save to localStorage whenever conversationData changes
+if (typeof window !== "undefined") {
+  effect(() => {
+    const data = conversationData.value;
+    if (data) {
+      debouncedSave(data);
+    }
+  });
+}
