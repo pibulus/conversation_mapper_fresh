@@ -19,13 +19,13 @@ export default function Home() {
 
       {/* Main Layout with Sidebar */}
       <div class="flex h-[calc(100vh-88px)]">
-        {/* Left Sidebar - Conversation History */}
-        <aside class="w-80 flex-shrink-0 overflow-hidden">
+        {/* Left Sidebar - Conversation History (hidden on mobile) */}
+        <aside class="hidden md:block w-80 flex-shrink-0 overflow-hidden">
           <ConversationList />
         </aside>
 
         {/* Right Content Area */}
-        <main class="flex-1 overflow-y-auto px-6 py-8">
+        <main class="flex-1 overflow-y-auto px-4 md:px-6 py-8">
           <div class="max-w-6xl mx-auto grid gap-6">
             {/* Upload Section */}
             <section class="bg-white rounded-lg border-4 border-pink-300 shadow-lg p-6">
