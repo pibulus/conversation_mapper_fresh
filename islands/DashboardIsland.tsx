@@ -1,9 +1,9 @@
 /**
- * Dashboard Island - Muuri Masonry Layout
+ * Dashboard Island - Responsive Masonry Layout
  *
- * 5 draggable cards in 3-column responsive masonry layout
- * Topic Graph spans all 3 columns for prominence
- * Based on SvelteKit conversation_mapper masonry implementation
+ * Mobile (<768px): Simple flexbox column (no Muuri)
+ * Tablet/Desktop (>=768px): Muuri masonry with drag-drop
+ * Topic Graph spans full width on all breakpoints
  */
 
 import { useSignalEffect, useSignal } from "@preact/signals";
@@ -19,6 +19,7 @@ export default function DashboardIsland() {
   const gridRef = useRef<HTMLDivElement>(null);
   const muuriRef = useRef<any>(null);
   const boundContainerRef = useRef<HTMLDivElement | null>(null);
+  const isMobile = useSignal(false);
 
   // Action items state
   const sortMode = useSignal<'manual' | 'assignee' | 'date'>('manual');
@@ -29,18 +30,35 @@ export default function DashboardIsland() {
   const newItemAssignee = useSignal('');
   const newItemDueDate = useSignal('');
 
-  // Initialize Muuri on mount with proper 3-column configuration
+  // Initialize Muuri only on tablet/desktop (>= 768px)
   useEffect(() => {
     if (!gridRef.current) return;
 
+    const MOBILE_BREAKPOINT = 768;
     let instance: any = null;
 
+    const checkViewport = () => {
+      const wasMobile = isMobile.value;
+      isMobile.value = window.innerWidth < MOBILE_BREAKPOINT;
+      return wasMobile !== isMobile.value; // true if changed
+    };
+
     const initMuuri = async () => {
+      if (!gridRef.current) return;
+
+      // Skip Muuri on mobile - use simple flexbox
+      if (isMobile.value) {
+        gridRef.current.style.display = 'flex';
+        gridRef.current.style.flexDirection = 'column';
+        gridRef.current.style.gap = '0';
+        return;
+      }
+
       try {
         // @ts-ignore - Muuri types not perfect with Deno
         const Muuri = (await import("muuri")).default;
 
-        // Create bounded container for dragging (like SvelteKit version)
+        // Create bounded container for dragging
         const boundContainer = document.createElement('div');
         boundContainer.style.position = 'absolute';
         boundContainer.style.zIndex = '100';
@@ -48,6 +66,11 @@ export default function DashboardIsland() {
         boundContainer.classList.add('muuri-drag-container');
         document.body.appendChild(boundContainer);
         boundContainerRef.current = boundContainer;
+
+        // Reset grid styles for Muuri
+        gridRef.current.style.display = '';
+        gridRef.current.style.flexDirection = '';
+        gridRef.current.style.gap = '';
 
         instance = new Muuri(gridRef.current, {
           items: '.dashboard-card',
@@ -110,9 +133,47 @@ export default function DashboardIsland() {
       }
     };
 
+    // Handle viewport changes
+    const handleResize = () => {
+      const viewportChanged = checkViewport();
+
+      if (viewportChanged) {
+        // Destroy Muuri if switching to mobile
+        if (isMobile.value && instance) {
+          instance._cleanup?.();
+          instance.destroy();
+          instance = null;
+          muuriRef.current = null;
+
+          if (boundContainerRef.current) {
+            boundContainerRef.current.remove();
+            boundContainerRef.current = null;
+          }
+
+          // Set up mobile flexbox
+          if (gridRef.current) {
+            gridRef.current.style.display = 'flex';
+            gridRef.current.style.flexDirection = 'column';
+            gridRef.current.style.gap = '0';
+          }
+        }
+        // Initialize Muuri if switching to tablet/desktop
+        else if (!isMobile.value && !instance) {
+          initMuuri();
+        }
+      }
+    };
+
+    // Initial check
+    checkViewport();
     initMuuri();
 
+    // Listen for resize
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
+
       if (instance) {
         instance._cleanup?.();
         instance.destroy();
@@ -124,9 +185,9 @@ export default function DashboardIsland() {
     };
   }, []);
 
-  // Refresh layout when data changes
+  // Refresh layout when data changes (only if Muuri is active)
   useSignalEffect(() => {
-    if (conversationData.value && muuriRef.current) {
+    if (conversationData.value && muuriRef.current && !isMobile.value) {
       setTimeout(() => {
         muuriRef.current?.refreshItems().layout();
       }, 100);
@@ -253,11 +314,13 @@ export default function DashboardIsland() {
 
   return (
     <div>
-      {/* Muuri Grid Container */}
+      {/* Grid Container - flexbox on mobile, Muuri masonry on tablet/desktop */}
       <div ref={gridRef} class="relative min-h-screen">
 
-        {/* CRITICAL: Grid sizer for column width calculation - hidden but essential */}
-        <div class="grid-sizer w-full md:w-1/2 lg:w-1/3" style="visibility: hidden; height: 0; position: absolute;"></div>
+        {/* Grid sizer - only used by Muuri on tablet/desktop */}
+        {!isMobile.value && (
+          <div class="grid-sizer w-full md:w-1/2 lg:w-1/3" style="visibility: hidden; height: 0; position: absolute;"></div>
+        )}
 
         {/* Card 1: Transcript */}
         <div class="dashboard-card w-full md:w-1/2 lg:w-1/3 p-2">
@@ -370,7 +433,7 @@ export default function DashboardIsland() {
           </div>
         </div>
 
-        {/* Card 4: Topic Graph - FULL WIDTH (spans all 3 columns) */}
+        {/* Card 4: Topic Graph - FULL WIDTH (spans all columns) */}
         <div class="dashboard-card w-full p-2">
           <div class="bg-white rounded-lg border-4 border-soft-blue shadow-brutal h-full">
             <div class="card-handle bg-soft-blue px-4 py-3 cursor-move border-b-4 border-blue-700">
