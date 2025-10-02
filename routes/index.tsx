@@ -1,6 +1,5 @@
 import UploadIsland from "../islands/UploadIsland.tsx";
 import DashboardIsland from "../islands/DashboardIsland.tsx";
-import EmojimapViz from "../islands/EmojimapViz.tsx";
 
 export default function Home() {
   return (
@@ -31,11 +30,6 @@ export default function Home() {
           {/* Dashboard with draggable cards */}
           <section>
             <DashboardIsland />
-          </section>
-
-          {/* Topic Map Visualization */}
-          <section>
-            <EmojimapViz />
           </section>
         </div>
       </main>
