@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Pablo's Soft Stack Theme */
+:root {
+  --color-paper: #FAF9F6;
+  --color-peach: #FFE5B4;
+  --color-hot-pink: #FF69B4;
+  --color-terminal-green: #00FF41;
+  --color-amber: #FFB000;
+  --color-soft-black: #0A0A0A;
+  --color-soft-purple: #9370DB;
+  --color-soft-blue: #87CEEB;
+  --color-soft-yellow: #F9E79F;
+  --color-soft-mint: #98FB98;
+}
+
+/* Global transitions for smooth interactions */
+* {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out,
+    transform 0.15s ease-in-out;
+}
