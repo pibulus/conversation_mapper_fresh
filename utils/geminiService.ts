@@ -9,23 +9,35 @@
 // Install with: npm install @google/generative-ai
 import { GoogleGenerativeAI } from "npm:@google/generative-ai@0.21.0";
 
-// Get API key from environment
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+// Hardcode the API key from the Svelte version for now
+// TODO: Move to proper env var system when needed
+const GEMINI_API_KEY = "***REMOVED***";
 
-if (!GEMINI_API_KEY) {
-  console.warn('⚠️ GEMINI_API_KEY not set. Markdown generation will fail.');
+let genAI: GoogleGenerativeAI | null = null;
+let model: any = null;
+
+// Lazy initialize to avoid breaking the app if SDK fails
+function getModel() {
+  if (!model && GEMINI_API_KEY) {
+    try {
+      genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+      model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    } catch (err) {
+      console.error('Failed to initialize Gemini:', err);
+    }
+  }
+  return model;
 }
-
-const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
-const model = genAI?.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
 
 export const geminiService = {
   /**
    * Generate markdown from conversation text using a custom prompt
    */
   async generateMarkdown(prompt: string, text: string): Promise<string> {
-    if (!model) {
-      throw new Error('Gemini API key not configured. Please set GEMINI_API_KEY environment variable.');
+    const modelInstance = getModel();
+
+    if (!modelInstance) {
+      throw new Error('Gemini API not available. Please check your API key.');
     }
 
     try {
@@ -42,7 +54,7 @@ Use proper markdown syntax including headers, lists, code blocks, etc as appropr
 CONVERSATION TEXT:
 ${text}`;
 
-      const result = await model.generateContent(fullPrompt);
+      const result = await modelInstance.generateContent(fullPrompt);
       const response = await result.response;
       const markdown = response.text().trim();
 

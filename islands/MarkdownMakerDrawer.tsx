@@ -42,7 +42,8 @@ function bounceEasing(t: number): number {
 
 export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conversationId }: MarkdownMakerDrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
-  const [animationClass, setAnimationClass] = useState("");
+  const [shouldRender, setShouldRender] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // Load saved outputs from localStorage
   useEffect(() => {
@@ -51,12 +52,17 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
     }
   }, [isOpen, conversationId]);
 
-  // Handle animation on open/close
+  // Handle smooth animation
   useEffect(() => {
     if (isOpen) {
-      setAnimationClass("drawer-slide-in");
+      setShouldRender(true);
+      // Small delay to ensure DOM is ready
+      setTimeout(() => setIsAnimating(true), 10);
     } else {
-      setAnimationClass("drawer-slide-out");
+      setIsAnimating(false);
+      // Wait for animation to complete before unmounting
+      const timeout = setTimeout(() => setShouldRender(false), 200);
+      return () => clearTimeout(timeout);
     }
   }, [isOpen]);
 
@@ -212,14 +218,21 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
     }
   }
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   return (
     <>
-      {/* Drawer with exact Svelte animation */}
+      {/* Drawer with smooth Svelte-style animation */}
       <div
         ref={drawerRef}
-        class={`fixed bottom-0 right-0 top-0 z-50 flex w-96 flex-col overflow-hidden border-l-4 border-soft-purple bg-paper shadow-brutal-lg ${animationClass}`}
+        class={`fixed bottom-0 right-0 top-0 z-50 flex w-96 flex-col overflow-hidden border-l-4 border-soft-purple bg-paper shadow-brutal-lg transition-transform duration-[400ms] ${
+          isAnimating ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        style={{
+          transitionTimingFunction: isAnimating
+            ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' // bounce in
+            : 'ease-in' // slide out
+        }}
       >
         {/* Header */}
         <div class="bg-soft-purple px-4 py-3 border-b-4 border-purple-600 flex justify-between items-center">
@@ -370,51 +383,6 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
           )}
         </div>
       </div>
-
-      {/* Exact animation from Svelte version */}
-      <style>{`
-        .drawer-slide-in {
-          animation: drawer-slide-in 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .drawer-slide-out {
-          animation: drawer-slide-out 200ms ease-in forwards;
-        }
-
-        @keyframes drawer-slide-in {
-          from {
-            transform: translateX(100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes drawer-slide-out {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(100%);
-          }
-        }
-
-        /* Custom cubic-bezier approximates the Svelte bounce easing */
-        @keyframes drawer-slide-in {
-          0% {
-            transform: translateX(100%);
-          }
-          50% {
-            transform: translateX(-10px);
-          }
-          75% {
-            transform: translateX(5px);
-          }
-          100% {
-            transform: translateX(0);
-          }
-        }
-      `}</style>
     </>
   );
 }
