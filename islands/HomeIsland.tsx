@@ -5,14 +5,21 @@
  * Shows only dashboard when data exists
  */
 
+import { signal } from "@preact/signals";
 import { conversationData } from "../signals/conversationStore.ts";
 import UploadIsland from "./UploadIsland.tsx";
 import DashboardIsland from "./DashboardIsland.tsx";
 import ConversationList from "./ConversationList.tsx";
 import MobileHistoryMenu from "./MobileHistoryMenu.tsx";
 import ShareButton from "./ShareButton.tsx";
+import MarkdownMakerDrawer from "./MarkdownMakerDrawer.tsx";
+
+const drawerOpen = signal(false);
 
 export default function HomeIsland() {
+  // Get transcript for MarkdownMaker
+  const transcript = conversationData.value?.transcript?.text || '';
+
   return (
     <div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
       {/* Header - Dynamic based on conversation state */}
@@ -36,6 +43,44 @@ export default function HomeIsland() {
                     🎤 Audio
                   </button>
                 )}
+                {/* Markdown Maker Drawer Toggle */}
+                <button
+                  onClick={() => drawerOpen.value = !drawerOpen.value}
+                  class="px-4 py-2 bg-soft-purple border-2 border-purple-600 rounded hover:bg-purple-500 transition-colors flex items-center gap-2 font-semibold text-sm text-white"
+                  title="Toggle Markdown Maker"
+                >
+                  {drawerOpen.value ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 6h16M4 12h16m-7 6h7"
+                      />
+                    </svg>
+                  )}
+                </button>
                 {/* Share button */}
                 <div>
                   <ShareButton />
@@ -55,6 +100,15 @@ export default function HomeIsland() {
           )}
         </div>
       </header>
+
+      {/* MarkdownMaker Drawer */}
+      {conversationData.value && (
+        <MarkdownMakerDrawer
+          isOpen={drawerOpen.value}
+          onClose={() => drawerOpen.value = false}
+          transcript={transcript}
+        />
+      )}
 
       {/* Main Layout with Conditional Sidebar */}
       <div class="flex h-[calc(100vh-88px)]">
