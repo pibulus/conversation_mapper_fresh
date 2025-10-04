@@ -2,11 +2,12 @@
  * EmojimapViz Island - Topic Graph Visualization
  *
  * Non-chronological topic map showing emoji nodes and their relationships
+ * Uses force-directed physics simulation for organic layout
  */
 
 import { useComputed } from "@preact/signals";
 import { conversationData } from "../signals/conversationStore.ts";
-import CircularNetworkGraph from "./CircularNetworkGraph.tsx";
+import ForceDirectedGraph from "./ForceDirectedGraph.tsx";
 
 export default function EmojimapViz() {
   const nodes = useComputed(() => conversationData.value?.nodes || []);
@@ -20,5 +21,5 @@ export default function EmojimapViz() {
     );
   }
 
-  return <CircularNetworkGraph loading={loading.value} />;
+  return <ForceDirectedGraph loading={loading.value} />;
 }

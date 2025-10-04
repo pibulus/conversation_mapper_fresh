@@ -16,6 +16,8 @@ import * as $ConversationList from "./islands/ConversationList.tsx";
 import * as $Counter from "./islands/Counter.tsx";
 import * as $DashboardIsland from "./islands/DashboardIsland.tsx";
 import * as $EmojimapViz from "./islands/EmojimapViz.tsx";
+import * as $ForceDirectedGraph from "./islands/ForceDirectedGraph.tsx";
+import * as $HomeIsland from "./islands/HomeIsland.tsx";
 import * as $MobileHistoryMenu from "./islands/MobileHistoryMenu.tsx";
 import * as $ShareButton from "./islands/ShareButton.tsx";
 import * as $SharedConversationLoader from "./islands/SharedConversationLoader.tsx";
@@ -41,6 +43,8 @@ const manifest = {
     "./islands/Counter.tsx": $Counter,
     "./islands/DashboardIsland.tsx": $DashboardIsland,
     "./islands/EmojimapViz.tsx": $EmojimapViz,
+    "./islands/ForceDirectedGraph.tsx": $ForceDirectedGraph,
+    "./islands/HomeIsland.tsx": $HomeIsland,
     "./islands/MobileHistoryMenu.tsx": $MobileHistoryMenu,
     "./islands/ShareButton.tsx": $ShareButton,
     "./islands/SharedConversationLoader.tsx": $SharedConversationLoader,

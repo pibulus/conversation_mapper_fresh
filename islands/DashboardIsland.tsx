@@ -1,26 +1,20 @@
 /**
- * Dashboard Island - Responsive Masonry Layout
+ * Dashboard Island - Simple CSS Grid Layout
  *
- * Mobile (<768px): Simple flexbox column (no Muuri)
- * Tablet/Desktop (>=768px): Muuri masonry with drag-drop
- * Topic Graph spans full width on all breakpoints
+ * Clean 3-column grid (1 on mobile, 2 on tablet, 3 on desktop)
+ * Topic Graph spans full width
  */
 
-import { useSignalEffect, useSignal } from "@preact/signals";
-import { useEffect, useRef } from "preact/hooks";
+import { useSignal } from "@preact/signals";
 import { conversationData } from "../signals/conversationStore.ts";
 import VisualizationSelector from "./VisualizationSelector.tsx";
-import ShareButton from "./ShareButton.tsx";
+import { showToast, copyToClipboard } from "../utils/toast.ts";
 
 // ===================================================================
 // COMPONENT
 // ===================================================================
 
 export default function DashboardIsland() {
-  const gridRef = useRef<HTMLDivElement>(null);
-  const muuriRef = useRef<any>(null);
-  const boundContainerRef = useRef<HTMLDivElement | null>(null);
-  const isMobile = useSignal(false);
 
   // Action items state
   const sortMode = useSignal<'manual' | 'assignee' | 'date'>('manual');
@@ -35,170 +29,6 @@ export default function DashboardIsland() {
 
   // Common assignee names (can be customized)
   const commonAssignees = ['Me', 'Team Lead', 'Developer', 'Designer', 'QA', 'Product Manager', 'Client'];
-
-  // Initialize Muuri only on tablet/desktop (>= 768px)
-  useEffect(() => {
-    if (!gridRef.current) return;
-
-    const MOBILE_BREAKPOINT = 768;
-    let instance: any = null;
-
-    const checkViewport = () => {
-      const wasMobile = isMobile.value;
-      isMobile.value = window.innerWidth < MOBILE_BREAKPOINT;
-      return wasMobile !== isMobile.value; // true if changed
-    };
-
-    const initMuuri = async () => {
-      if (!gridRef.current) return;
-
-      // Skip Muuri on mobile - use simple flexbox
-      if (isMobile.value) {
-        gridRef.current.style.display = 'flex';
-        gridRef.current.style.flexDirection = 'column';
-        gridRef.current.style.gap = '0';
-        return;
-      }
-
-      try {
-        // @ts-ignore - Muuri types not perfect with Deno
-        const Muuri = (await import("muuri")).default;
-
-        // Create bounded container for dragging
-        const boundContainer = document.createElement('div');
-        boundContainer.style.position = 'absolute';
-        boundContainer.style.zIndex = '100';
-        boundContainer.style.pointerEvents = 'none';
-        boundContainer.classList.add('muuri-drag-container');
-        document.body.appendChild(boundContainer);
-        boundContainerRef.current = boundContainer;
-
-        // Reset grid styles for Muuri
-        gridRef.current.style.display = '';
-        gridRef.current.style.flexDirection = '';
-        gridRef.current.style.gap = '';
-
-        instance = new Muuri(gridRef.current, {
-          items: '.dashboard-card',
-
-          // CRITICAL: Use grid-sizer for column width calculation
-          columnWidth: '.grid-sizer',
-
-          layoutDuration: 200,
-          layoutEasing: 'cubic-bezier(0.17, 0.67, 0.83, 0.67)',
-          layoutOnInit: true,
-
-          // Drag settings
-          dragEnabled: true,
-          dragContainer: boundContainer,
-          dragHandle: '.card-handle',
-          dragSort: true,
-          dragStartPredicate: {
-            distance: 5,
-            delay: 0
-          },
-          dragRelease: {
-            duration: 200,
-            easing: 'cubic-bezier(0.17, 0.67, 0.83, 0.67)',
-            useDragContainer: true
-          },
-
-          // Layout settings
-          layout: {
-            fillGaps: false,
-            horizontal: false,
-            alignRight: false,
-            alignBottom: false
-          }
-        });
-
-        muuriRef.current = instance;
-
-        // Update drag container position on scroll/resize
-        const updateDragContainer = () => {
-          if (!gridRef.current || !boundContainer) return;
-          const rect = gridRef.current.getBoundingClientRect();
-          boundContainer.style.top = `${rect.top}px`;
-          boundContainer.style.left = `${rect.left}px`;
-          boundContainer.style.width = `${rect.width}px`;
-          boundContainer.style.height = `${rect.height}px`;
-        };
-
-        updateDragContainer();
-        window.addEventListener('resize', updateDragContainer);
-        window.addEventListener('scroll', updateDragContainer);
-
-        // Clean up listeners on destroy
-        instance._cleanup = () => {
-          window.removeEventListener('resize', updateDragContainer);
-          window.removeEventListener('scroll', updateDragContainer);
-        };
-
-      } catch (error) {
-        console.error('Failed to initialize Muuri:', error);
-      }
-    };
-
-    // Handle viewport changes
-    const handleResize = () => {
-      const viewportChanged = checkViewport();
-
-      if (viewportChanged) {
-        // Destroy Muuri if switching to mobile
-        if (isMobile.value && instance) {
-          instance._cleanup?.();
-          instance.destroy();
-          instance = null;
-          muuriRef.current = null;
-
-          if (boundContainerRef.current) {
-            boundContainerRef.current.remove();
-            boundContainerRef.current = null;
-          }
-
-          // Set up mobile flexbox
-          if (gridRef.current) {
-            gridRef.current.style.display = 'flex';
-            gridRef.current.style.flexDirection = 'column';
-            gridRef.current.style.gap = '0';
-          }
-        }
-        // Initialize Muuri if switching to tablet/desktop
-        else if (!isMobile.value && !instance) {
-          initMuuri();
-        }
-      }
-    };
-
-    // Initial check
-    checkViewport();
-    initMuuri();
-
-    // Listen for resize
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-
-      if (instance) {
-        instance._cleanup?.();
-        instance.destroy();
-      }
-      if (boundContainerRef.current) {
-        boundContainerRef.current.remove();
-        boundContainerRef.current = null;
-      }
-    };
-  }, []);
-
-  // Refresh layout when data changes (only if Muuri is active)
-  useSignalEffect(() => {
-    if (conversationData.value && muuriRef.current && !isMobile.value) {
-      setTimeout(() => {
-        muuriRef.current?.refreshItems().layout();
-      }, 100);
-    }
-  });
 
   if (!conversationData.value) {
     return (
@@ -332,39 +162,68 @@ export default function DashboardIsland() {
 
   return (
     <div>
-      {/* Grid Container - flexbox on mobile, Muuri masonry on tablet/desktop */}
-      <div ref={gridRef} class="relative min-h-screen">
-
-        {/* Grid sizer - only used by Muuri on tablet/desktop */}
-        {!isMobile.value && (
-          <div class="grid-sizer w-full md:w-1/2 lg:w-1/3" style="visibility: hidden; height: 0; position: absolute;"></div>
-        )}
+      {/* Grid Container - Simple CSS Grid */}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
         {/* Card 1: Transcript */}
-        <div class="dashboard-card w-full md:w-1/2 lg:w-1/3 p-2">
+        <div class="w-full">
           <div class="bg-white rounded-lg border-4 border-purple-300 shadow-brutal h-full">
-            <div class="card-handle bg-purple-400 px-4 py-3 cursor-move border-b-4 border-purple-500">
+            <div class="bg-purple-400 px-4 py-3 border-b-4 border-purple-500 flex justify-between items-center">
               <h3 class="font-bold text-white">📝 Transcript</h3>
+              <button
+                onClick={() => transcript?.text && copyToClipboard(transcript.text)}
+                class="text-white hover:text-gray-200 cursor-pointer transition-colors"
+                title="Copy transcript"
+                disabled={!transcript?.text}
+              >
+                <i class="fa fa-copy text-sm"></i>
+              </button>
             </div>
             <div class="p-4 max-h-96 overflow-y-auto">
-              <div class="whitespace-pre-wrap text-sm font-mono">
-                {transcript.text}
-              </div>
+              {!transcript?.text || transcript.text.trim() === '' ? (
+                <div class="flex flex-col items-center justify-center py-8 text-center">
+                  <i class="fa fa-file-text-o text-4xl text-gray-300 mb-3"></i>
+                  <p class="text-sm font-medium text-gray-600">No transcript available</p>
+                  <p class="text-xs text-gray-500 mt-1">Upload a conversation to see the transcript</p>
+                </div>
+              ) : (
+                <div class="whitespace-pre-wrap text-sm font-mono">
+                  {transcript.text}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Card 2: Summary */}
-        <div class="dashboard-card w-full md:w-1/2 lg:w-1/3 p-2">
+        <div class="w-full">
           <div class="bg-white rounded-lg border-4 border-pink-300 shadow-brutal h-full">
-            <div class="card-handle bg-pink-400 px-4 py-3 cursor-move border-b-4 border-pink-500 flex justify-between items-center">
+            <div class="bg-pink-400 px-4 py-3 border-b-4 border-pink-500 flex justify-between items-center">
               <h3 class="font-bold text-white">📊 Summary</h3>
-              <span class="text-xs text-white opacity-75">{conversation.title}</span>
+              <div class="flex items-center gap-2">
+                <button
+                  onClick={() => summary && copyToClipboard(summary)}
+                  class="text-white hover:text-gray-200 cursor-pointer transition-colors"
+                  title="Copy summary"
+                  disabled={!summary}
+                >
+                  <i class="fa fa-copy text-sm"></i>
+                </button>
+                <span class="text-xs text-white opacity-75">{conversation.title}</span>
+              </div>
             </div>
             <div class="p-4 max-h-96 overflow-y-auto">
-              <p class="text-sm whitespace-pre-wrap">
-                {summary || "No summary generated"}
-              </p>
+              {!summary || summary === "No summary generated" ? (
+                <div class="flex flex-col items-center justify-center py-8 text-center">
+                  <i class="fa fa-info-circle text-4xl text-gray-300 mb-3"></i>
+                  <p class="text-sm font-medium text-gray-600">No summary available yet</p>
+                  <p class="text-xs text-gray-500 mt-1">Upload a conversation to generate a summary</p>
+                </div>
+              ) : (
+                <p class="text-sm whitespace-pre-wrap">
+                  {summary}
+                </p>
+              )}
               <div class="mt-4 text-xs text-gray-600 border-t pt-2">
                 <p>📊 Topics: {nodes.length}</p>
                 <p>📝 Source: {conversation.source}</p>
@@ -374,9 +233,9 @@ export default function DashboardIsland() {
         </div>
 
         {/* Card 3: Action Items */}
-        <div class="dashboard-card w-full md:w-1/2 lg:w-1/3 p-2">
+        <div class="w-full">
           <div class="bg-white rounded-lg border-4 border-terminal-green shadow-brutal h-full">
-            <div class="card-handle bg-terminal-green px-4 py-3 cursor-move border-b-4 border-green-700 flex justify-between items-center">
+            <div class="bg-terminal-green px-4 py-3 border-b-4 border-green-700 flex justify-between items-center">
               <h3 class="font-bold text-soft-black">✅ Action Items</h3>
               <div class="flex gap-2">
                 <button
@@ -407,7 +266,11 @@ export default function DashboardIsland() {
             </div>
             <div class="p-4 pt-2 max-h-96 overflow-y-auto">
               {sortedActionItems.length === 0 ? (
-                <p class="text-sm text-gray-500">No action items found</p>
+                <div class="flex flex-col items-center justify-center py-8 text-center">
+                  <i class="fa fa-clipboard-check text-4xl text-gray-300 mb-3"></i>
+                  <p class="text-sm font-medium text-gray-600">No action items found</p>
+                  <p class="text-xs text-gray-500 mt-1">Add one manually using the + button</p>
+                </div>
               ) : (
                 <ul class="space-y-2">
                   {sortedActionItems.map((item, index) => (
@@ -482,41 +345,13 @@ export default function DashboardIsland() {
         </div>
 
         {/* Card 4: Topic Visualizations - FULL WIDTH (spans all columns) */}
-        <div class="dashboard-card w-full p-2">
+        <div class="w-full lg:col-span-3">
           <div class="bg-white rounded-lg border-4 border-soft-blue shadow-brutal h-full">
-            <div class="card-handle bg-soft-blue px-4 py-3 cursor-move border-b-4 border-blue-700">
+            <div class="bg-soft-blue px-4 py-3 border-b-4 border-blue-700">
               <h3 class="font-bold text-white">📊 Topic Visualizations</h3>
             </div>
             <div class="p-4" style="min-height: 500px;">
               <VisualizationSelector />
-            </div>
-          </div>
-        </div>
-
-        {/* Card 5: Audio Recordings */}
-        <div class="dashboard-card w-full md:w-1/2 lg:w-1/3 p-2">
-          <div class="bg-white rounded-lg border-4 border-amber shadow-brutal h-full">
-            <div class="card-handle bg-amber px-4 py-3 cursor-move border-b-4 border-yellow-700">
-              <h3 class="font-bold text-soft-black">🎤 Audio Recordings</h3>
-            </div>
-            <div class="p-4">
-              {conversation.source === 'audio' ? (
-                <p class="text-sm">Audio file processed ✓</p>
-              ) : (
-                <p class="text-sm text-gray-500">No audio uploaded</p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Card 6: Share & Export */}
-        <div class="dashboard-card w-full md:w-1/2 lg:w-1/3 p-2">
-          <div class="bg-white rounded-lg border-4 border-purple-300 shadow-brutal h-full">
-            <div class="card-handle bg-purple-400 px-4 py-3 cursor-move border-b-4 border-purple-500">
-              <h3 class="font-bold text-white">🔗 Share & Export</h3>
-            </div>
-            <div class="p-4">
-              <ShareButton />
             </div>
           </div>
         </div>
