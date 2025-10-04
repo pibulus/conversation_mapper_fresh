@@ -9,9 +9,8 @@
 // Install with: npm install @google/generative-ai
 import { GoogleGenerativeAI } from "npm:@google/generative-ai@0.21.0";
 
-// Hardcode the API key from the Svelte version for now
-// TODO: Move to proper env var system when needed
-const GEMINI_API_KEY = "***REMOVED***";
+// Load API key from environment (Fresh/Deno doesn't auto-inject VITE_ vars)
+const GEMINI_API_KEY = Deno.env.get("VITE_GEMINI_API_KEY") || "";
 
 let genAI: GoogleGenerativeAI | null = null;
 let model: any = null;

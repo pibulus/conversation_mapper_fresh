@@ -6,14 +6,12 @@ import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $api_joke from "./routes/api/joke.ts";
 import * as $api_process from "./routes/api/process.ts";
-import * as $greet_name_ from "./routes/greet/[name].tsx";
 import * as $index from "./routes/index.tsx";
 import * as $shared_shareId_ from "./routes/shared/[shareId].tsx";
 import * as $shared_index from "./routes/shared/index.tsx";
 import * as $ArcDiagramViz from "./islands/ArcDiagramViz.tsx";
 import * as $CircularNetworkGraph from "./islands/CircularNetworkGraph.tsx";
 import * as $ConversationList from "./islands/ConversationList.tsx";
-import * as $Counter from "./islands/Counter.tsx";
 import * as $DashboardIsland from "./islands/DashboardIsland.tsx";
 import * as $EmojimapViz from "./islands/EmojimapViz.tsx";
 import * as $ForceDirectedGraph from "./islands/ForceDirectedGraph.tsx";
@@ -32,7 +30,6 @@ const manifest = {
     "./routes/_app.tsx": $_app,
     "./routes/api/joke.ts": $api_joke,
     "./routes/api/process.ts": $api_process,
-    "./routes/greet/[name].tsx": $greet_name_,
     "./routes/index.tsx": $index,
     "./routes/shared/[shareId].tsx": $shared_shareId_,
     "./routes/shared/index.tsx": $shared_index,
@@ -41,7 +38,6 @@ const manifest = {
     "./islands/ArcDiagramViz.tsx": $ArcDiagramViz,
     "./islands/CircularNetworkGraph.tsx": $CircularNetworkGraph,
     "./islands/ConversationList.tsx": $ConversationList,
-    "./islands/Counter.tsx": $Counter,
     "./islands/DashboardIsland.tsx": $DashboardIsland,
     "./islands/EmojimapViz.tsx": $EmojimapViz,
     "./islands/ForceDirectedGraph.tsx": $ForceDirectedGraph,
