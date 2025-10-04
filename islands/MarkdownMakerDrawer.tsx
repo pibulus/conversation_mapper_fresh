@@ -2,18 +2,28 @@
  * MarkdownMaker Drawer Island
  *
  * Right-hand slide-in drawer for converting conversations to different formats
- * Ported from Svelte conversation_mapper version
+ * Ported from Svelte conversation_mapper version with full functionality
  */
 
 import { signal } from "@preact/signals";
-import { useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { markdownPrompts } from "../utils/markdownPrompts.ts";
+import { geminiService } from "../utils/geminiService.ts";
 import { showToast } from "../utils/toast.ts";
 
 interface MarkdownMakerDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   transcript: string;
+  conversationId: string;
+}
+
+interface SavedOutput {
+  id: string;
+  conversation_id: string;
+  content: string;
+  prompt: string;
+  created_at: string;
 }
 
 const selectedPromptId = signal<string | null>(null);
@@ -21,9 +31,34 @@ const customPrompt = signal("");
 const markdown = signal("");
 const loading = signal(false);
 const error = signal<string | null>(null);
+const savedOutputs = signal<SavedOutput[]>([]);
 
-export default function MarkdownMakerDrawer({ isOpen, onClose, transcript }: MarkdownMakerDrawerProps) {
+// Bounce easing function - EXACT copy from Svelte version
+function bounceEasing(t: number): number {
+  const b = 3; // Bounce frequency
+  const d = 0.7; // Damping
+  return 1 - Math.pow(1 - t, 2) * (1 + d * Math.sin(b * Math.PI * t));
+}
+
+export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conversationId }: MarkdownMakerDrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
+  const [animationClass, setAnimationClass] = useState("");
+
+  // Load saved outputs from localStorage
+  useEffect(() => {
+    if (isOpen && conversationId) {
+      loadSavedOutputs();
+    }
+  }, [isOpen, conversationId]);
+
+  // Handle animation on open/close
+  useEffect(() => {
+    if (isOpen) {
+      setAnimationClass("drawer-slide-in");
+    } else {
+      setAnimationClass("drawer-slide-out");
+    }
+  }, [isOpen]);
 
   // Handle click outside to close
   useEffect(() => {
@@ -46,6 +81,66 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript }: Mar
     };
   }, [isOpen, onClose]);
 
+  // Load saved outputs from localStorage
+  function loadSavedOutputs() {
+    try {
+      const stored = localStorage.getItem('markdown_outputs');
+      if (stored) {
+        const allOutputs: SavedOutput[] = JSON.parse(stored);
+        savedOutputs.value = allOutputs.filter(o => o.conversation_id === conversationId);
+      }
+    } catch (err) {
+      console.error('Error loading saved outputs:', err);
+    }
+  }
+
+  // Save output to localStorage
+  function saveOutput() {
+    if (!markdown.value || !conversationId) return;
+
+    try {
+      const newOutput: SavedOutput = {
+        id: crypto.randomUUID(),
+        conversation_id: conversationId,
+        content: markdown.value,
+        prompt: selectedPromptId.value
+          ? markdownPrompts.find(p => p.id === selectedPromptId.value)?.label || 'Custom'
+          : 'Custom',
+        created_at: new Date().toISOString()
+      };
+
+      // Get all outputs, add new one, save back
+      const stored = localStorage.getItem('markdown_outputs');
+      const allOutputs: SavedOutput[] = stored ? JSON.parse(stored) : [];
+      allOutputs.push(newOutput);
+      localStorage.setItem('markdown_outputs', JSON.stringify(allOutputs));
+
+      // Update signal
+      savedOutputs.value = allOutputs.filter(o => o.conversation_id === conversationId);
+      showToast('Output saved!', 'success');
+    } catch (err) {
+      console.error('Error saving output:', err);
+      showToast('Failed to save output', 'error');
+    }
+  }
+
+  // Delete saved output
+  function deleteOutput(id: string) {
+    try {
+      const stored = localStorage.getItem('markdown_outputs');
+      if (stored) {
+        const allOutputs: SavedOutput[] = JSON.parse(stored);
+        const filtered = allOutputs.filter(o => o.id !== id);
+        localStorage.setItem('markdown_outputs', JSON.stringify(filtered));
+        savedOutputs.value = filtered.filter(o => o.conversation_id === conversationId);
+        showToast('Output deleted', 'success');
+      }
+    } catch (err) {
+      console.error('Error deleting output:', err);
+      showToast('Failed to delete output', 'error');
+    }
+  }
+
   // Generate markdown from preset prompt
   async function generateFromPreset(promptId: string) {
     const promptOption = markdownPrompts.find(p => p.id === promptId);
@@ -60,14 +155,12 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript }: Mar
     selectedPromptId.value = promptId;
 
     try {
-      // TODO: Implement Gemini API call
-      // For now, just show a placeholder
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      markdown.value = `# ${promptOption.label}\n\n*Generated from conversation*\n\n${transcript.substring(0, 200)}...\n\n*Note: Gemini API integration pending*`;
+      const result = await geminiService.generateMarkdown(promptOption.prompt, transcript);
+      markdown.value = result;
       showToast('Markdown generated!', 'success');
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Generation failed';
-      showToast('Failed to generate markdown', 'error');
+      showToast(err instanceof Error ? err.message : 'Failed to generate markdown', 'error');
       markdown.value = '';
     } finally {
       loading.value = false;
@@ -87,13 +180,12 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript }: Mar
     selectedPromptId.value = null;
 
     try {
-      // TODO: Implement Gemini API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      markdown.value = `# Custom Output\n\n*Generated with custom prompt*\n\n${transcript.substring(0, 200)}...\n\n*Note: Gemini API integration pending*`;
+      const result = await geminiService.generateMarkdown(customPrompt.value, transcript);
+      markdown.value = result;
       showToast('Markdown generated!', 'success');
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Generation failed';
-      showToast('Failed to generate markdown', 'error');
+      showToast(err instanceof Error ? err.message : 'Failed to generate markdown', 'error');
       markdown.value = '';
     } finally {
       loading.value = false;
@@ -110,16 +202,24 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript }: Mar
     }
   }
 
+  // Copy saved output
+  async function copySavedOutput(content: string) {
+    try {
+      await navigator.clipboard.writeText(content);
+      showToast('Copied to clipboard!', 'success');
+    } catch (err) {
+      showToast('Failed to copy', 'error');
+    }
+  }
+
   if (!isOpen) return null;
 
   return (
     <>
-      {/* Drawer */}
+      {/* Drawer with exact Svelte animation */}
       <div
         ref={drawerRef}
-        class={`fixed bottom-0 right-0 top-0 z-50 flex w-96 flex-col overflow-hidden border-l-4 border-soft-purple bg-paper shadow-brutal-lg ${
-          isOpen ? 'animate-slide-in-right' : ''
-        }`}
+        class={`fixed bottom-0 right-0 top-0 z-50 flex w-96 flex-col overflow-hidden border-l-4 border-soft-purple bg-paper shadow-brutal-lg ${animationClass}`}
       >
         {/* Header */}
         <div class="bg-soft-purple px-4 py-3 border-b-4 border-purple-600 flex justify-between items-center">
@@ -205,24 +305,116 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript }: Mar
 
           {/* Markdown Preview */}
           {markdown.value && (
-            <div class="border-4 border-soft-blue rounded-lg shadow-brutal-sm overflow-hidden">
+            <div class="border-4 border-soft-blue rounded-lg shadow-brutal-sm overflow-hidden mb-4">
               <div class="bg-soft-blue px-4 py-2 border-b-4 border-blue-600 flex justify-between items-center">
                 <span class="font-bold text-white">Preview</span>
-                <button
-                  class="text-white hover:text-gray-200 cursor-pointer transition-colors"
-                  onClick={copyToClipboard}
-                  title="Copy to clipboard"
-                >
-                  <i class="fa fa-copy"></i>
-                </button>
+                <div class="flex gap-2">
+                  <button
+                    class="text-white hover:text-gray-200 cursor-pointer transition-colors"
+                    onClick={copyToClipboard}
+                    title="Copy to clipboard"
+                  >
+                    <i class="fa fa-copy"></i>
+                  </button>
+                  <button
+                    class="text-white hover:text-gray-200 cursor-pointer transition-colors"
+                    onClick={saveOutput}
+                    title="Save output"
+                  >
+                    <i class="fa fa-save"></i>
+                  </button>
+                </div>
               </div>
               <div class="p-4 bg-white max-h-96 overflow-y-auto">
                 <pre class="text-sm whitespace-pre-wrap font-mono">{markdown.value}</pre>
               </div>
             </div>
           )}
+
+          {/* Saved Outputs */}
+          {savedOutputs.value.length > 0 && (
+            <div class="border-t-2 border-gray-200 pt-4 mt-4">
+              <h4 class="font-bold text-sm mb-3">💾 Saved Outputs</h4>
+              <div class="space-y-2">
+                {savedOutputs.value.map((output) => (
+                  <div key={output.id} class="border-2 border-gray-300 rounded-lg p-3 bg-white">
+                    <div class="flex justify-between items-start mb-2">
+                      <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-sm text-purple-600">{output.prompt}</p>
+                        <p class="text-xs text-gray-500">{new Date(output.created_at).toLocaleString()}</p>
+                      </div>
+                      <div class="flex gap-1 ml-2">
+                        <button
+                          class="btn btn-ghost btn-xs"
+                          onClick={() => copySavedOutput(output.content)}
+                          title="Copy"
+                        >
+                          <i class="fa fa-copy text-xs"></i>
+                        </button>
+                        <button
+                          class="btn btn-ghost btn-xs text-error"
+                          onClick={() => deleteOutput(output.id)}
+                          title="Delete"
+                        >
+                          <i class="fa fa-trash text-xs"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="text-xs text-gray-600 line-clamp-3">
+                      {output.content.substring(0, 150)}...
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Exact animation from Svelte version */}
+      <style>{`
+        .drawer-slide-in {
+          animation: drawer-slide-in 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .drawer-slide-out {
+          animation: drawer-slide-out 200ms ease-in forwards;
+        }
+
+        @keyframes drawer-slide-in {
+          from {
+            transform: translateX(100%);
+          }
+          to {
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes drawer-slide-out {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(100%);
+          }
+        }
+
+        /* Custom cubic-bezier approximates the Svelte bounce easing */
+        @keyframes drawer-slide-in {
+          0% {
+            transform: translateX(100%);
+          }
+          50% {
+            transform: translateX(-10px);
+          }
+          75% {
+            transform: translateX(5px);
+          }
+          100% {
+            transform: translateX(0);
+          }
+        }
+      `}</style>
     </>
   );
 }

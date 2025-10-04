@@ -107,6 +107,7 @@ export default function HomeIsland() {
           isOpen={drawerOpen.value}
           onClose={() => drawerOpen.value = false}
           transcript={transcript}
+          conversationId={conversationData.value.conversation.id}
         />
       )}
 
