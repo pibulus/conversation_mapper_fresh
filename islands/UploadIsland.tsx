@@ -2,6 +2,7 @@ import { useSignal, useComputed } from "@preact/signals";
 import { useEffect, useRef } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
 import LoadingModal from "../components/LoadingModal.tsx";
+import AudioVisualizer from "./AudioVisualizer.tsx";
 
 export default function UploadIsland() {
   const mode = useSignal<'text' | 'audio' | 'record'>('record');
@@ -16,6 +17,8 @@ export default function UploadIsland() {
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const recordingTimerRef = useRef<number | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
 
   const MAX_RECORDING_TIME = 10 * 60; // 10 minutes in seconds
   const WARNING_TIME = 30; // 30 seconds before limit
@@ -58,6 +61,23 @@ export default function UploadIsland() {
           audioChunksRef.current.push(event.data);
         }
       };
+
+      // Set up Web Audio API for visualization
+      try {
+        const AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
+        const audioContext = new AudioContext();
+        const source = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256; // Frequency resolution
+        source.connect(analyser);
+
+        audioContextRef.current = audioContext;
+        analyserRef.current = analyser;
+        console.log('🎵 Web Audio API initialized for visualization');
+      } catch (error) {
+        console.warn('Failed to initialize Web Audio API:', error);
+        // Continue without visualization - not critical
+      }
 
       mediaRecorder.start(1000); // Collect data every second
       mediaRecorderRef.current = mediaRecorder;
@@ -152,6 +172,14 @@ export default function UploadIsland() {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+
+    // Clean up Web Audio API resources
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(console.warn);
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+
     mediaRecorderRef.current = null;
     audioChunksRef.current = [];
     recordingTime.value = 0;
@@ -325,26 +353,8 @@ export default function UploadIsland() {
                 <strong>⚠️ Recording in progress:</strong> You must stop recording before leaving this page
               </div>
 
-              {/* Simple Audio Visualizer */}
-              <div class="rounded-lg p-4 h-20 flex items-center justify-center" style={{
-                background: 'var(--color-base-solid)',
-                opacity: 0.5
-              }}>
-                <div class="flex gap-1 items-end h-full">
-                  {[...Array(24)].map((_, i) => (
-                    <div
-                      key={i}
-                      class="w-2 rounded-t animate-pulse"
-                      style={{
-                        background: 'var(--color-accent)',
-                        height: `${30 + Math.random() * 70}%`,
-                        animationDelay: `${i * 0.08}s`,
-                        animationDuration: '0.8s'
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
+              {/* Real-time Audio Visualizer */}
+              <AudioVisualizer analyser={analyserRef.current} />
             </div>
           )}
 

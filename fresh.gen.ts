@@ -13,6 +13,7 @@ import * as $shared_shareId_ from "./routes/shared/[shareId].tsx";
 import * as $shared_index from "./routes/shared/index.tsx";
 import * as $ArcDiagramViz from "./islands/ArcDiagramViz.tsx";
 import * as $AudioRecorder from "./islands/AudioRecorder.tsx";
+import * as $AudioVisualizer from "./islands/AudioVisualizer.tsx";
 import * as $CircularNetworkGraph from "./islands/CircularNetworkGraph.tsx";
 import * as $ConversationList from "./islands/ConversationList.tsx";
 import * as $DashboardIsland from "./islands/DashboardIsland.tsx";
@@ -42,6 +43,7 @@ const manifest = {
   islands: {
     "./islands/ArcDiagramViz.tsx": $ArcDiagramViz,
     "./islands/AudioRecorder.tsx": $AudioRecorder,
+    "./islands/AudioVisualizer.tsx": $AudioVisualizer,
     "./islands/CircularNetworkGraph.tsx": $CircularNetworkGraph,
     "./islands/ConversationList.tsx": $ConversationList,
     "./islands/DashboardIsland.tsx": $DashboardIsland,
