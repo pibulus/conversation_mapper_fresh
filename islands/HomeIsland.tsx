@@ -34,10 +34,17 @@ export default function HomeIsland() {
             // Conversation-specific header with title + utilities
             <div class="flex items-center justify-between">
               <div class="flex-1 min-w-0">
-                <h1 class="text-2xl font-bold text-purple-600 truncate">
+                <h1 class="truncate" style={{
+                  fontSize: 'calc(var(--heading-size) * 1.6)',
+                  fontWeight: 'var(--heading-weight)',
+                  color: 'var(--color-accent)'
+                }}>
                   {conversationData.value.conversation.title}
                 </h1>
-                <p class="text-xs text-gray-500 mt-1">
+                <p class="mt-1" style={{
+                  fontSize: 'var(--tiny-size)',
+                  color: 'var(--color-text-secondary)'
+                }}>
                   {conversationData.value.conversation.source === 'audio' ? '🎤 Audio' : '📝 Text'} • {new Date(conversationData.value.conversation.created_at).toLocaleDateString()}
                 </p>
               </div>
@@ -52,14 +59,29 @@ export default function HomeIsland() {
 
                 {/* Audio indicator */}
                 {conversationData.value.conversation.source === 'audio' && (
-                  <button class="px-4 py-2 bg-amber border-2 border-yellow-700 rounded hover:bg-yellow-400 transition-colors flex items-center gap-2 font-semibold text-sm">
+                  <button class="px-4 py-2 rounded flex items-center gap-2" style={{
+                    background: 'var(--color-accent)',
+                    border: `2px solid var(--color-border)`,
+                    color: 'white',
+                    fontWeight: '600',
+                    fontSize: 'var(--text-size)',
+                    transition: 'var(--transition-fast)'
+                  }}>
                     🎤 Audio
                   </button>
                 )}
                 {/* Markdown Maker Drawer Toggle */}
                 <button
                   onClick={() => drawerOpen.value = !drawerOpen.value}
-                  class="px-4 py-2 bg-soft-purple border-2 border-purple-600 rounded hover:bg-purple-500 transition-colors flex items-center gap-2 font-semibold text-sm text-white"
+                  class="px-4 py-2 rounded flex items-center gap-2"
+                  style={{
+                    background: 'var(--color-accent)',
+                    border: `2px solid var(--color-border)`,
+                    color: 'white',
+                    fontWeight: '600',
+                    fontSize: 'var(--text-size)',
+                    transition: 'var(--transition-fast)'
+                  }}
                   title="Toggle Markdown Maker"
                 >
                   {drawerOpen.value ? (
@@ -104,10 +126,17 @@ export default function HomeIsland() {
             // Default header when no conversation loaded
             <div class="flex items-center justify-between">
               <div>
-                <h1 class="text-3xl font-bold text-purple-600">
+                <h1 style={{
+                  fontSize: 'calc(var(--heading-size) * 2)',
+                  fontWeight: 'var(--heading-weight)',
+                  color: 'var(--color-accent)'
+                }}>
                   🧠 Conversation Mapper
                 </h1>
-                <p class="text-sm text-gray-600 mt-1">
+                <p class="mt-1" style={{
+                  fontSize: 'var(--text-size)',
+                  color: 'var(--color-text-secondary)'
+                }}>
                   Meeting transcripts that make sense
                 </p>
               </div>
