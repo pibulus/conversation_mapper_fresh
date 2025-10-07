@@ -4,6 +4,7 @@
 
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
+import * as $api_append from "./routes/api/append.ts";
 import * as $api_gemini from "./routes/api/gemini.ts";
 import * as $api_joke from "./routes/api/joke.ts";
 import * as $api_process from "./routes/api/process.ts";
@@ -11,6 +12,7 @@ import * as $index from "./routes/index.tsx";
 import * as $shared_shareId_ from "./routes/shared/[shareId].tsx";
 import * as $shared_index from "./routes/shared/index.tsx";
 import * as $ArcDiagramViz from "./islands/ArcDiagramViz.tsx";
+import * as $AudioRecorder from "./islands/AudioRecorder.tsx";
 import * as $CircularNetworkGraph from "./islands/CircularNetworkGraph.tsx";
 import * as $ConversationList from "./islands/ConversationList.tsx";
 import * as $DashboardIsland from "./islands/DashboardIsland.tsx";
@@ -29,6 +31,7 @@ const manifest = {
   routes: {
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
+    "./routes/api/append.ts": $api_append,
     "./routes/api/gemini.ts": $api_gemini,
     "./routes/api/joke.ts": $api_joke,
     "./routes/api/process.ts": $api_process,
@@ -38,6 +41,7 @@ const manifest = {
   },
   islands: {
     "./islands/ArcDiagramViz.tsx": $ArcDiagramViz,
+    "./islands/AudioRecorder.tsx": $AudioRecorder,
     "./islands/CircularNetworkGraph.tsx": $CircularNetworkGraph,
     "./islands/ConversationList.tsx": $ConversationList,
     "./islands/DashboardIsland.tsx": $DashboardIsland,

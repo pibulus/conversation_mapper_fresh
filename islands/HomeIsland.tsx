@@ -13,6 +13,7 @@ import ConversationList from "./ConversationList.tsx";
 import MobileHistoryMenu from "./MobileHistoryMenu.tsx";
 import ShareButton from "./ShareButton.tsx";
 import MarkdownMakerDrawer from "./MarkdownMakerDrawer.tsx";
+import AudioRecorder from "./AudioRecorder.tsx";
 import JuicyThemes from "../components/JuicyThemes.tsx";
 
 const drawerOpen = signal(false);
@@ -92,6 +93,11 @@ export default function HomeIsland() {
                 </div>
               </div>
               <div class="flex items-center gap-2">
+                {/* Audio Recorder - NEW! */}
+                <AudioRecorder
+                  conversationId={conversationData.value.conversation.id || ''}
+                />
+
                 {/* Markdown Maker Drawer Toggle */}
                 <button
                   onClick={() => drawerOpen.value = !drawerOpen.value}
