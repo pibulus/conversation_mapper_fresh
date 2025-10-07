@@ -27,45 +27,92 @@ export default function HomeIsland() {
       <header style={{
         borderBottom: `var(--border-width) solid var(--color-border)`,
         background: 'var(--color-secondary)',
-        boxShadow: 'var(--shadow-soft)'
+        boxShadow: 'var(--shadow-lifted)'
       }}>
-        <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="max-w-7xl mx-auto px-6 py-5">
           {conversationData.value ? (
             // Conversation-specific header with title + utilities
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-4">
               <div class="flex-1 min-w-0">
-                <h1
-                  class="truncate cursor-pointer hover:opacity-80"
-                  style={{
-                    fontSize: 'calc(var(--heading-size) * 1.6)',
-                    fontWeight: 'var(--heading-weight)',
-                    color: 'var(--color-accent)',
-                    transition: 'var(--transition-fast)'
-                  }}
-                  onClick={() => {
-                    conversationData.value = null;
-                    window.history.pushState({}, '', '/');
-                  }}
-                  title="Back to home"
-                >
-                  {conversationData.value.conversation.title}
-                </h1>
-                <p class="mt-1" style={{
+                {/* Title with back button */}
+                <div class="flex items-center gap-3 mb-1">
+                  <button
+                    onClick={() => {
+                      conversationData.value = null;
+                      window.history.pushState({}, '', '/');
+                    }}
+                    class="flex items-center justify-center w-9 h-9 rounded-lg hover:bg-white/10 transition-all"
+                    style={{
+                      border: `2px solid var(--color-border)`,
+                      color: 'var(--color-accent)'
+                    }}
+                    title="Back to home"
+                  >
+                    <i class="fa fa-arrow-left text-sm"></i>
+                  </button>
+                  <h1
+                    class="truncate"
+                    style={{
+                      fontSize: 'calc(var(--heading-size) * 1.8)',
+                      fontWeight: '700',
+                      color: 'var(--color-text)',
+                      lineHeight: '1.2',
+                      letterSpacing: '-0.02em'
+                    }}
+                  >
+                    {conversationData.value.conversation.title}
+                  </h1>
+                </div>
+                {/* Metadata row */}
+                <div class="flex items-center gap-3 pl-12" style={{
                   fontSize: 'var(--tiny-size)',
                   color: 'var(--color-text-secondary)'
                 }}>
-                  {conversationData.value.conversation.source === 'audio' ? '🎤 Audio' : '📝 Text'} • {
-                    conversationData.value.conversation.created_at
+                  <span class="flex items-center gap-1.5">
+                    <i class={conversationData.value.conversation.source === 'audio' ? 'fa fa-microphone' : 'fa fa-file-text-o'}></i>
+                    {conversationData.value.conversation.source === 'audio' ? 'Audio' : 'Text'}
+                  </span>
+                  <span>•</span>
+                  <span class="flex items-center gap-1.5">
+                    <i class="fa fa-calendar-o"></i>
+                    {conversationData.value.conversation.created_at
                       ? new Date(conversationData.value.conversation.created_at).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric'
                         })
                       : 'Unknown date'
-                  }
-                </p>
+                    }
+                  </span>
+                  <span>•</span>
+                  <span class="flex items-center gap-1.5">
+                    <i class="fa fa-hashtag"></i>
+                    {conversationData.value.nodes.length} topics
+                  </span>
+                </div>
               </div>
-              <div class="flex gap-2 ml-4">
+              <div class="flex items-center gap-2">
+                {/* Markdown Maker Drawer Toggle */}
+                <button
+                  onClick={() => drawerOpen.value = !drawerOpen.value}
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg hover:brightness-110 transition-all"
+                  style={{
+                    background: 'var(--color-accent)',
+                    border: `2px solid var(--color-border)`,
+                    color: 'white',
+                    fontWeight: '600',
+                    fontSize: 'var(--text-size)',
+                    boxShadow: 'var(--shadow-soft)'
+                  }}
+                  title="Markdown Maker"
+                >
+                  <i class={drawerOpen.value ? "fa fa-times" : "fa fa-bars"}></i>
+                  <span class="hidden sm:inline">Markdown</span>
+                </button>
+
+                {/* Share button */}
+                <ShareButton />
+
                 {/* Theme selector */}
                 <JuicyThemes
                   storageKey="conversation-mapper-theme"
@@ -73,70 +120,6 @@ export default function HomeIsland() {
                   showVintageControls={true}
                   position="right"
                 />
-
-                {/* Audio indicator */}
-                {conversationData.value.conversation.source === 'audio' && (
-                  <button class="px-4 py-2 rounded flex items-center gap-2" style={{
-                    background: 'var(--color-accent)',
-                    border: `2px solid var(--color-border)`,
-                    color: 'white',
-                    fontWeight: '600',
-                    fontSize: 'var(--text-size)',
-                    transition: 'var(--transition-fast)'
-                  }}>
-                    🎤 Audio
-                  </button>
-                )}
-                {/* Markdown Maker Drawer Toggle */}
-                <button
-                  onClick={() => drawerOpen.value = !drawerOpen.value}
-                  class="px-4 py-2 rounded flex items-center gap-2"
-                  style={{
-                    background: 'var(--color-accent)',
-                    border: `2px solid var(--color-border)`,
-                    color: 'white',
-                    fontWeight: '600',
-                    fontSize: 'var(--text-size)',
-                    transition: 'var(--transition-fast)'
-                  }}
-                  title="Toggle Markdown Maker"
-                >
-                  {drawerOpen.value ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M4 6h16M4 12h16m-7 6h7"
-                      />
-                    </svg>
-                  )}
-                </button>
-                {/* Share button */}
-                <div>
-                  <ShareButton />
-                </div>
               </div>
             </div>
           ) : (
@@ -144,24 +127,26 @@ export default function HomeIsland() {
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
                 <div style={{
-                  fontSize: '3.5rem',
+                  fontSize: '4rem',
                   lineHeight: 1,
-                  filter: 'drop-shadow(2px 2px 0 rgba(0,0,0,0.1))'
+                  filter: 'drop-shadow(3px 3px 0 rgba(0,0,0,0.1))'
                 }}>🧠</div>
                 <div>
                   <h1 style={{
-                    fontSize: 'calc(var(--heading-size) * 2.2)',
+                    fontSize: 'calc(var(--heading-size) * 2.5)',
                     fontWeight: '800',
                     color: 'var(--color-accent)',
-                    letterSpacing: '-0.02em',
-                    lineHeight: 1.1
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1,
+                    textShadow: '2px 2px 0 rgba(0,0,0,0.05)'
                   }}>
                     Conversation Mapper
                   </h1>
-                  <p class="mt-1" style={{
-                    fontSize: 'calc(var(--text-size) * 1.1)',
+                  <p class="mt-2" style={{
+                    fontSize: 'calc(var(--text-size) * 1.15)',
                     color: 'var(--color-text-secondary)',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    letterSpacing: '0.01em'
                   }}>
                     Meeting transcripts that make sense
                   </p>
