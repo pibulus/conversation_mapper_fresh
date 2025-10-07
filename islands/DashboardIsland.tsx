@@ -20,12 +20,15 @@ export default function DashboardIsland() {
   const sortMode = useSignal<'manual' | 'assignee' | 'date'>('manual');
   const editingItemId = useSignal<string | null>(null);
   const editingDescription = useSignal('');
+  const editingAssignee = useSignal('');
+  const editingDueDate = useSignal('');
   const showAddModal = useSignal(false);
   const newItemDescription = useSignal('');
   const newItemAssignee = useSignal('');
   const newItemDueDate = useSignal('');
   const searchQuery = useSignal('');
   const showAssigneeDropdown = useSignal(false);
+  const activeAssigneeDropdown = useSignal<string | null>(null);
 
   // Common assignee names (can be customized)
   const commonAssignees = ['Me', 'Team Lead', 'Developer', 'Designer', 'QA', 'Product Manager', 'Client'];
@@ -96,9 +99,11 @@ export default function DashboardIsland() {
   }
 
   // Start editing item
-  function startEditing(itemId: string, currentDescription: string) {
+  function startEditing(itemId: string, currentDescription: string, currentAssignee: string | null, currentDueDate: string | null) {
     editingItemId.value = itemId;
     editingDescription.value = currentDescription;
+    editingAssignee.value = currentAssignee || '';
+    editingDueDate.value = currentDueDate || '';
   }
 
   // Save edited item
@@ -107,7 +112,13 @@ export default function DashboardIsland() {
 
     const updatedItems = conversationData.value.actionItems.map(item =>
       item.id === editingItemId.value
-        ? { ...item, description: editingDescription.value }
+        ? {
+            ...item,
+            description: editingDescription.value,
+            assignee: editingAssignee.value || null,
+            due_date: editingDueDate.value || null,
+            updated_at: new Date().toISOString()
+          }
         : item
     );
 
@@ -118,12 +129,68 @@ export default function DashboardIsland() {
 
     editingItemId.value = null;
     editingDescription.value = '';
+    editingAssignee.value = '';
+    editingDueDate.value = '';
   }
 
   // Cancel editing
   function cancelEdit() {
     editingItemId.value = null;
     editingDescription.value = '';
+    editingAssignee.value = '';
+    editingDueDate.value = '';
+  }
+
+  // Update assignee for an item
+  function updateAssignee(itemId: string, assignee: string | null) {
+    if (!conversationData.value) return;
+
+    const updatedItems = conversationData.value.actionItems.map(item =>
+      item.id === itemId
+        ? { ...item, assignee, updated_at: new Date().toISOString() }
+        : item
+    );
+
+    conversationData.value = {
+      ...conversationData.value,
+      actionItems: updatedItems
+    };
+  }
+
+  // Update due date for an item
+  function updateDueDate(itemId: string, due_date: string | null) {
+    if (!conversationData.value) return;
+
+    const updatedItems = conversationData.value.actionItems.map(item =>
+      item.id === itemId
+        ? { ...item, due_date, updated_at: new Date().toISOString() }
+        : item
+    );
+
+    conversationData.value = {
+      ...conversationData.value,
+      actionItems: updatedItems
+    };
+  }
+
+  // Delete an item
+  function deleteItem(itemId: string) {
+    if (!conversationData.value) return;
+    if (!confirm('Delete this action item?')) return;
+
+    conversationData.value = {
+      ...conversationData.value,
+      actionItems: conversationData.value.actionItems.filter(item => item.id !== itemId)
+    };
+  }
+
+  // Format date as friendly "Day, Month Date"
+  function formatFriendlyDate(dateString: string): string {
+    const date = new Date(dateString);
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
   }
 
   // Add new item
@@ -374,77 +441,159 @@ export default function DashboardIsland() {
                   }} class="mt-1">Add one manually using the + button</p>
                 </div>
               ) : (
-                <ul class="space-y-2">
-                  {sortedActionItems.map((item, index) => (
-                    <li
+                <div class="space-y-3">
+                  {sortedActionItems.map((item) => (
+                    <div
                       key={item.id}
-                      class={`flex items-start gap-2 text-sm p-2 rounded hover:bg-gray-50 transition-all ${
-                        item.status === 'completed' ? 'opacity-60' : ''
-                      }`}
+                      class="relative p-4 rounded-lg bg-white hover:bg-gray-50 transition-all"
+                      style={{
+                        border: '2px solid var(--color-border)',
+                        boxShadow: item.status === 'completed' ? 'none' : '2px 2px 0 rgba(0,0,0,0.1)'
+                      }}
                     >
-                      <input
-                        type="checkbox"
-                        checked={item.status === 'completed'}
-                        onChange={() => toggleActionItem(item.id)}
-                        class="mt-1 cursor-pointer"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                      <div class="flex-1 min-w-0">
-                        {editingItemId.value === item.id ? (
-                          <div class="flex gap-1">
-                            <input
-                              type="text"
-                              value={editingDescription.value}
-                              onInput={(e) => editingDescription.value = (e.target as HTMLInputElement).value}
-                              class="flex-1 text-xs border rounded px-1"
-                              autoFocus
-                            />
-                            <button onClick={saveEdit} class="text-xs px-1">✓</button>
-                            <button onClick={cancelEdit} class="text-xs px-1">✕</button>
+                      {/* Improved grid layout with checkbox and content */}
+                      <div class="grid grid-cols-[auto_1fr] gap-3 items-start">
+                        {/* Checkbox */}
+                        <div class="flex items-center pt-1">
+                          <input
+                            type="checkbox"
+                            checked={item.status === 'completed'}
+                            onChange={() => toggleActionItem(item.id)}
+                            class="cursor-pointer w-5 h-5"
+                            style={{ accentColor: 'var(--color-accent)' }}
+                          />
+                        </div>
+
+                        {/* Content */}
+                        <div class="flex flex-col gap-3">
+                          {/* Description */}
+                          {editingItemId.value === item.id ? (
+                            <div class="space-y-2">
+                              <textarea
+                                value={editingDescription.value}
+                                onInput={(e) => editingDescription.value = (e.target as HTMLTextAreaElement).value}
+                                class="w-full rounded px-2 py-1 text-sm"
+                                style={{ border: '2px solid var(--color-border)', minHeight: '60px' }}
+                                autoFocus
+                              />
+                              <div class="flex gap-2">
+                                <button
+                                  onClick={saveEdit}
+                                  class="px-3 py-1 rounded text-xs font-bold text-white"
+                                  style={{ background: 'var(--color-accent)' }}
+                                >
+                                  ✓ Save
+                                </button>
+                                <button
+                                  onClick={cancelEdit}
+                                  class="px-3 py-1 rounded text-xs font-bold"
+                                  style={{ border: '2px solid var(--color-border)' }}
+                                >
+                                  ✕ Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p
+                              class={`leading-relaxed ${item.status === 'completed' ? 'line-through opacity-60' : ''}`}
+                              style={{ fontSize: 'var(--text-size)', color: 'var(--color-text)' }}
+                              onDblClick={() => startEditing(item.id, item.description, item.assignee, item.due_date)}
+                              title="Double-click to edit"
+                            >
+                              {item.description}
+                            </p>
+                          )}
+
+                          {/* Metadata row - assignee & due date */}
+                          <div class="flex items-center gap-3 flex-wrap">
+                            {/* Assignee selector */}
+                            <div class="relative">
+                              <button
+                                onClick={() => activeAssigneeDropdown.value = activeAssigneeDropdown.value === item.id ? null : item.id}
+                                class="flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
+                                style={{ border: '2px solid var(--color-border)' }}
+                              >
+                                <i class="fa fa-user text-xs"></i>
+                                <span style={{ color: item.assignee ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
+                                  {item.assignee || 'Unassigned'}
+                                </span>
+                              </button>
+                              {activeAssigneeDropdown.value === item.id && (
+                                <div
+                                  class="absolute z-10 mt-1 bg-white rounded shadow-lg"
+                                  style={{ border: '2px solid var(--color-border)', minWidth: '150px' }}
+                                >
+                                  <button
+                                    onClick={() => {
+                                      updateAssignee(item.id, null);
+                                      activeAssigneeDropdown.value = null;
+                                    }}
+                                    class="w-full text-left px-3 py-2 text-xs hover:bg-purple-50"
+                                    style={{ borderBottom: '1px solid var(--color-border)' }}
+                                  >
+                                    None
+                                  </button>
+                                  {commonAssignees.map((assignee) => (
+                                    <button
+                                      key={assignee}
+                                      onClick={() => {
+                                        updateAssignee(item.id, assignee);
+                                        activeAssigneeDropdown.value = null;
+                                      }}
+                                      class="w-full text-left px-3 py-2 text-xs hover:bg-purple-50"
+                                      style={{
+                                        borderBottom: '1px solid var(--color-border)',
+                                        background: item.assignee === assignee ? 'var(--color-accent)' : 'transparent',
+                                        color: item.assignee === assignee ? 'white' : 'var(--color-text)'
+                                      }}
+                                    >
+                                      {assignee}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Due date selector */}
+                            <div class="relative">
+                              <input
+                                type="date"
+                                id={`date-${item.id}`}
+                                value={item.due_date || ''}
+                                onChange={(e) => updateDueDate(item.id, (e.target as HTMLInputElement).value || null)}
+                                class="absolute opacity-0 pointer-events-none"
+                              />
+                              <button
+                                onClick={() => {
+                                  const input = document.getElementById(`date-${item.id}`) as HTMLInputElement | null;
+                                  if (input && 'showPicker' in input) {
+                                    (input as any).showPicker();
+                                  }
+                                }}
+                                class="flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
+                                style={{ border: '2px solid var(--color-border)' }}
+                              >
+                                <i class="fa fa-calendar text-xs"></i>
+                                <span style={{ color: item.due_date ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
+                                  {item.due_date ? formatFriendlyDate(item.due_date) : 'No due date'}
+                                </span>
+                              </button>
+                            </div>
                           </div>
-                        ) : (
-                          <p
-                            class={item.status === 'completed' ? 'line-through' : ''}
-                            style={{
-                              fontSize: 'var(--text-size)',
-                              color: item.status === 'completed' ? 'var(--color-text-secondary)' : 'var(--color-text)'
-                            }}
-                            onDblClick={() => startEditing(item.id, item.description)}
-                            title="Double-click to edit"
-                          >
-                            {item.description}
-                          </p>
-                        )}
-                        {(item.assignee || item.due_date) && (
-                          <div class="flex flex-wrap gap-2 mt-1">
-                            {item.assignee && (
-                              <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
-                                👤 {item.assignee}
-                              </span>
-                            )}
-                            {item.due_date && (
-                              <span class={`text-xs px-2 py-0.5 rounded ${
-                                new Date(item.due_date) < new Date()
-                                  ? 'bg-red-100 text-red-700'
-                                  : new Date(item.due_date) < new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
-                                  ? 'bg-yellow-100 text-yellow-700'
-                                  : 'bg-gray-100 text-gray-700'
-                              }`}>
-                                📅 {new Date(item.due_date).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: item.due_date.split('-')[0] !== new Date().getFullYear().toString()
-                                    ? 'numeric'
-                                    : undefined
-                                })}
-                              </span>
-                            )}
-                          </div>
-                        )}
+                        </div>
                       </div>
-                    </li>
+
+                      {/* Delete button */}
+                      <button
+                        onClick={() => deleteItem(item.id)}
+                        class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 hover:text-red-600 transition-colors"
+                        title="Delete"
+                      >
+                        <i class="fa fa-times text-xs"></i>
+                      </button>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </div>
           </div>
