@@ -1,6 +1,7 @@
 import { useSignal, useComputed } from "@preact/signals";
 import { useEffect, useRef } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
+import LoadingModal from "../components/LoadingModal.tsx";
 
 export default function UploadIsland() {
   const mode = useSignal<'text' | 'audio' | 'record'>('record');
@@ -347,14 +348,6 @@ export default function UploadIsland() {
             </div>
           )}
 
-          {isProcessing.value && !isRecording.value && (
-            <p class="text-center font-semibold" style={{
-              fontSize: 'var(--text-size)',
-              color: 'var(--color-accent)'
-            }}>
-              ⚡ Processing audio...
-            </p>
-          )}
         </div>
       )}
 
@@ -416,16 +409,11 @@ export default function UploadIsland() {
               Upload audio file (MP3, WAV, M4A, etc.)
             </p>
           </div>
-          {isProcessing.value && (
-            <p class="text-center font-semibold" style={{
-              fontSize: 'var(--text-size)',
-              color: 'var(--color-accent)'
-            }}>
-              ⚡ Processing audio...
-            </p>
-          )}
         </div>
       )}
+
+      {/* Beautiful Loading Modal */}
+      <LoadingModal isOpen={isProcessing.value} />
     </div>
   );
 }
