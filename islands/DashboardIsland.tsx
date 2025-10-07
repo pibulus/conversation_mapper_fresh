@@ -227,6 +227,63 @@ export default function DashboardIsland() {
     sortMode.value = modes[(currentIndex + 1) % modes.length];
   }
 
+  // Extract key points from summary
+  function extractKeyPoints(text: string): string[] {
+    if (!text) return [];
+
+    // Split into paragraphs
+    const paragraphs = text.split('\n\n');
+
+    // Short text - extract sentences
+    if (paragraphs.length <= 2) {
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
+      return sentences
+        .slice(0, 3)
+        .map(s => s.trim())
+        .map(s => s.charAt(0).toUpperCase() + s.slice(1));
+    }
+
+    // Try to find bullet points
+    const bulletPoints = text.match(/- (.+)/g);
+    if (bulletPoints && bulletPoints.length >= 2) {
+      return bulletPoints
+        .slice(0, 3)
+        .map(point => point.replace(/^- /, ''));
+    }
+
+    // Extract key sentences from paragraphs
+    return paragraphs
+      .slice(0, 3)
+      .map(p => {
+        const sentences = p.split(/[.!?]+/);
+        return sentences[0].trim();
+      })
+      .filter(s => s.length > 10)
+      .map(s => s.charAt(0).toUpperCase() + s.slice(1));
+  }
+
+  // Format summary with markdown
+  function formatSummaryHtml(text: string): string {
+    if (!text) return '';
+
+    const formatted = text
+      // Headers
+      .replace(/^# (.+)$/gm, '<h3 style="font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; color: var(--color-accent);">$1</h3>')
+      .replace(/^## (.+)$/gm, '<h4 style="font-size: 1.1rem; font-weight: 600; margin: 0.75rem 0 0.5rem; color: var(--color-text);">$1</h4>')
+      .replace(/^### (.+)$/gm, '<h5 style="font-size: 1rem; font-weight: 600; margin: 0.5rem 0 0.25rem;">$1</h5>')
+      // Bold
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      // Italic
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+      // Lists - convert to proper HTML lists
+      .replace(/^- (.+)$/gm, '<li style="margin-left: 1.5rem; list-style: disc;">$1</li>')
+      .replace(/^([0-9]+)\. (.+)$/gm, '<li style="margin-left: 1.5rem; list-style: decimal;">$2</li>')
+      // Paragraphs
+      .replace(/\n\n/g, '</p><p style="margin: 0.75rem 0;">');
+
+    return `<div style="line-height: 1.7;"><p style="margin: 0.75rem 0;">${formatted}</p></div>`;
+  }
+
   return (
     <div>
       {/* Grid Container - Simple CSS Grid */}
@@ -279,11 +336,48 @@ export default function DashboardIsland() {
                   }} class="mt-1">Upload a conversation to see the transcript</p>
                 </div>
               ) : (
-                <div class="whitespace-pre-wrap font-mono" style={{
-                  fontSize: 'var(--text-size)',
-                  color: 'var(--color-text)'
-                }}>
-                  {transcript.text}
+                <div class="relative p-4 rounded-lg bg-white" style={{ border: '2px solid var(--color-border)' }}>
+                  {/* Format transcript with speaker highlighting */}
+                  <div
+                    class="whitespace-pre-wrap leading-relaxed"
+                    style={{
+                      fontSize: 'var(--text-size)',
+                      color: 'var(--color-text)',
+                      lineHeight: '1.8'
+                    }}
+                    dangerouslySetInnerHTML={{
+                      __html: transcript.text
+                        .replace(/\n/g, '<br/>')
+                        .replace(
+                          /(Speaker\s*\d+|[A-Z][a-z]+):/g,
+                          '<span style="font-weight: 600; color: var(--color-accent); margin-right: 0.5rem;">$1:</span>'
+                        )
+                    }}
+                  />
+
+                  {/* Speaker list if available */}
+                  {transcript.speakers && transcript.speakers.length > 0 && (
+                    <div class="mt-4 pt-4" style={{ borderTop: '2px solid var(--color-border)' }}>
+                      <div style={{ fontSize: 'var(--tiny-size)', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
+                        Speakers:
+                      </div>
+                      <div class="flex flex-wrap gap-2">
+                        {transcript.speakers.map((speaker) => (
+                          <span
+                            key={speaker}
+                            class="px-2 py-1 rounded text-xs font-medium"
+                            style={{
+                              background: 'var(--color-accent)',
+                              color: 'white',
+                              border: '2px solid var(--color-border)'
+                            }}
+                          >
+                            {speaker}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -344,22 +438,62 @@ export default function DashboardIsland() {
                   }} class="mt-1">Upload a conversation to generate a summary</p>
                 </div>
               ) : (
-                <p class="whitespace-pre-wrap" style={{
-                  fontSize: 'var(--text-size)',
-                  color: 'var(--color-text)',
-                  lineHeight: 'var(--line-height)'
-                }}>
-                  {summary}
-                </p>
+                <div>
+                  {/* Main summary with markdown formatting */}
+                  <div class="p-4 rounded-lg bg-white" style={{ border: '2px solid var(--color-border)' }}>
+                    <div
+                      style={{ fontSize: 'var(--text-size)', color: 'var(--color-text)' }}
+                      dangerouslySetInnerHTML={{ __html: formatSummaryHtml(summary) }}
+                    />
+                  </div>
+
+                  {/* Key Points Section */}
+                  {extractKeyPoints(summary).length > 0 && (
+                    <div class="mt-4 p-4 rounded-lg" style={{ background: 'rgba(var(--color-accent-rgb), 0.05)', border: '2px solid var(--color-border)' }}>
+                      <h4 style={{
+                        fontSize: 'var(--text-size)',
+                        fontWeight: '700',
+                        color: 'var(--color-accent)',
+                        marginBottom: '0.75rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}>
+                        Key Points
+                      </h4>
+                      <ul class="space-y-2">
+                        {extractKeyPoints(summary).map((point, index) => (
+                          <li key={index} class="flex items-start gap-2">
+                            <span class="flex items-center justify-center rounded" style={{
+                              minWidth: '1.25rem',
+                              height: '1.25rem',
+                              background: 'var(--color-accent)',
+                              color: 'white',
+                              fontSize: '0.65rem',
+                              marginTop: '0.125rem'
+                            }}>
+                              <i class="fa fa-check"></i>
+                            </span>
+                            <span style={{ fontSize: 'var(--text-size)', color: 'var(--color-text)', flex: 1 }}>
+                              {point}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Metadata */}
+                  <div class="mt-4 pt-3 flex items-center gap-4" style={{
+                    borderTop: `2px solid var(--color-border)`,
+                    fontSize: 'var(--tiny-size)',
+                    color: 'var(--color-text-secondary)'
+                  }}>
+                    <span>📊 {nodes.length} topics</span>
+                    <span>•</span>
+                    <span>📝 {conversation.source}</span>
+                  </div>
+                </div>
               )}
-              <div class="mt-4 pt-2" style={{
-                borderTop: `1px solid var(--color-border)`,
-                fontSize: 'var(--small-size)',
-                color: 'var(--color-text-secondary)'
-              }}>
-                <p>📊 Topics: {nodes.length}</p>
-                <p>📝 Source: {conversation.source}</p>
-              </div>
             </div>
           </div>
         </div>
