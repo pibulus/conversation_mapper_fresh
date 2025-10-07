@@ -142,20 +142,30 @@ export default function HomeIsland() {
           ) : (
             // Default header when no conversation loaded
             <div class="flex items-center justify-between">
-              <div>
-                <h1 style={{
-                  fontSize: 'calc(var(--heading-size) * 2)',
-                  fontWeight: 'var(--heading-weight)',
-                  color: 'var(--color-accent)'
-                }}>
-                  🧠 Conversation Mapper
-                </h1>
-                <p class="mt-1" style={{
-                  fontSize: 'var(--text-size)',
-                  color: 'var(--color-text-secondary)'
-                }}>
-                  Meeting transcripts that make sense
-                </p>
+              <div class="flex items-center gap-4">
+                <div style={{
+                  fontSize: '3.5rem',
+                  lineHeight: 1,
+                  filter: 'drop-shadow(2px 2px 0 rgba(0,0,0,0.1))'
+                }}>🧠</div>
+                <div>
+                  <h1 style={{
+                    fontSize: 'calc(var(--heading-size) * 2.2)',
+                    fontWeight: '800',
+                    color: 'var(--color-accent)',
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1.1
+                  }}>
+                    Conversation Mapper
+                  </h1>
+                  <p class="mt-1" style={{
+                    fontSize: 'calc(var(--text-size) * 1.1)',
+                    color: 'var(--color-text-secondary)',
+                    fontWeight: '500'
+                  }}>
+                    Meeting transcripts that make sense
+                  </p>
+                </div>
               </div>
               <JuicyThemes
                 storageKey="conversation-mapper-theme"

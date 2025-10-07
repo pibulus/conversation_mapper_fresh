@@ -239,9 +239,10 @@ export default function UploadIsland() {
           onClick={() => mode.value = 'record'}
           class="px-4 py-2 rounded-lg font-semibold"
           style={{
-            border: `2px solid var(--color-border)`,
-            background: mode.value === 'record' ? 'var(--color-accent)' : 'var(--color-secondary)',
-            color: mode.value === 'record' ? 'white' : 'var(--color-accent)',
+            border: `var(--border-width) solid var(--color-border)`,
+            background: mode.value === 'record' ? 'var(--color-accent)' : 'white',
+            color: mode.value === 'record' ? 'white' : 'var(--color-text)',
+            boxShadow: mode.value === 'record' ? 'var(--shadow-soft)' : 'none',
             transition: 'var(--transition-medium)',
             fontSize: 'var(--text-size)'
           }}
@@ -252,9 +253,10 @@ export default function UploadIsland() {
           onClick={() => mode.value = 'text'}
           class="px-4 py-2 rounded-lg font-semibold"
           style={{
-            border: `2px solid var(--color-border)`,
-            background: mode.value === 'text' ? 'var(--color-accent)' : 'var(--color-secondary)',
-            color: mode.value === 'text' ? 'white' : 'var(--color-accent)',
+            border: `var(--border-width) solid var(--color-border)`,
+            background: mode.value === 'text' ? 'var(--color-accent)' : 'white',
+            color: mode.value === 'text' ? 'white' : 'var(--color-text)',
+            boxShadow: mode.value === 'text' ? 'var(--shadow-soft)' : 'none',
             transition: 'var(--transition-medium)',
             fontSize: 'var(--text-size)'
           }}
@@ -265,9 +267,10 @@ export default function UploadIsland() {
           onClick={() => mode.value = 'audio'}
           class="px-4 py-2 rounded-lg font-semibold"
           style={{
-            border: `2px solid var(--color-border)`,
-            background: mode.value === 'audio' ? 'var(--color-accent)' : 'var(--color-secondary)',
-            color: mode.value === 'audio' ? 'white' : 'var(--color-accent)',
+            border: `var(--border-width) solid var(--color-border)`,
+            background: mode.value === 'audio' ? 'var(--color-accent)' : 'white',
+            color: mode.value === 'audio' ? 'white' : 'var(--color-text)',
+            boxShadow: mode.value === 'audio' ? 'var(--shadow-soft)' : 'none',
             transition: 'var(--transition-medium)',
             fontSize: 'var(--text-size)'
           }}
