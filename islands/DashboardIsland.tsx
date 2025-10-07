@@ -167,27 +167,55 @@ export default function DashboardIsland() {
 
         {/* Card 1: Transcript */}
         <div class="w-full">
-          <div class="bg-white rounded-lg border-4 border-purple-300 shadow-brutal h-full">
-            <div class="bg-purple-400 px-4 py-3 border-b-4 border-purple-500 flex justify-between items-center">
-              <h3 class="font-bold text-white">📝 Transcript</h3>
+          <div style={{
+            background: 'var(--color-secondary)',
+            borderRadius: 'var(--border-radius)',
+            border: `var(--border-width) solid var(--color-border)`,
+            boxShadow: 'var(--shadow-brutal)',
+            height: '100%'
+          }}>
+            <div style={{
+              background: 'var(--color-accent)',
+              padding: 'var(--card-padding)',
+              borderBottom: `var(--border-width) solid var(--color-border)`,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h3 style={{
+                fontSize: 'var(--heading-size)',
+                fontWeight: 'var(--heading-weight)',
+                color: 'white'
+              }}>📝 Transcript</h3>
               <button
                 onClick={() => transcript?.text && copyToClipboard(transcript.text)}
-                class="text-white hover:text-gray-200 cursor-pointer transition-colors"
+                class="text-white hover:text-gray-200 cursor-pointer"
+                style={{ transition: 'var(--transition-fast)' }}
                 title="Copy transcript"
                 disabled={!transcript?.text}
               >
                 <i class="fa fa-copy text-sm"></i>
               </button>
             </div>
-            <div class="p-4 max-h-96 overflow-y-auto">
+            <div style={{ padding: 'var(--card-padding)' }} class="max-h-96 overflow-y-auto">
               {!transcript?.text || transcript.text.trim() === '' ? (
                 <div class="flex flex-col items-center justify-center py-8 text-center">
                   <i class="fa fa-file-text-o text-4xl text-gray-300 mb-3"></i>
-                  <p class="text-sm font-medium text-gray-600">No transcript available</p>
-                  <p class="text-xs text-gray-500 mt-1">Upload a conversation to see the transcript</p>
+                  <p style={{
+                    fontSize: 'var(--text-size)',
+                    fontWeight: '500',
+                    color: 'var(--color-text-secondary)'
+                  }}>No transcript available</p>
+                  <p style={{
+                    fontSize: 'var(--small-size)',
+                    color: 'var(--color-text-secondary)'
+                  }} class="mt-1">Upload a conversation to see the transcript</p>
                 </div>
               ) : (
-                <div class="whitespace-pre-wrap text-sm font-mono">
+                <div class="whitespace-pre-wrap font-mono" style={{
+                  fontSize: 'var(--text-size)',
+                  color: 'var(--color-text)'
+                }}>
                   {transcript.text}
                 </div>
               )}
@@ -197,34 +225,71 @@ export default function DashboardIsland() {
 
         {/* Card 2: Summary */}
         <div class="w-full">
-          <div class="bg-white rounded-lg border-4 border-pink-300 shadow-brutal h-full">
-            <div class="bg-pink-400 px-4 py-3 border-b-4 border-pink-500 flex justify-between items-center">
-              <h3 class="font-bold text-white">📊 Summary</h3>
+          <div style={{
+            background: 'var(--color-secondary)',
+            borderRadius: 'var(--border-radius)',
+            border: `var(--border-width) solid var(--color-border)`,
+            boxShadow: 'var(--shadow-brutal)',
+            height: '100%'
+          }}>
+            <div style={{
+              background: 'var(--color-accent)',
+              padding: 'var(--card-padding)',
+              borderBottom: `var(--border-width) solid var(--color-border)`,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h3 style={{
+                fontSize: 'var(--heading-size)',
+                fontWeight: 'var(--heading-weight)',
+                color: 'white'
+              }}>📊 Summary</h3>
               <div class="flex items-center gap-2">
                 <button
                   onClick={() => summary && copyToClipboard(summary)}
-                  class="text-white hover:text-gray-200 cursor-pointer transition-colors"
+                  class="text-white hover:text-gray-200 cursor-pointer"
+                  style={{ transition: 'var(--transition-fast)' }}
                   title="Copy summary"
                   disabled={!summary}
                 >
                   <i class="fa fa-copy text-sm"></i>
                 </button>
-                <span class="text-xs text-white opacity-75">{conversation.title}</span>
+                <span style={{
+                  fontSize: 'var(--tiny-size)',
+                  color: 'white',
+                  opacity: 0.75
+                }}>{conversation.title}</span>
               </div>
             </div>
-            <div class="p-4 max-h-96 overflow-y-auto">
+            <div style={{ padding: 'var(--card-padding)' }} class="max-h-96 overflow-y-auto">
               {!summary || summary === "No summary generated" ? (
                 <div class="flex flex-col items-center justify-center py-8 text-center">
                   <i class="fa fa-info-circle text-4xl text-gray-300 mb-3"></i>
-                  <p class="text-sm font-medium text-gray-600">No summary available yet</p>
-                  <p class="text-xs text-gray-500 mt-1">Upload a conversation to generate a summary</p>
+                  <p style={{
+                    fontSize: 'var(--text-size)',
+                    fontWeight: '500',
+                    color: 'var(--color-text-secondary)'
+                  }}>No summary available yet</p>
+                  <p style={{
+                    fontSize: 'var(--small-size)',
+                    color: 'var(--color-text-secondary)'
+                  }} class="mt-1">Upload a conversation to generate a summary</p>
                 </div>
               ) : (
-                <p class="text-sm whitespace-pre-wrap">
+                <p class="whitespace-pre-wrap" style={{
+                  fontSize: 'var(--text-size)',
+                  color: 'var(--color-text)',
+                  lineHeight: 'var(--line-height)'
+                }}>
                   {summary}
                 </p>
               )}
-              <div class="mt-4 text-xs text-gray-600 border-t pt-2">
+              <div class="mt-4 pt-2" style={{
+                borderTop: `1px solid var(--color-border)`,
+                fontSize: 'var(--small-size)',
+                color: 'var(--color-text-secondary)'
+              }}>
                 <p>📊 Topics: {nodes.length}</p>
                 <p>📝 Source: {conversation.source}</p>
               </div>
@@ -234,20 +299,45 @@ export default function DashboardIsland() {
 
         {/* Card 3: Action Items */}
         <div class="w-full">
-          <div class="bg-white rounded-lg border-4 border-terminal-green shadow-brutal h-full">
-            <div class="bg-terminal-green px-4 py-3 border-b-4 border-green-700 flex justify-between items-center">
-              <h3 class="font-bold text-soft-black">✅ Action Items</h3>
+          <div style={{
+            background: 'var(--color-secondary)',
+            borderRadius: 'var(--border-radius)',
+            border: `var(--border-width) solid var(--color-border)`,
+            boxShadow: 'var(--shadow-brutal)',
+            height: '100%'
+          }}>
+            <div style={{
+              background: 'var(--color-accent)',
+              padding: 'var(--card-padding)',
+              borderBottom: `var(--border-width) solid var(--color-border)`,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h3 style={{
+                fontSize: 'var(--heading-size)',
+                fontWeight: 'var(--heading-weight)',
+                color: 'white'
+              }}>✅ Action Items</h3>
               <div class="flex gap-2">
                 <button
                   onClick={cycleSortMode}
-                  class="text-xs bg-white px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"
+                  class="bg-white px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"
+                  style={{
+                    fontSize: 'var(--tiny-size)',
+                    transition: 'var(--transition-fast)'
+                  }}
                   title={`Sort: ${sortMode.value}`}
                 >
                   {sortMode.value === 'manual' ? '🤚' : sortMode.value === 'assignee' ? '👤' : '📅'}
                 </button>
                 <button
                   onClick={() => showAddModal.value = true}
-                  class="text-xs bg-white px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"
+                  class="bg-white px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"
+                  style={{
+                    fontSize: 'var(--tiny-size)',
+                    transition: 'var(--transition-fast)'
+                  }}
                   title="Add new item"
                 >
                   ➕
@@ -255,21 +345,33 @@ export default function DashboardIsland() {
               </div>
             </div>
             {/* Search bar */}
-            <div class="px-4 pt-3 pb-1">
+            <div style={{ padding: '0.75rem 1rem 0.25rem' }}>
               <input
                 type="text"
                 value={searchQuery.value}
                 onInput={(e) => searchQuery.value = (e.target as HTMLInputElement).value}
                 placeholder="🔍 Search items..."
-                class="w-full text-xs border-2 border-gray-200 rounded px-2 py-1 focus:border-green-400 focus:outline-none"
+                class="w-full rounded px-2 py-1 focus:outline-none"
+                style={{
+                  fontSize: 'var(--tiny-size)',
+                  border: '2px solid var(--color-border)',
+                  transition: 'var(--transition-fast)'
+                }}
               />
             </div>
-            <div class="p-4 pt-2 max-h-96 overflow-y-auto">
+            <div style={{ padding: '0.5rem var(--card-padding) var(--card-padding)' }} class="max-h-96 overflow-y-auto">
               {sortedActionItems.length === 0 ? (
                 <div class="flex flex-col items-center justify-center py-8 text-center">
                   <i class="fa fa-clipboard-check text-4xl text-gray-300 mb-3"></i>
-                  <p class="text-sm font-medium text-gray-600">No action items found</p>
-                  <p class="text-xs text-gray-500 mt-1">Add one manually using the + button</p>
+                  <p style={{
+                    fontSize: 'var(--text-size)',
+                    fontWeight: '500',
+                    color: 'var(--color-text-secondary)'
+                  }}>No action items found</p>
+                  <p style={{
+                    fontSize: 'var(--small-size)',
+                    color: 'var(--color-text-secondary)'
+                  }} class="mt-1">Add one manually using the + button</p>
                 </div>
               ) : (
                 <ul class="space-y-2">
@@ -302,7 +404,11 @@ export default function DashboardIsland() {
                           </div>
                         ) : (
                           <p
-                            class={item.status === 'completed' ? 'line-through text-gray-500' : ''}
+                            class={item.status === 'completed' ? 'line-through' : ''}
+                            style={{
+                              fontSize: 'var(--text-size)',
+                              color: item.status === 'completed' ? 'var(--color-text-secondary)' : 'var(--color-text)'
+                            }}
                             onDblClick={() => startEditing(item.id, item.description)}
                             title="Double-click to edit"
                           >
@@ -346,11 +452,25 @@ export default function DashboardIsland() {
 
         {/* Card 4: Topic Visualizations - FULL WIDTH (spans all columns) */}
         <div class="w-full lg:col-span-3">
-          <div class="bg-white rounded-lg border-4 border-soft-blue shadow-brutal h-full">
-            <div class="bg-soft-blue px-4 py-3 border-b-4 border-blue-700">
-              <h3 class="font-bold text-white">📊 Topic Visualizations</h3>
+          <div style={{
+            background: 'var(--color-secondary)',
+            borderRadius: 'var(--border-radius)',
+            border: `var(--border-width) solid var(--color-border)`,
+            boxShadow: 'var(--shadow-brutal)',
+            height: '100%'
+          }}>
+            <div style={{
+              background: 'var(--color-accent)',
+              padding: 'var(--card-padding)',
+              borderBottom: `var(--border-width) solid var(--color-border)`
+            }}>
+              <h3 style={{
+                fontSize: 'var(--heading-size)',
+                fontWeight: 'var(--heading-weight)',
+                color: 'white'
+              }}>📊 Topic Visualizations</h3>
             </div>
-            <div class="p-4" style="min-height: 500px;">
+            <div style={{ padding: 'var(--card-padding)', minHeight: '500px' }}>
               <VisualizationSelector />
             </div>
           </div>
@@ -361,24 +481,47 @@ export default function DashboardIsland() {
       {/* Add New Item Modal */}
       {showAddModal.value && (
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="bg-white rounded-lg border-4 border-purple-400 shadow-brutal p-6 max-w-md w-full mx-4">
-            <h3 class="text-xl font-bold mb-4">➕ Add New Action Item</h3>
+          <div class="max-w-md w-full mx-4" style={{
+            background: 'var(--color-secondary)',
+            borderRadius: 'var(--border-radius)',
+            border: `var(--border-width) solid var(--color-border)`,
+            boxShadow: 'var(--shadow-lifted)',
+            padding: 'var(--card-padding)'
+          }}>
+            <h3 style={{
+              fontSize: 'calc(var(--heading-size) * 1.2)',
+              fontWeight: 'var(--heading-weight)',
+              color: 'var(--color-text)',
+              marginBottom: '1rem'
+            }}>➕ Add New Action Item</h3>
 
             <div class="space-y-3">
               <div>
-                <label class="text-sm font-semibold">Description *</label>
+                <label style={{
+                  fontSize: 'var(--text-size)',
+                  fontWeight: '600',
+                  color: 'var(--color-text)'
+                }}>Description *</label>
                 <input
                   type="text"
                   value={newItemDescription.value}
                   onInput={(e) => newItemDescription.value = (e.target as HTMLInputElement).value}
                   placeholder="What needs to be done?"
-                  class="w-full border-2 border-gray-300 rounded px-3 py-2 text-sm"
+                  class="w-full rounded px-3 py-2"
+                  style={{
+                    fontSize: 'var(--text-size)',
+                    border: '2px solid var(--color-border)'
+                  }}
                   autoFocus
                 />
               </div>
 
               <div class="relative">
-                <label class="text-sm font-semibold">Assignee</label>
+                <label style={{
+                  fontSize: 'var(--text-size)',
+                  fontWeight: '600',
+                  color: 'var(--color-text)'
+                }}>Assignee</label>
                 <div class="relative">
                   <input
                     type="text"
@@ -387,7 +530,11 @@ export default function DashboardIsland() {
                     onFocus={() => showAssigneeDropdown.value = true}
                     onBlur={() => setTimeout(() => showAssigneeDropdown.value = false, 200)}
                     placeholder="Who's responsible?"
-                    class="w-full border-2 border-gray-300 rounded px-3 py-2 text-sm pr-8"
+                    class="w-full rounded px-3 py-2 pr-8"
+                    style={{
+                      fontSize: 'var(--text-size)',
+                      border: '2px solid var(--color-border)'
+                    }}
                   />
                   <button
                     type="button"
@@ -417,12 +564,20 @@ export default function DashboardIsland() {
               </div>
 
               <div>
-                <label class="text-sm font-semibold">Due Date</label>
+                <label style={{
+                  fontSize: 'var(--text-size)',
+                  fontWeight: '600',
+                  color: 'var(--color-text)'
+                }}>Due Date</label>
                 <input
                   type="date"
                   value={newItemDueDate.value}
                   onInput={(e) => newItemDueDate.value = (e.target as HTMLInputElement).value}
-                  class="w-full border-2 border-gray-300 rounded px-3 py-2 text-sm"
+                  class="w-full rounded px-3 py-2"
+                  style={{
+                    fontSize: 'var(--text-size)',
+                    border: '2px solid var(--color-border)'
+                  }}
                 />
               </div>
             </div>
@@ -431,7 +586,14 @@ export default function DashboardIsland() {
               <button
                 onClick={addNewItem}
                 disabled={!newItemDescription.value.trim()}
-                class="flex-1 bg-terminal-green text-soft-black font-bold py-2 px-4 rounded border-2 border-green-700 hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="flex-1 py-2 px-4 rounded font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: 'var(--color-accent)',
+                  color: 'white',
+                  border: `2px solid var(--color-border)`,
+                  fontSize: 'var(--text-size)',
+                  transition: 'var(--transition-fast)'
+                }}
               >
                 Add Item
               </button>
@@ -442,7 +604,13 @@ export default function DashboardIsland() {
                   newItemAssignee.value = '';
                   newItemDueDate.value = '';
                 }}
-                class="px-4 py-2 border-2 border-gray-300 rounded hover:bg-gray-100"
+                class="px-4 py-2 rounded hover:bg-gray-100"
+                style={{
+                  border: `2px solid var(--color-border)`,
+                  fontSize: 'var(--text-size)',
+                  transition: 'var(--transition-fast)',
+                  color: 'var(--color-text)'
+                }}
               >
                 Cancel
               </button>
