@@ -13,6 +13,7 @@ import ConversationList from "./ConversationList.tsx";
 import MobileHistoryMenu from "./MobileHistoryMenu.tsx";
 import ShareButton from "./ShareButton.tsx";
 import MarkdownMakerDrawer from "./MarkdownMakerDrawer.tsx";
+import JuicyThemes from "../components/JuicyThemes.tsx";
 
 const drawerOpen = signal(false);
 
@@ -21,9 +22,13 @@ export default function HomeIsland() {
   const transcript = conversationData.value?.transcript?.text || '';
 
   return (
-    <div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div class="min-h-screen" style={{ background: 'var(--color-base)' }}>
       {/* Header - Dynamic based on conversation state */}
-      <header class="border-b-4 border-purple-400 bg-white shadow-lg">
+      <header style={{
+        borderBottom: `var(--border-width) solid var(--color-border)`,
+        background: 'var(--color-secondary)',
+        boxShadow: 'var(--shadow-soft)'
+      }}>
         <div class="max-w-7xl mx-auto px-6 py-4">
           {conversationData.value ? (
             // Conversation-specific header with title + utilities
@@ -37,6 +42,14 @@ export default function HomeIsland() {
                 </p>
               </div>
               <div class="flex gap-2 ml-4">
+                {/* Theme selector */}
+                <JuicyThemes
+                  storageKey="conversation-mapper-theme"
+                  showRandom={true}
+                  showVintageControls={true}
+                  position="right"
+                />
+
                 {/* Audio indicator */}
                 {conversationData.value.conversation.source === 'audio' && (
                   <button class="px-4 py-2 bg-amber border-2 border-yellow-700 rounded hover:bg-yellow-400 transition-colors flex items-center gap-2 font-semibold text-sm">
@@ -89,13 +102,21 @@ export default function HomeIsland() {
             </div>
           ) : (
             // Default header when no conversation loaded
-            <div>
-              <h1 class="text-3xl font-bold text-purple-600">
-                🧠 Conversation Mapper
-              </h1>
-              <p class="text-sm text-gray-600 mt-1">
-                Meeting transcripts that make sense
-              </p>
+            <div class="flex items-center justify-between">
+              <div>
+                <h1 class="text-3xl font-bold text-purple-600">
+                  🧠 Conversation Mapper
+                </h1>
+                <p class="text-sm text-gray-600 mt-1">
+                  Meeting transcripts that make sense
+                </p>
+              </div>
+              <JuicyThemes
+                storageKey="conversation-mapper-theme"
+                showRandom={true}
+                showVintageControls={true}
+                position="right"
+              />
             </div>
           )}
         </div>
