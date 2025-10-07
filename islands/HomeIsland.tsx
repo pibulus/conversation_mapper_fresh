@@ -195,8 +195,16 @@ export default function HomeIsland() {
           <div class="max-w-6xl mx-auto grid gap-6">
             {/* Upload Section - Only show when NO data */}
             {!conversationData.value && (
-              <section class="bg-white rounded-lg border-4 border-pink-300 shadow-lg p-6">
-                <h2 class="text-xl font-bold text-pink-600 mb-4">
+              <section class="rounded-lg p-6" style={{
+                background: 'var(--color-secondary)',
+                border: `var(--border-width) solid var(--color-border)`,
+                boxShadow: 'var(--shadow-soft)'
+              }}>
+                <h2 class="mb-4" style={{
+                  fontSize: 'calc(var(--heading-size) * 1.4)',
+                  fontWeight: 'var(--heading-weight)',
+                  color: 'var(--color-accent)'
+                }}>
                   📤 Upload Conversation
                 </h2>
                 <UploadIsland />

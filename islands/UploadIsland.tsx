@@ -237,31 +237,40 @@ export default function UploadIsland() {
       <div class="flex gap-2">
         <button
           onClick={() => mode.value = 'record'}
-          class={`px-4 py-2 rounded-lg font-semibold border-2 transition-all ${
-            mode.value === 'record'
-              ? 'bg-pink-400 text-white border-pink-600'
-              : 'bg-white text-pink-400 border-pink-300 hover:bg-pink-50'
-          }`}
+          class="px-4 py-2 rounded-lg font-semibold"
+          style={{
+            border: `2px solid var(--color-border)`,
+            background: mode.value === 'record' ? 'var(--color-accent)' : 'var(--color-secondary)',
+            color: mode.value === 'record' ? 'white' : 'var(--color-accent)',
+            transition: 'var(--transition-medium)',
+            fontSize: 'var(--text-size)'
+          }}
         >
           🎙️ Record
         </button>
         <button
           onClick={() => mode.value = 'text'}
-          class={`px-4 py-2 rounded-lg font-semibold border-2 transition-all ${
-            mode.value === 'text'
-              ? 'bg-pink-400 text-white border-pink-600'
-              : 'bg-white text-pink-400 border-pink-300 hover:bg-pink-50'
-          }`}
+          class="px-4 py-2 rounded-lg font-semibold"
+          style={{
+            border: `2px solid var(--color-border)`,
+            background: mode.value === 'text' ? 'var(--color-accent)' : 'var(--color-secondary)',
+            color: mode.value === 'text' ? 'white' : 'var(--color-accent)',
+            transition: 'var(--transition-medium)',
+            fontSize: 'var(--text-size)'
+          }}
         >
           📝 Text
         </button>
         <button
           onClick={() => mode.value = 'audio'}
-          class={`px-4 py-2 rounded-lg font-semibold border-2 transition-all ${
-            mode.value === 'audio'
-              ? 'bg-pink-400 text-white border-pink-600'
-              : 'bg-white text-pink-400 border-pink-300 hover:bg-pink-50'
-          }`}
+          class="px-4 py-2 rounded-lg font-semibold"
+          style={{
+            border: `2px solid var(--color-border)`,
+            background: mode.value === 'audio' ? 'var(--color-accent)' : 'var(--color-secondary)',
+            color: mode.value === 'audio' ? 'white' : 'var(--color-accent)',
+            transition: 'var(--transition-medium)',
+            fontSize: 'var(--text-size)'
+          }}
         >
           🎤 Upload
         </button>
@@ -273,11 +282,15 @@ export default function UploadIsland() {
           <button
             onClick={isRecording.value ? stopRecording : startRecording}
             disabled={isProcessing.value && !isRecording.value}
-            class={`w-full py-4 font-bold rounded-lg border-3 shadow-lg transition-all ${
-              isRecording.value
-                ? 'bg-red-500 text-white border-red-700 hover:bg-red-600'
-                : 'bg-purple-500 text-white border-purple-700 hover:bg-purple-600'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            class="w-full py-4 font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              border: `var(--border-width) solid var(--color-border)`,
+              background: isRecording.value ? '#EF4444' : 'var(--color-accent)',
+              color: 'white',
+              boxShadow: 'var(--shadow-soft)',
+              transition: 'var(--transition-medium)',
+              fontSize: 'var(--text-size)'
+            }}
           >
             {isRecording.value ? '⏹ Stop Recording' : '🎙️ Start Recording'}
           </button>
@@ -285,28 +298,41 @@ export default function UploadIsland() {
           {/* Recording Timer & Visualizer */}
           {isRecording.value && (
             <div class="space-y-3">
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-gray-600">Recording time limit: 10 minutes</span>
-                <span class={`font-mono text-lg font-bold ${
-                  showTimeWarning.value ? 'text-red-600 animate-pulse' : 'text-gray-700'
-                }`}>
+              <div class="flex items-center justify-between">
+                <span style={{
+                  fontSize: 'var(--text-size)',
+                  color: 'var(--color-text-secondary)'
+                }}>Recording time limit: 10 minutes</span>
+                <span class={`font-mono font-bold ${showTimeWarning.value ? 'animate-pulse' : ''}`} style={{
+                  fontSize: 'calc(var(--text-size) * 1.2)',
+                  color: showTimeWarning.value ? '#EF4444' : 'var(--color-text)'
+                }}>
                   {formatTime(timeRemaining.value)}
                 </span>
               </div>
 
               {/* Warning */}
-              <div class="bg-red-50 border-2 border-red-300 rounded-lg p-3 text-sm text-red-700">
+              <div class="rounded-lg p-3" style={{
+                background: '#FEE2E2',
+                border: `2px solid #FECACA`,
+                fontSize: 'var(--text-size)',
+                color: '#B91C1C'
+              }}>
                 <strong>⚠️ Recording in progress:</strong> You must stop recording before leaving this page
               </div>
 
               {/* Simple Audio Visualizer */}
-              <div class="bg-purple-100 rounded-lg p-4 h-20 flex items-center justify-center">
+              <div class="rounded-lg p-4 h-20 flex items-center justify-center" style={{
+                background: 'var(--color-base-solid)',
+                opacity: 0.5
+              }}>
                 <div class="flex gap-1 items-end h-full">
                   {[...Array(24)].map((_, i) => (
                     <div
                       key={i}
-                      class="w-2 bg-purple-500 rounded-t animate-pulse"
+                      class="w-2 rounded-t animate-pulse"
                       style={{
+                        background: 'var(--color-accent)',
                         height: `${30 + Math.random() * 70}%`,
                         animationDelay: `${i * 0.08}s`,
                         animationDuration: '0.8s'
@@ -319,7 +345,10 @@ export default function UploadIsland() {
           )}
 
           {isProcessing.value && !isRecording.value && (
-            <p class="text-center text-purple-600 font-semibold">
+            <p class="text-center font-semibold" style={{
+              fontSize: 'var(--text-size)',
+              color: 'var(--color-accent)'
+            }}>
               ⚡ Processing audio...
             </p>
           )}
@@ -330,7 +359,14 @@ export default function UploadIsland() {
       {mode.value === 'text' && (
         <div class="space-y-3">
           <textarea
-            class="w-full h-48 p-4 border-3 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none resize-none"
+            class="w-full h-48 p-4 rounded-lg focus:outline-none resize-none"
+            style={{
+              border: `var(--border-width) solid var(--color-border)`,
+              background: 'var(--color-secondary)',
+              color: 'var(--color-text)',
+              fontSize: 'var(--text-size)',
+              transition: 'var(--transition-fast)'
+            }}
             placeholder="Paste your conversation text here..."
             value={textInput.value}
             onInput={(e) => textInput.value = (e.target as HTMLTextAreaElement).value}
@@ -338,7 +374,15 @@ export default function UploadIsland() {
           <button
             onClick={handleTextSubmit}
             disabled={isProcessing.value || !textInput.value.trim()}
-            class="px-6 py-3 bg-purple-500 text-white font-bold rounded-lg border-3 border-purple-700 shadow-lg hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            class="px-6 py-3 font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: 'var(--color-accent)',
+              color: 'white',
+              border: `var(--border-width) solid var(--color-border)`,
+              boxShadow: 'var(--shadow-soft)',
+              fontSize: 'var(--text-size)',
+              transition: 'var(--transition-medium)'
+            }}
           >
             {isProcessing.value ? '⚡ Processing...' : '🚀 Analyze Text'}
           </button>
@@ -348,20 +392,32 @@ export default function UploadIsland() {
       {/* Audio Upload Mode */}
       {mode.value === 'audio' && (
         <div class="space-y-3">
-          <div class="border-3 border-dashed border-purple-300 rounded-lg p-8 text-center hover:border-purple-500 transition-all">
+          <div class="rounded-lg p-8 text-center" style={{
+            border: `var(--border-width) dashed var(--color-border)`,
+            transition: 'var(--transition-medium)'
+          }}>
             <input
               type="file"
               accept="audio/*"
               onChange={handleAudioUpload}
               disabled={isProcessing.value}
-              class="w-full cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-purple-500 file:text-white file:font-semibold hover:file:bg-purple-600"
+              class="w-full cursor-pointer"
+              style={{
+                fontSize: 'var(--text-size)'
+              }}
             />
-            <p class="text-sm text-gray-500 mt-2">
+            <p class="mt-2" style={{
+              fontSize: 'var(--small-size)',
+              color: 'var(--color-text-secondary)'
+            }}>
               Upload audio file (MP3, WAV, M4A, etc.)
             </p>
           </div>
           {isProcessing.value && (
-            <p class="text-center text-purple-600 font-semibold">
+            <p class="text-center font-semibold" style={{
+              fontSize: 'var(--text-size)',
+              color: 'var(--color-accent)'
+            }}>
               ⚡ Processing audio...
             </p>
           )}
