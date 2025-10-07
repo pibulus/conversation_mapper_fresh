@@ -240,22 +240,41 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
   // Play/pause recording
   function togglePlayback(recording: Recording) {
     if (playingRecordingId.value === recording.id) {
-      // Pause
+      // Pause current recording
       if (audioElementRef.current) {
         audioElementRef.current.pause();
+        audioElementRef.current.src = '';
       }
       playingRecordingId.value = null;
     } else {
-      // Play
+      // Stop any currently playing audio first
       if (audioElementRef.current) {
         audioElementRef.current.pause();
+        audioElementRef.current.src = '';
       }
 
+      // Create and play new audio
       const audio = new Audio(URL.createObjectURL(recording.data));
-      audio.play();
+
       audio.onended = () => {
         playingRecordingId.value = null;
+        audioElementRef.current = null;
       };
+
+      audio.onerror = (error) => {
+        console.error('Error playing audio:', error);
+        playingRecordingId.value = null;
+        audioElementRef.current = null;
+        alert('Error playing audio. The file may be corrupted.');
+      };
+
+      audio.play().catch(error => {
+        console.error('Failed to play audio:', error);
+        playingRecordingId.value = null;
+        audioElementRef.current = null;
+        alert('Failed to play audio. Please check your browser settings.');
+      });
+
       audioElementRef.current = audio;
       playingRecordingId.value = recording.id;
     }
@@ -266,12 +285,23 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
     const url = URL.createObjectURL(recording.data);
     const a = document.createElement('a');
     a.href = url;
-    a.download = recording.file_name;
+
+    // Add proper file extension based on mime type
+    let extension = 'webm';
+    if (recording.data.type.includes('ogg')) extension = 'ogg';
+    else if (recording.data.type.includes('mp4')) extension = 'mp4';
+    else if (recording.data.type.includes('wav')) extension = 'wav';
+
+    const fileName = recording.file_name.includes('.')
+      ? recording.file_name
+      : `${recording.file_name}.${extension}`;
+
+    a.download = fileName;
     a.click();
     URL.revokeObjectURL(url);
   }
 
-  // Handle beforeunload
+  // Handle beforeunload and cleanup
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isRecording.value) {
@@ -282,8 +312,18 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
+
+      // Cleanup audio playback
+      if (audioElementRef.current) {
+        audioElementRef.current.pause();
+        audioElementRef.current.src = '';
+        audioElementRef.current = null;
+      }
+
+      // Cleanup recording resources
       cleanup();
     };
   }, []);
@@ -445,7 +485,7 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
                           class="w-8 h-8 flex items-center justify-center rounded hover:bg-white/50 transition-colors"
                           title={playingRecordingId.value === recording.id ? 'Pause' : 'Play'}
                         >
-                          <i class={`fa ${playingRecordingId.value === recording.id ? 'fa-pause' : 'fa-play'} text-sm`}></i>
+                          <i class={`fa ${playingRecordingId.value === recording.id ? 'fa-pause animate-pulse' : 'fa-play'} text-sm`}></i>
                         </button>
                         <button
                           onClick={() => downloadRecording(recording)}
