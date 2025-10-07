@@ -53,6 +53,8 @@ This document tracks the feature parity between the original Svelte implementati
 | Speaker detection | ✅ | ✅ | ✅ **Complete** | AI extraction |
 | **Processing** |
 | Transcription | ✅ | ✅ | ✅ **Complete** | Gemini API |
+| Speaker diarization | ✅ | ✅ | ✅ **Complete** | Auto-detect speakers |
+| Speaker display | ✅ | ✅ | ✅ **Complete** | Badges in transcript |
 | Topic extraction | ✅ | ✅ | ✅ **Complete** | Graph nodes |
 | Relationship mapping | ✅ | ✅ | ✅ **Complete** | Graph edges |
 | Action item detection | ✅ | ✅ | ✅ **Complete** | With metadata |
@@ -163,7 +165,7 @@ This document tracks the feature parity between the original Svelte implementati
 |---------|--------|-------|----------|-------|
 | Backend persistence | ❌ | ❌ | **Medium** | Both use localStorage only |
 | Real-time collaboration | ❌ | ❌ | **Low** | Future enhancement |
-| Speaker diarization | ❌ | ❌ | **Low** | AI can improve |
+| Speaker name editing | ✅ | ❌ | **Low** | Svelte has edit UI |
 | Audio waveform viz | ❌ | ❌ | **Low** | Simple bars only |
 | Batch audio upload | ❌ | ❌ | **Low** | One at a time |
 | Voice commands | ❌ | ❌ | **Low** | "Mark X as done" |
@@ -172,7 +174,7 @@ This document tracks the feature parity between the original Svelte implementati
 
 ## Summary
 
-### ✅ **Feature Parity Achieved: 98%**
+### ✅ **Feature Parity Achieved: 99%**
 
 The Fresh implementation now has **complete feature parity** with the original Svelte version for all core functionality:
 
