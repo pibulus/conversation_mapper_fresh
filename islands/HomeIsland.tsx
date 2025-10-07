@@ -23,7 +23,7 @@ export default function HomeIsland() {
   const transcript = conversationData.value?.transcript?.text || '';
 
   return (
-    <div class="min-h-screen" style={{ background: 'var(--color-base)' }}>
+    <div class="min-h-screen" style={{ background: 'var(--gradient-bg)' }}>
       {/* Header - Dynamic based on conversation state */}
       <header style={{
         borderBottom: `var(--border-width) solid var(--color-border)`,

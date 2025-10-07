@@ -19,6 +19,7 @@
   --color-text: #3D3935;
   --color-text-secondary: #8B7F77;
   --color-border: rgba(61, 57, 53, 0.1);
+  --gradient-bg: linear-gradient(to bottom right, #FFE5D4, #FF9A76);
 
   /* ===================================================================
      DESIGN TOKENS - Consistent styling across components

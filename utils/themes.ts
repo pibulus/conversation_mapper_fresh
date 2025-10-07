@@ -20,6 +20,7 @@ export const peachyCream: Theme = {
   cssVars: {
     "--color-base-solid": "#FFEBD4",
     "--shadow-soft": "0 4px 12px rgba(0, 0, 0, 0.08)",
+    "--gradient-bg": "linear-gradient(to bottom right, #FFE5D4, #FF9A76)",
   },
 };
 
@@ -36,10 +37,11 @@ export const lavenderDream: Theme = {
   cssVars: {
     "--color-base-solid": "#EFE5F7",
     "--shadow-soft": "0 4px 12px rgba(155, 126, 199, 0.12)",
+    "--gradient-bg": "linear-gradient(to bottom right, #E8D5F2, #B591D9)",
   },
 };
 
-// Sky Blue - Fresh blue gradient
+// Sky Blue - Fresh blue gradient (matches Svelte screenshot)
 export const skyBlue: Theme = {
   name: "SKY",
   vibe: "fresh & clear",
@@ -52,6 +54,7 @@ export const skyBlue: Theme = {
   cssVars: {
     "--color-base-solid": "#E3F2FD",
     "--shadow-soft": "0 4px 12px rgba(92, 157, 213, 0.12)",
+    "--gradient-bg": "linear-gradient(to bottom right, #97abff, #123597)",
   },
 };
 
@@ -68,10 +71,11 @@ export const mintFresh: Theme = {
   cssVars: {
     "--color-base-solid": "#E8F8F5",
     "--shadow-soft": "0 4px 12px rgba(93, 190, 170, 0.12)",
+    "--gradient-bg": "linear-gradient(to bottom right, #D4F5ED, #3EBEAA)",
   },
 };
 
-// Sunset Pink - Warm pink gradient
+// Sunset Pink - Warm pink gradient (matches Svelte screenshot)
 export const sunsetPink: Theme = {
   name: "SUNSET",
   vibe: "playful & energetic",
@@ -84,6 +88,7 @@ export const sunsetPink: Theme = {
   cssVars: {
     "--color-base-solid": "#FFE6F0",
     "--shadow-soft": "0 4px 12px rgba(232, 93, 143, 0.12)",
+    "--gradient-bg": "linear-gradient(to bottom right, #FFC2D4, #9D50BB)",
   },
 };
 
