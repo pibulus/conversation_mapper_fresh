@@ -34,18 +34,35 @@ export default function HomeIsland() {
             // Conversation-specific header with title + utilities
             <div class="flex items-center justify-between">
               <div class="flex-1 min-w-0">
-                <h1 class="truncate" style={{
-                  fontSize: 'calc(var(--heading-size) * 1.6)',
-                  fontWeight: 'var(--heading-weight)',
-                  color: 'var(--color-accent)'
-                }}>
+                <h1
+                  class="truncate cursor-pointer hover:opacity-80"
+                  style={{
+                    fontSize: 'calc(var(--heading-size) * 1.6)',
+                    fontWeight: 'var(--heading-weight)',
+                    color: 'var(--color-accent)',
+                    transition: 'var(--transition-fast)'
+                  }}
+                  onClick={() => {
+                    conversationData.value = null;
+                    window.history.pushState({}, '', '/');
+                  }}
+                  title="Back to home"
+                >
                   {conversationData.value.conversation.title}
                 </h1>
                 <p class="mt-1" style={{
                   fontSize: 'var(--tiny-size)',
                   color: 'var(--color-text-secondary)'
                 }}>
-                  {conversationData.value.conversation.source === 'audio' ? '🎤 Audio' : '📝 Text'} • {new Date(conversationData.value.conversation.created_at).toLocaleDateString()}
+                  {conversationData.value.conversation.source === 'audio' ? '🎤 Audio' : '📝 Text'} • {
+                    conversationData.value.conversation.created_at
+                      ? new Date(conversationData.value.conversation.created_at).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })
+                      : 'Unknown date'
+                  }
                 </p>
               </div>
               <div class="flex gap-2 ml-4">

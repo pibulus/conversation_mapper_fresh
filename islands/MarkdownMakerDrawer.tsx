@@ -57,11 +57,11 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
     if (isOpen) {
       setShouldRender(true);
       // Small delay to ensure DOM is ready
-      setTimeout(() => setIsAnimating(true), 10);
+      setTimeout(() => setIsAnimating(true), 50);
     } else {
       setIsAnimating(false);
       // Wait for animation to complete before unmounting
-      const timeout = setTimeout(() => setShouldRender(false), 200);
+      const timeout = setTimeout(() => setShouldRender(false), 450);
       return () => clearTimeout(timeout);
     }
   }, [isOpen]);
@@ -225,18 +225,29 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
       {/* Drawer with smooth Svelte-style animation */}
       <div
         ref={drawerRef}
-        class={`fixed bottom-0 right-0 top-0 z-50 flex w-96 flex-col overflow-hidden border-l-4 border-soft-purple bg-paper shadow-brutal-lg transition-transform duration-[400ms] ${
+        class={`fixed bottom-0 right-0 top-0 z-50 flex w-96 flex-col overflow-hidden transition-transform duration-[400ms] ${
           isAnimating ? 'translate-x-0' : 'translate-x-full'
         }`}
         style={{
+          borderLeft: `var(--border-width) solid var(--color-border)`,
+          background: 'var(--color-secondary)',
+          boxShadow: 'var(--shadow-lifted)',
           transitionTimingFunction: isAnimating
             ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' // bounce in
-            : 'ease-in' // slide out
+            : 'cubic-bezier(0.4, 0, 1, 1)' // slide out
         }}
       >
         {/* Header */}
-        <div class="bg-soft-purple px-4 py-3 border-b-4 border-purple-600 flex justify-between items-center">
-          <h3 class="font-bold text-white">📝 Markdown Maker</h3>
+        <div class="flex justify-between items-center" style={{
+          background: 'var(--color-accent)',
+          padding: 'var(--card-padding)',
+          borderBottom: `var(--border-width) solid var(--color-border)`
+        }}>
+          <h3 style={{
+            fontSize: 'var(--heading-size)',
+            fontWeight: 'var(--heading-weight)',
+            color: 'white'
+          }}>📝 Markdown Maker</h3>
           <button
             onClick={onClose}
             class="text-white hover:text-gray-200 cursor-pointer transition-colors"
