@@ -2,59 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Pablo's Soft Stack Theme */
-:root {
-  --color-paper: #FAF9F6;
-  --color-peach: #FFE5B4;
-  --color-hot-pink: #FF69B4;
-  --color-terminal-green: #00FF41;
-  --color-amber: #FFB000;
-  --color-soft-black: #0A0A0A;
-  --color-soft-purple: #9370DB;
-  --color-soft-blue: #87CEEB;
-  --color-soft-yellow: #F9E79F;
-  --color-soft-mint: #98FB98;
+/* ===================================================================
+   CONVERSATION MAPPER - Clean Pastel Aesthetic
+   Matching the original Svelte design
+   ================================================================ */
 
+:root {
   /* ===================================================================
      THEME SYSTEM - Dynamic colors set by JuicyThemes
      ================================================================ */
   /* Defaults (overridden by theme system) */
-  --color-base: linear-gradient(135deg, #FFE5CC 0%, #FFDAB9 50%, #FFE4CC 100%);
-  --color-base-solid: #FFE5CC;
-  --color-secondary: #FFF9F3;
-  --color-accent: #FF6B9D;
-  --color-text: #2C2825;
-  --color-text-secondary: #6B5D54;
-  --color-border: #2C2825;
+  --color-base: linear-gradient(135deg, #FFEBD4 0%, #FFD9B8 100%);
+  --color-base-solid: #FFEBD4;
+  --color-secondary: rgba(255, 255, 255, 0.6);
+  --color-accent: #E8839C;
+  --color-text: #3D3935;
+  --color-text-secondary: #8B7F77;
+  --color-border: rgba(61, 57, 53, 0.1);
 
   /* ===================================================================
      DESIGN TOKENS - Consistent styling across components
      ================================================================ */
 
   /* Spacing */
-  --card-padding: 1.5rem;
-  --card-gap: 1.5rem;
-  --section-gap: 2rem;
+  --card-padding: 1.25rem;
+  --card-gap: 1.25rem;
+  --section-gap: 1.5rem;
 
   /* Borders & Corners */
-  --border-width: 3px;
+  --border-width: 2px;
   --border-radius: 12px;
   --border-radius-sm: 8px;
   --border-radius-lg: 16px;
 
   /* Typography */
-  --heading-size: 1.25rem;
-  --heading-weight: 700;
-  --text-size: 1rem;
+  --heading-size: 1.125rem;
+  --heading-weight: 600;
+  --text-size: 0.9375rem;
   --text-weight: 400;
   --small-size: 0.875rem;
   --tiny-size: 0.75rem;
   --line-height: 1.6;
 
-  /* Shadows */
-  --shadow-brutal: 4px 4px 0 var(--color-border);
-  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lifted: 0 8px 24px rgba(0, 0, 0, 0.12);
+  /* Shadows - Softer, more subtle */
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lifted: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
 
   /* Animations */
   --transition-fast: 150ms ease;
@@ -62,10 +55,53 @@
   --transition-slow: 300ms ease;
 }
 
-/* Global transitions for smooth interactions */
+/* ===================================================================
+   GLOBAL STYLES
+   ================================================================ */
+
 * {
   transition: background-color var(--transition-medium),
               border-color var(--transition-medium),
-              transform var(--transition-fast),
-              box-shadow var(--transition-medium);
+              transform var(--transition-fast);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===================================================================
+   SCROLLBARS - Clean and minimal
+   ================================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* ===================================================================
+   UTILITY CLASSES
+   ================================================================ */
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

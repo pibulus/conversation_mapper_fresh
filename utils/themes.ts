@@ -1,107 +1,108 @@
-// 🎨 Default Juicy Themes
-// Two carefully tuned themes + smart random generation
+// 🎨 Conversation Mapper Themes
+// Clean pastel themes matching the original Svelte design
 
 import type { Theme, ThemeSystemConfig } from "../theme-system/mod.ts";
-import { RandomThemeGenerator } from "../theme-system/mod.ts";
 
-// Light theme - Vintage Cream
-export const vintageCream: Theme = {
-  name: "VINTAGE CREAM",
-  vibe: "warm nostalgia",
-  base: "linear-gradient(135deg, #FDFCF8 0%, #FFF9F3 100%)",
-  secondary: "#FFE8CC",
-  accent: "#FF6B9D",
-  text: "#2C2825",
-  textSecondary: "#6B5D54",
-  border: "#2C2825",
+// ===================================================================
+// CORE THEMES - Clean pastel aesthetics
+// ===================================================================
+
+// Peachy Cream (default) - Warm peachy gradient
+export const peachyCream: Theme = {
+  name: "PEACHY",
+  vibe: "warm & welcoming",
+  base: "linear-gradient(135deg, #FFEBD4 0%, #FFD9B8 100%)",
+  secondary: "rgba(255, 255, 255, 0.6)",
+  accent: "#E8839C",
+  text: "#3D3935",
+  textSecondary: "#8B7F77",
+  border: "rgba(61, 57, 53, 0.1)",
   cssVars: {
-    "--color-base-solid": "#FDFCF8",
-    "--shadow-soft": "rgba(139, 90, 43, 0.1)",
-    "--highlight": "#FFD3B6",
+    "--color-base-solid": "#FFEBD4",
+    "--shadow-soft": "0 4px 12px rgba(0, 0, 0, 0.08)",
   },
 };
 
-// Dark theme - Terminal Dusk
-export const terminalDusk: Theme = {
-  name: "TERMINAL DUSK",
-  vibe: "midnight hacker",
-  base: "#0A0B0F",
-  secondary: "#15171F",
-  accent: "#00FF88",
-  text: "#00FF88",
-  textSecondary: "#00CC6A",
-  border: "#00FF88",
+// Lavender Dream - Soft purple gradient
+export const lavenderDream: Theme = {
+  name: "LAVENDER",
+  vibe: "calm & creative",
+  base: "linear-gradient(135deg, #EFE5F7 0%, #DBC9ED 100%)",
+  secondary: "rgba(255, 255, 255, 0.6)",
+  accent: "#9B7EC7",
+  text: "#3D3A42",
+  textSecondary: "#8B8390",
+  border: "rgba(61, 58, 66, 0.1)",
   cssVars: {
-    "--color-base-solid": "#0A0B0F",
-    "--shadow-glow": "0 0 20px rgba(0, 255, 136, 0.3)",
-    "--terminal-amber": "#FFB000",
-    "--terminal-blue": "#00B4D8",
+    "--color-base-solid": "#EFE5F7",
+    "--shadow-soft": "0 4px 12px rgba(155, 126, 199, 0.12)",
   },
 };
 
-// Random theme generator
-export function generateJuicyRandomTheme(preferLight: boolean = true): Theme {
-  const isLight = preferLight;
-  const randomTheme = RandomThemeGenerator.generateHarmonicTheme(
-    isLight ? "light" : "dark",
-  );
+// Sky Blue - Fresh blue gradient
+export const skyBlue: Theme = {
+  name: "SKY",
+  vibe: "fresh & clear",
+  base: "linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)",
+  secondary: "rgba(255, 255, 255, 0.6)",
+  accent: "#5C9DD5",
+  text: "#2C3E50",
+  textSecondary: "#7A8C9E",
+  border: "rgba(44, 62, 80, 0.1)",
+  cssVars: {
+    "--color-base-solid": "#E3F2FD",
+    "--shadow-soft": "0 4px 12px rgba(92, 157, 213, 0.12)",
+  },
+};
 
-  // Fun vibes for random themes
-  const vibes = [
-    "electric dreams",
-    "soft rebellion",
-    "neon garden",
-    "vapor wave",
-    "sunset overdrive",
-    "digital rain",
-    "candy shop",
-    "retro future",
-    "cosmic dust",
-    "pixel party",
-    "chrome dreams",
-    "pastel punk",
-  ];
+// Mint Fresh - Soft green gradient
+export const mintFresh: Theme = {
+  name: "MINT",
+  vibe: "energizing & balanced",
+  base: "linear-gradient(135deg, #E8F8F5 0%, #CDEEE8 100%)",
+  secondary: "rgba(255, 255, 255, 0.6)",
+  accent: "#5DBEAA",
+  text: "#2C4A42",
+  textSecondary: "#7A9690",
+  border: "rgba(44, 74, 66, 0.1)",
+  cssVars: {
+    "--color-base-solid": "#E8F8F5",
+    "--shadow-soft": "0 4px 12px rgba(93, 190, 170, 0.12)",
+  },
+};
 
-  randomTheme.name = "RANDOM";
-  randomTheme.vibe = vibes[Math.floor(Math.random() * vibes.length)];
+// Sunset Pink - Warm pink gradient
+export const sunsetPink: Theme = {
+  name: "SUNSET",
+  vibe: "playful & energetic",
+  base: "linear-gradient(135deg, #FFE6F0 0%, #FFCCE0 100%)",
+  secondary: "rgba(255, 255, 255, 0.6)",
+  accent: "#E85D8F",
+  text: "#3D2A35",
+  textSecondary: "#8B7580",
+  border: "rgba(61, 42, 53, 0.1)",
+  cssVars: {
+    "--color-base-solid": "#FFE6F0",
+    "--shadow-soft": "0 4px 12px rgba(232, 93, 143, 0.12)",
+  },
+};
 
-  // Add CSS variables
-  randomTheme.cssVars = {
-    "--color-base-solid": randomTheme.base.includes("gradient")
-      ? randomTheme.base.match(/#[0-9A-Fa-f]{6}/)?.[0] || randomTheme.base
-      : randomTheme.base,
-    "--shadow-brutal": `4px 4px 0 ${randomTheme.border}`,
-  };
+// ===================================================================
+// THEME CONFIGURATION
+// ===================================================================
 
-  return randomTheme;
-}
+export const themes = [
+  peachyCream,
+  lavenderDream,
+  skyBlue,
+  mintFresh,
+  sunsetPink,
+];
 
-// Default configuration
 export const juicyConfig: ThemeSystemConfig = {
-  themes: [vintageCream, terminalDusk],
-  defaultTheme: "VINTAGE CREAM",
-  storageKey: "juicy-theme",
-  randomEnabled: true,
+  themes: themes,
+  defaultTheme: "PEACHY",
+  storageKey: "conversation-mapper-theme",
+  randomEnabled: false, // Disabled - we have curated themes
   cssPrefix: "--color",
 };
-
-// Conversation Mapper theme - Warm peachy gradient
-export const conversationMapperTheme: Theme = {
-  name: "CONVERSATION MAPPER",
-  vibe: "warm peachy goodness",
-  base: "linear-gradient(135deg, #FFE5CC 0%, #FFDAB9 50%, #FFE4CC 100%)",
-  secondary: "#FFF9F3",
-  accent: "#FF6B9D",
-  text: "#2C2825",
-  textSecondary: "#6B5D54",
-  border: "#2C2825",
-  cssVars: {
-    "--color-base-solid": "#FFE5CC",
-    "--shadow-soft": "rgba(139, 90, 43, 0.1)",
-    "--shadow-brutal": "4px 4px 0 #2C2825",
-    "--highlight": "#FFD3B6",
-  },
-};
-
-// Export themes array for easy access
-export const themes = [conversationMapperTheme, vintageCream, terminalDusk];
