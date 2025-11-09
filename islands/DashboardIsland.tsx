@@ -6,9 +6,11 @@
  */
 
 import { useSignal } from "@preact/signals";
+import { useEffect, useRef } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
 import VisualizationSelector from "./VisualizationSelector.tsx";
 import { showToast, copyToClipboard } from "../utils/toast.ts";
+import { formatTranscriptSafe, formatMarkdownSafe } from "../utils/sanitize.ts";
 
 // ===================================================================
 // COMPONENT
@@ -30,8 +32,41 @@ export default function DashboardIsland() {
   const showAssigneeDropdown = useSignal(false);
   const activeAssigneeDropdown = useSignal<string | null>(null);
 
+  // Refs for cleanup
+  const dropdownTimeoutRef = useRef<number | null>(null);
+
   // Common assignee names (can be customized)
   const commonAssignees = ['Me', 'Team Lead', 'Developer', 'Designer', 'QA', 'Product Manager', 'Client'];
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (dropdownTimeoutRef.current !== null) {
+        clearTimeout(dropdownTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Click outside to close active dropdown
+  useEffect(() => {
+    if (activeAssigneeDropdown.value === null) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Check if click is outside dropdown
+      if (!target.closest('.assignee-dropdown-container')) {
+        activeAssigneeDropdown.value = null;
+      }
+    };
+
+    setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 10);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [activeAssigneeDropdown.value]);
 
   if (!conversationData.value) {
     return (
@@ -262,27 +297,6 @@ export default function DashboardIsland() {
       .map(s => s.charAt(0).toUpperCase() + s.slice(1));
   }
 
-  // Format summary with markdown
-  function formatSummaryHtml(text: string): string {
-    if (!text) return '';
-
-    const formatted = text
-      // Headers
-      .replace(/^# (.+)$/gm, '<h3 style="font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; color: var(--color-accent);">$1</h3>')
-      .replace(/^## (.+)$/gm, '<h4 style="font-size: 1.1rem; font-weight: 600; margin: 0.75rem 0 0.5rem; color: var(--color-text);">$1</h4>')
-      .replace(/^### (.+)$/gm, '<h5 style="font-size: 1rem; font-weight: 600; margin: 0.5rem 0 0.25rem;">$1</h5>')
-      // Bold
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-      // Italic
-      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-      // Lists - convert to proper HTML lists
-      .replace(/^- (.+)$/gm, '<li style="margin-left: 1.5rem; list-style: disc;">$1</li>')
-      .replace(/^([0-9]+)\. (.+)$/gm, '<li style="margin-left: 1.5rem; list-style: decimal;">$2</li>')
-      // Paragraphs
-      .replace(/\n\n/g, '</p><p style="margin: 0.75rem 0;">');
-
-    return `<div style="line-height: 1.7;"><p style="margin: 0.75rem 0;">${formatted}</p></div>`;
-  }
 
   return (
     <div>
@@ -337,7 +351,7 @@ export default function DashboardIsland() {
                 </div>
               ) : (
                 <div class="relative p-4 rounded-lg bg-white" style={{ border: '2px solid var(--color-border)' }}>
-                  {/* Format transcript with speaker highlighting */}
+                  {/* Format transcript with speaker highlighting (XSS-safe) */}
                   <div
                     class="whitespace-pre-wrap leading-relaxed"
                     style={{
@@ -346,12 +360,7 @@ export default function DashboardIsland() {
                       lineHeight: '1.8'
                     }}
                     dangerouslySetInnerHTML={{
-                      __html: transcript.text
-                        .replace(/\n/g, '<br/>')
-                        .replace(
-                          /(Speaker\s*\d+|[A-Z][a-z]+):/g,
-                          '<span style="font-weight: 600; color: var(--color-accent); margin-right: 0.5rem;">$1:</span>'
-                        )
+                      __html: formatTranscriptSafe(transcript.text)
                     }}
                   />
 
@@ -439,11 +448,11 @@ export default function DashboardIsland() {
                 </div>
               ) : (
                 <div>
-                  {/* Main summary with markdown formatting */}
+                  {/* Main summary with markdown formatting (XSS-safe) */}
                   <div class="p-4 rounded-lg bg-white" style={{ border: '2px solid var(--color-border)' }}>
                     <div
                       style={{ fontSize: 'var(--text-size)', color: 'var(--color-text)' }}
-                      dangerouslySetInnerHTML={{ __html: formatSummaryHtml(summary) }}
+                      dangerouslySetInnerHTML={{ __html: formatMarkdownSafe(summary) }}
                     />
                   </div>
 
@@ -641,7 +650,7 @@ export default function DashboardIsland() {
                           {/* Metadata row - assignee & due date */}
                           <div class="flex items-center gap-3 flex-wrap">
                             {/* Assignee selector */}
-                            <div class="relative">
+                            <div class="relative assignee-dropdown-container">
                               <button
                                 onClick={() => activeAssigneeDropdown.value = activeAssigneeDropdown.value === item.id ? null : item.id}
                                 class="flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
@@ -811,7 +820,17 @@ export default function DashboardIsland() {
                     value={newItemAssignee.value}
                     onInput={(e) => newItemAssignee.value = (e.target as HTMLInputElement).value}
                     onFocus={() => showAssigneeDropdown.value = true}
-                    onBlur={() => setTimeout(() => showAssigneeDropdown.value = false, 200)}
+                    onBlur={() => {
+                      // Clear any existing timeout
+                      if (dropdownTimeoutRef.current !== null) {
+                        clearTimeout(dropdownTimeoutRef.current);
+                      }
+                      // Set new timeout and track it
+                      dropdownTimeoutRef.current = setTimeout(() => {
+                        showAssigneeDropdown.value = false;
+                        dropdownTimeoutRef.current = null;
+                      }, 200) as unknown as number;
+                    }}
                     placeholder="Who's responsible?"
                     class="w-full rounded px-3 py-2 pr-8"
                     style={{

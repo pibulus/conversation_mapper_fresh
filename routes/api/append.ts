@@ -28,10 +28,10 @@ export const handler: Handlers = {
       }
 
       // Initialize Gemini AI
-      const apiKey = Deno.env.get("VITE_GEMINI_API_KEY");
+      const apiKey = Deno.env.get("GEMINI_API_KEY");
       if (!apiKey) {
         return new Response(
-          JSON.stringify({ error: "Missing VITE_GEMINI_API_KEY environment variable" }),
+          JSON.stringify({ error: "Missing GEMINI_API_KEY environment variable" }),
           { status: 500, headers: { "Content-Type": "application/json" } }
         );
       }
@@ -58,6 +58,15 @@ export const handler: Handlers = {
         return new Response(
           JSON.stringify({ error: "No conversation ID provided" }),
           { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      // Validate file size (50MB max to prevent abuse)
+      const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+      if (audioFile.size > MAX_FILE_SIZE) {
+        return new Response(
+          JSON.stringify({ error: `File too large. Maximum size is 50MB (received ${(audioFile.size / 1024 / 1024).toFixed(1)}MB)` }),
+          { status: 413, headers: { "Content-Type": "application/json" } }
         );
       }
 

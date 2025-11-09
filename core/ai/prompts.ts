@@ -15,7 +15,7 @@ Return only the cleaned-up transcription, with no additional text.
 
 I want you to denote all the different speakers.
 If you can work out their names then use their name, otherwise use Speaker1, Speaker2 etc.
-Make sure you show each spekers name before their text.
+Make sure you show each speaker's name before their text.
 `;
 
 // ===================================================================
