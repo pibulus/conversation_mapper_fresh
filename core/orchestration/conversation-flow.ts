@@ -12,7 +12,8 @@ import type {
 	ActionItem,
 	Node,
 	Edge,
-	Transcript
+	Transcript,
+	NodeInput
 } from '../types/index.ts';
 
 export interface ConversationFlowResult {
@@ -36,10 +37,11 @@ export async function processAudio(
 	aiService: AIService,
 	audioBlob: Blob,
 	conversationId: string,
-	existingActionItems: ActionItem[] = []
+	existingActionItems: ActionItem[] = [],
+	existingNodes: NodeInput[] = []
 ): Promise<ConversationFlowResult> {
 	// Parallel AI analysis
-	const analysis = await analyzeAudio(aiService, audioBlob, existingActionItems);
+	const analysis = await analyzeAudio(aiService, audioBlob, existingActionItems, existingNodes);
 
 	// Generate title from transcription
 	const title = await aiService.generateTitle(analysis.transcription.text);
@@ -99,10 +101,11 @@ export async function processText(
 	text: string,
 	conversationId: string,
 	speakers: string[] = [],
-	existingActionItems: ActionItem[] = []
+	existingActionItems: ActionItem[] = [],
+	existingNodes: NodeInput[] = []
 ): Promise<ConversationFlowResult> {
 	// Parallel AI analysis
-	const analysis = await analyzeText(aiService, text, speakers, existingActionItems);
+	const analysis = await analyzeText(aiService, text, speakers, existingActionItems, existingNodes);
 
 	// Generate title
 	const title = await aiService.generateTitle(text);

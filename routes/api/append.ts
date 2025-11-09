@@ -48,6 +48,7 @@ export const handler: Handlers = {
       const existingTranscript = formData.get("existingTranscript") as string | null;
       const existingActionItemsJson = formData.get("existingActionItems") as string | null;
       const existingSummary = formData.get("existingSummary") as string | null;
+      const existingNodesJson = formData.get("existingNodes") as string | null;
 
       if (!audioFile) {
         return new Response(
@@ -82,18 +83,30 @@ export const handler: Handlers = {
         }
       }
 
+      // Parse existing nodes for topic deduplication
+      let existingNodes: any[] = [];
+      if (existingNodesJson) {
+        try {
+          existingNodes = JSON.parse(existingNodesJson);
+        } catch (error) {
+          console.warn("Failed to parse existing nodes:", error);
+        }
+      }
+
       // Convert File to Blob
       const audioBlob = new Blob([await audioFile.arrayBuffer()], { type: audioFile.type });
 
-      // Process audio through nervous system with existing action items
+      // Process audio through nervous system with existing action items and nodes
       console.log(`📎 Appending audio to conversation ${conversationId}`);
       console.log(`📋 Found ${existingActionItems.length} existing action items`);
+      console.log(`🕸️ Found ${existingNodes.length} existing topics`);
 
       const result: ConversationFlowResult = await processAudio(
         aiService,
         audioBlob,
         conversationId,
-        existingActionItems
+        existingActionItems,
+        existingNodes
       );
 
       // Merge transcripts if we have existing content

@@ -10,7 +10,8 @@ import type {
 	ActionItemInput,
 	ActionItemStatusUpdate,
 	TranscriptionResult,
-	ConversationGraph
+	ConversationGraph,
+	NodeInput
 } from '../types/index.ts';
 
 import {
@@ -82,13 +83,14 @@ export interface AIService {
 	generateTitle(transcript: string): Promise<string>;
 	extractActionItems(
 		input: string | Blob,
-		speakers?: string[]
+		speakers?: string[],
+		existingActionItems?: ActionItem[]
 	): Promise<ActionItemInput[]>;
 	checkActionItemStatus(
 		input: string | Blob,
 		existingActionItems: ActionItem[]
 	): Promise<ActionItemStatusUpdate[]>;
-	extractTopics(text: string): Promise<ConversationGraph>;
+	extractTopics(text: string, existingNodes?: NodeInput[]): Promise<ConversationGraph>;
 	generateSummary(text: string): Promise<string>;
 	generateMarkdown(formatPrompt: string, text: string): Promise<string>;
 }
@@ -137,10 +139,11 @@ export function createGeminiService(model: any): AIService {
 
 		async extractActionItems(
 			input: string | Blob,
-			speakers: string[] = []
+			speakers: string[] = [],
+			existingActionItems: ActionItem[] = []
 		): Promise<ActionItemInput[]> {
 			try {
-				const prompt = buildActionItemsPrompt(input, speakers);
+				const prompt = buildActionItemsPrompt(input, speakers, existingActionItems);
 
 				let result;
 				if (input instanceof Blob) {
@@ -219,11 +222,11 @@ export function createGeminiService(model: any): AIService {
 		// TOPIC/NODE EXTRACTION
 		// ===============================================================
 
-		async extractTopics(text: string): Promise<ConversationGraph> {
+		async extractTopics(text: string, existingNodes: NodeInput[] = []): Promise<ConversationGraph> {
 			if (!text) return { nodes: [], edges: [] };
 
 			try {
-				const prompt = buildTopicExtractionPrompt(text);
+				const prompt = buildTopicExtractionPrompt(text, existingNodes);
 				const result = await model.generateContent(prompt);
 				const response = await result.response;
 				let jsonString = response.text();
