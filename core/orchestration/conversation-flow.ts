@@ -36,7 +36,7 @@ export async function processAudio(
 	aiService: AIService,
 	audioBlob: Blob,
 	conversationId: string,
-	existingActionItems: any[] = []
+	existingActionItems: ActionItem[] = []
 ): Promise<ConversationFlowResult> {
 	// Parallel AI analysis
 	const analysis = await analyzeAudio(aiService, audioBlob, existingActionItems);
@@ -99,7 +99,7 @@ export async function processText(
 	text: string,
 	conversationId: string,
 	speakers: string[] = [],
-	existingActionItems: any[] = []
+	existingActionItems: ActionItem[] = []
 ): Promise<ConversationFlowResult> {
 	// Parallel AI analysis
 	const analysis = await analyzeText(aiService, text, speakers, existingActionItems);

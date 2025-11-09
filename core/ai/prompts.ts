@@ -5,6 +5,8 @@
  * Framework-agnostic, reusable across any implementation
  */
 
+import type { ActionItem } from '../types/index.ts';
+
 // ===================================================================
 // TRANSCRIPTION
 // ===================================================================
@@ -49,7 +51,7 @@ export const buildActionItemsPrompt = (input: string | Blob, speakers: string[] 
 // AI SELF-CHECKOFF (The Magic!)
 // ===================================================================
 
-export const buildActionItemStatusPrompt = (existingActionItems: any[]): string => {
+export const buildActionItemStatusPrompt = (existingActionItems: ActionItem[]): string => {
 	const actionItemsJSON = JSON.stringify(
 		existingActionItems.map((item) => ({
 			id: item.id,

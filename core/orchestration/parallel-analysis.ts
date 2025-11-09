@@ -9,6 +9,7 @@
 
 import type { AIService } from '../ai/gemini.ts';
 import type {
+	ActionItem,
 	ActionItemInput,
 	ActionItemStatusUpdate,
 	ConversationGraph
@@ -28,7 +29,7 @@ export async function analyzeText(
 	aiService: AIService,
 	text: string,
 	speakers: string[] = [],
-	existingActionItems: any[] = []
+	existingActionItems: ActionItem[] = []
 ): Promise<AnalysisResult> {
 	// Run all AI operations in parallel
 	const [topics, actionItems, statusUpdates, summary] = await Promise.all([
@@ -54,7 +55,7 @@ export async function analyzeText(
 export async function analyzeAudio(
 	aiService: AIService,
 	audioBlob: Blob,
-	existingActionItems: any[] = []
+	existingActionItems: ActionItem[] = []
 ): Promise<AnalysisResult & { transcription: { text: string; speakers: string[] } }> {
 	// First transcribe the audio
 	const transcription = await aiService.transcribeAudio(audioBlob);

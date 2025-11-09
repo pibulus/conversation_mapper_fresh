@@ -1,4 +1,9 @@
 {
+  "name": "conversation-mapper",
+  "version": "1.0.0",
+  "description": "Turn messy meeting recordings into organized topic maps, action items, and summaries - automatically",
+  "author": "Conversation Mapper Contributors",
+  "license": "MIT",
   "lock": false,
   "nodeModulesDir": "auto",
   "tasks": {

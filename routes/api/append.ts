@@ -14,6 +14,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createGeminiService } from "@core/ai/gemini.ts";
 import { processAudio } from "@core/orchestration/conversation-flow.ts";
 import type { ConversationFlowResult } from "@core/orchestration/conversation-flow.ts";
+import type { ActionItem } from "@core/types/index.ts";
 
 export const handler: Handlers = {
   async POST(req) {
@@ -71,7 +72,7 @@ export const handler: Handlers = {
       }
 
       // Parse existing action items for smart completion detection
-      let existingActionItems: any[] = [];
+      let existingActionItems: ActionItem[] = [];
       if (existingActionItemsJson) {
         try {
           existingActionItems = JSON.parse(existingActionItemsJson);

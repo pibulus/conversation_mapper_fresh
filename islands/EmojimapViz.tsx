@@ -6,12 +6,12 @@
  */
 
 import { useComputed } from "@preact/signals";
-import { conversationData } from "../signals/conversationStore.ts";
+import { conversationData, isProcessing } from "../signals/conversationStore.ts";
 import ForceDirectedGraph from "./ForceDirectedGraph.tsx";
 
 export default function EmojimapViz() {
   const nodes = useComputed(() => conversationData.value?.nodes || []);
-  const loading = useComputed(() => false); // TODO: Connect to loading state
+  const loading = useComputed(() => isProcessing.value);
 
   if (!conversationData.value || nodes.value.length === 0) {
     return (

@@ -47,6 +47,9 @@ export const conversationData = signal<ConversationData | null>(null);
 // Flag to prevent auto-save when viewing shared conversations
 export const isViewingShared = signal<boolean>(false);
 
+// Global processing state (true when AI is analyzing)
+export const isProcessing = signal<boolean>(false);
+
 // Auto-save to localStorage whenever conversationData changes
 // SKIP auto-save when viewing shared conversations
 if (typeof window !== "undefined") {

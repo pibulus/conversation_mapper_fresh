@@ -6,6 +6,7 @@
  */
 
 import type {
+	ActionItem,
 	ActionItemInput,
 	ActionItemStatusUpdate,
 	TranscriptionResult,
@@ -85,7 +86,7 @@ export interface AIService {
 	): Promise<ActionItemInput[]>;
 	checkActionItemStatus(
 		input: string | Blob,
-		existingActionItems: any[]
+		existingActionItems: ActionItem[]
 	): Promise<ActionItemStatusUpdate[]>;
 	extractTopics(text: string): Promise<ConversationGraph>;
 	generateSummary(text: string): Promise<string>;
@@ -177,7 +178,7 @@ export function createGeminiService(model: any): AIService {
 
 		async checkActionItemStatus(
 			input: string | Blob,
-			existingActionItems: any[]
+			existingActionItems: ActionItem[]
 		): Promise<ActionItemStatusUpdate[]> {
 			try {
 				if (!existingActionItems || existingActionItems.length === 0) {
