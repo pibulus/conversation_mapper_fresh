@@ -172,7 +172,7 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
       formData.append("audio", audioBlob);
       formData.append("conversationId", conversationId);
 
-      // Pass existing transcript and action items for smart appending
+      // Pass existing transcript, action items, and summary for smart appending
       if (conversationData.value) {
         if (conversationData.value.transcript?.text) {
           formData.append("existingTranscript", conversationData.value.transcript.text);
@@ -180,6 +180,10 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
 
         if (conversationData.value.actionItems) {
           formData.append("existingActionItems", JSON.stringify(conversationData.value.actionItems));
+        }
+
+        if (conversationData.value.summary) {
+          formData.append("existingSummary", conversationData.value.summary);
         }
       }
 

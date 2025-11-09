@@ -47,6 +47,7 @@ export const handler: Handlers = {
       const conversationId = formData.get("conversationId") as string;
       const existingTranscript = formData.get("existingTranscript") as string | null;
       const existingActionItemsJson = formData.get("existingActionItems") as string | null;
+      const existingSummary = formData.get("existingSummary") as string | null;
 
       if (!audioFile) {
         return new Response(
@@ -102,6 +103,11 @@ export const handler: Handlers = {
         result.conversation.transcript = combinedTranscript;
       }
 
+      // Append summaries if we have existing summary
+      if (existingSummary && result.summary) {
+        result.summary = `${existingSummary}\n\n**Update from latest recording:**\n${result.summary}`;
+      }
+
       // Process status updates from AI analysis
       // These tell us which action items were marked as complete in the new audio
       console.log(`✅ Status updates detected: ${result.statusUpdates.length}`);
@@ -112,17 +118,27 @@ export const handler: Handlers = {
           update => update.id === item.id
         );
 
-        if (statusUpdate && statusUpdate.status === 'completed') {
-          console.log(`✓ Marking action item as completed: ${item.description}`);
-          return {
-            ...item,
-            status: 'completed' as const,
-            updated_at: new Date().toISOString(),
-            metadata: {
-              ...item.metadata,
-              completion_reason: statusUpdate.reason
-            }
-          };
+        // Handle bi-directional status updates (completed ↔ pending)
+        if (statusUpdate) {
+          if (statusUpdate.status === 'completed') {
+            console.log(`✓ Marking action item as completed: ${item.description}`);
+            return {
+              ...item,
+              status: 'completed' as const,
+              updated_at: new Date().toISOString(),
+              ai_checked: true,
+              checked_reason: statusUpdate.reason
+            };
+          } else if (statusUpdate.status === 'pending') {
+            console.log(`↺ Reverting action item to pending: ${item.description}`);
+            return {
+              ...item,
+              status: 'pending' as const,
+              updated_at: new Date().toISOString(),
+              ai_checked: true,
+              checked_reason: statusUpdate.reason
+            };
+          }
         }
 
         return item;
