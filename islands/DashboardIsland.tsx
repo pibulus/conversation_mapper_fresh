@@ -32,6 +32,10 @@ export default function DashboardIsland() {
   const showAssigneeDropdown = useSignal(false);
   const activeAssigneeDropdown = useSignal<string | null>(null);
 
+  // Drag-and-drop state
+  const draggedItemId = useSignal<string | null>(null);
+  const dragOverItemId = useSignal<string | null>(null);
+
   // Refs for cleanup
   const dropdownTimeoutRef = useRef<number | null>(null);
 
@@ -260,6 +264,68 @@ export default function DashboardIsland() {
     const modes: Array<'manual' | 'assignee' | 'date'> = ['manual', 'assignee', 'date'];
     const currentIndex = modes.indexOf(sortMode.value);
     sortMode.value = modes[(currentIndex + 1) % modes.length];
+  }
+
+  // Drag-and-drop handlers
+  function handleDragStart(e: DragEvent, itemId: string) {
+    draggedItemId.value = itemId;
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+    }
+  }
+
+  function handleDragEnd() {
+    draggedItemId.value = null;
+    dragOverItemId.value = null;
+  }
+
+  function handleDragOver(e: DragEvent, itemId: string) {
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'move';
+    }
+    dragOverItemId.value = itemId;
+  }
+
+  function handleDragLeave() {
+    dragOverItemId.value = null;
+  }
+
+  function handleDrop(e: DragEvent, dropTargetId: string) {
+    e.preventDefault();
+    if (!conversationData.value || !draggedItemId.value) return;
+
+    const draggedId = draggedItemId.value;
+    if (draggedId === dropTargetId) {
+      draggedItemId.value = null;
+      dragOverItemId.value = null;
+      return;
+    }
+
+    // Only reorder if in manual sort mode and both items are pending
+    const items = conversationData.value.actionItems;
+    const draggedItem = items.find(item => item.id === draggedId);
+    const dropTargetItem = items.find(item => item.id === dropTargetId);
+
+    if (!draggedItem || !dropTargetItem) return;
+    if (draggedItem.status === 'completed' || dropTargetItem.status === 'completed') return;
+
+    // Get indices
+    const draggedIndex = items.indexOf(draggedItem);
+    const dropTargetIndex = items.indexOf(dropTargetItem);
+
+    // Reorder array
+    const newItems = [...items];
+    newItems.splice(draggedIndex, 1);
+    newItems.splice(dropTargetIndex, 0, draggedItem);
+
+    conversationData.value = {
+      ...conversationData.value,
+      actionItems: newItems
+    };
+
+    draggedItemId.value = null;
+    dragOverItemId.value = null;
   }
 
   // Extract key points from summary
@@ -537,7 +603,7 @@ export default function DashboardIsland() {
                     fontSize: 'var(--tiny-size)',
                     transition: 'var(--transition-fast)'
                   }}
-                  title={`Sort: ${sortMode.value}`}
+                  title={sortMode.value === 'manual' ? 'Sort: Manual (drag to reorder)' : sortMode.value === 'assignee' ? 'Sort: By assignee' : 'Sort: By due date'}
                 >
                   {sortMode.value === 'manual' ? '🤚' : sortMode.value === 'assignee' ? '👤' : '📅'}
                 </button>
@@ -568,6 +634,11 @@ export default function DashboardIsland() {
                   transition: 'var(--transition-fast)'
                 }}
               />
+              {sortMode.value === 'manual' && (
+                <p class="text-xs text-gray-500 mt-1 italic">
+                  💡 Drag pending items to reorder them
+                </p>
+              )}
             </div>
             <div style={{ padding: '0.5rem var(--card-padding) var(--card-padding)' }} class="max-h-96 overflow-y-auto">
               {sortedActionItems.length === 0 ? (
@@ -585,27 +656,53 @@ export default function DashboardIsland() {
                 </div>
               ) : (
                 <div class="space-y-3">
-                  {sortedActionItems.map((item) => (
-                    <div
-                      key={item.id}
-                      class="relative p-4 rounded-lg bg-white hover:bg-gray-50 transition-all"
-                      style={{
-                        border: '2px solid var(--color-border)',
-                        boxShadow: item.status === 'completed' ? 'none' : '2px 2px 0 rgba(0,0,0,0.1)'
-                      }}
-                    >
-                      {/* Improved grid layout with checkbox and content */}
-                      <div class="grid grid-cols-[auto_1fr] gap-3 items-start">
-                        {/* Checkbox */}
-                        <div class="flex items-center pt-1">
-                          <input
-                            type="checkbox"
-                            checked={item.status === 'completed'}
-                            onChange={() => toggleActionItem(item.id)}
-                            class="cursor-pointer w-5 h-5"
-                            style={{ accentColor: 'var(--color-accent)' }}
-                          />
-                        </div>
+                  {sortedActionItems.map((item) => {
+                    const isDragging = draggedItemId.value === item.id;
+                    const isDragOver = dragOverItemId.value === item.id;
+                    const canDrag = item.status === 'pending' && sortMode.value === 'manual';
+
+                    return (
+                      <div
+                        key={item.id}
+                        draggable={canDrag}
+                        onDragStart={(e) => canDrag && handleDragStart(e, item.id)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={(e) => canDrag && handleDragOver(e, item.id)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => canDrag && handleDrop(e, item.id)}
+                        class="relative p-4 rounded-lg bg-white hover:bg-gray-50 transition-all"
+                        style={{
+                          border: `2px solid ${isDragOver ? 'var(--color-accent)' : 'var(--color-border)'}`,
+                          boxShadow: item.status === 'completed' ? 'none' : '2px 2px 0 rgba(0,0,0,0.1)',
+                          opacity: isDragging ? '0.5' : '1',
+                          cursor: canDrag ? 'move' : 'default'
+                        }}
+                      >
+                        {/* Grid layout with drag handle, checkbox and content */}
+                        <div class="grid grid-cols-[auto_auto_1fr] gap-3 items-start">
+                          {/* Drag Handle */}
+                          <div class="flex items-center pt-1">
+                            {canDrag ? (
+                              <i
+                                class="fa fa-grip-vertical text-gray-400 hover:text-gray-600 cursor-move"
+                                title="Drag to reorder"
+                                style={{ fontSize: '16px' }}
+                              ></i>
+                            ) : (
+                              <div style={{ width: '16px' }}></div>
+                            )}
+                          </div>
+
+                          {/* Checkbox */}
+                          <div class="flex items-center pt-1">
+                            <input
+                              type="checkbox"
+                              checked={item.status === 'completed'}
+                              onChange={() => toggleActionItem(item.id)}
+                              class="cursor-pointer w-5 h-5"
+                              style={{ accentColor: 'var(--color-accent)' }}
+                            />
+                          </div>
 
                         {/* Content */}
                         <div class="flex flex-col gap-3">
@@ -735,7 +832,8 @@ export default function DashboardIsland() {
                         <i class="fa fa-times text-xs"></i>
                       </button>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
