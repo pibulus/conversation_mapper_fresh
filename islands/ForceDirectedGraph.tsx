@@ -22,6 +22,10 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
   const fullscreenPortalRef = useRef<HTMLDivElement | null>(null);
   const emojimapHandleRef = useRef<EmojimapHandle | null>(null);
 
+  // Track event listeners for cleanup
+  const portalClickListenerRef = useRef<((e: MouseEvent) => void) | null>(null);
+  const escapeListenerRef = useRef<((e: KeyboardEvent) => void) | null>(null);
+
   const isFullscreen = useSignal(false);
 
   // Context menu state
@@ -44,6 +48,16 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
 
   function toggleFullscreen() {
     if (isFullscreen.value) {
+      // Remove event listeners before removing portal
+      if (fullscreenPortalRef.current && portalClickListenerRef.current) {
+        fullscreenPortalRef.current.removeEventListener('click', portalClickListenerRef.current);
+        portalClickListenerRef.current = null;
+      }
+      if (escapeListenerRef.current) {
+        document.removeEventListener('keydown', escapeListenerRef.current);
+        escapeListenerRef.current = null;
+      }
+
       // Remove fullscreen
       if (fullscreenPortalRef.current?.parentNode) {
         fullscreenPortalRef.current.parentNode.removeChild(fullscreenPortalRef.current);
@@ -111,19 +125,21 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
     modalContainer.appendChild(vizContainer);
     portal.appendChild(modalContainer);
 
-    // Click outside to close
-    portal.addEventListener('click', (e) => {
+    // Click outside to close (store listener for cleanup)
+    const clickListener = (e: MouseEvent) => {
       if (e.target === portal) toggleFullscreen();
-    });
+    };
+    portal.addEventListener('click', clickListener);
+    portalClickListenerRef.current = clickListener;
 
-    // Escape key to close
+    // Escape key to close (store listener for cleanup)
     const escListener = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         toggleFullscreen();
-        document.removeEventListener('keydown', escListener);
       }
     };
     document.addEventListener('keydown', escListener);
+    escapeListenerRef.current = escListener;
 
     document.body.appendChild(portal);
     fullscreenPortalRef.current = portal;

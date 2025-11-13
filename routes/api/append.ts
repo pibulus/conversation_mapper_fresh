@@ -14,6 +14,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createGeminiService } from "@core/ai/gemini.ts";
 import { processAudio } from "@core/orchestration/conversation-flow.ts";
 import type { ConversationFlowResult } from "@core/orchestration/conversation-flow.ts";
+import type { ActionItem } from "@core/types/index.ts";
 
 export const handler: Handlers = {
   async POST(req) {
@@ -28,10 +29,10 @@ export const handler: Handlers = {
       }
 
       // Initialize Gemini AI
-      const apiKey = Deno.env.get("VITE_GEMINI_API_KEY");
+      const apiKey = Deno.env.get("GEMINI_API_KEY");
       if (!apiKey) {
         return new Response(
-          JSON.stringify({ error: "Missing VITE_GEMINI_API_KEY environment variable" }),
+          JSON.stringify({ error: "Missing GEMINI_API_KEY environment variable" }),
           { status: 500, headers: { "Content-Type": "application/json" } }
         );
       }
@@ -46,6 +47,8 @@ export const handler: Handlers = {
       const conversationId = formData.get("conversationId") as string;
       const existingTranscript = formData.get("existingTranscript") as string | null;
       const existingActionItemsJson = formData.get("existingActionItems") as string | null;
+      const existingSummary = formData.get("existingSummary") as string | null;
+      const existingNodesJson = formData.get("existingNodes") as string | null;
 
       if (!audioFile) {
         return new Response(
@@ -61,8 +64,17 @@ export const handler: Handlers = {
         );
       }
 
+      // Validate file size (50MB max to prevent abuse)
+      const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+      if (audioFile.size > MAX_FILE_SIZE) {
+        return new Response(
+          JSON.stringify({ error: `File too large. Maximum size is 50MB (received ${(audioFile.size / 1024 / 1024).toFixed(1)}MB)` }),
+          { status: 413, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
       // Parse existing action items for smart completion detection
-      let existingActionItems: any[] = [];
+      let existingActionItems: ActionItem[] = [];
       if (existingActionItemsJson) {
         try {
           existingActionItems = JSON.parse(existingActionItemsJson);
@@ -71,18 +83,30 @@ export const handler: Handlers = {
         }
       }
 
+      // Parse existing nodes for topic deduplication
+      let existingNodes: any[] = [];
+      if (existingNodesJson) {
+        try {
+          existingNodes = JSON.parse(existingNodesJson);
+        } catch (error) {
+          console.warn("Failed to parse existing nodes:", error);
+        }
+      }
+
       // Convert File to Blob
       const audioBlob = new Blob([await audioFile.arrayBuffer()], { type: audioFile.type });
 
-      // Process audio through nervous system with existing action items
+      // Process audio through nervous system with existing action items and nodes
       console.log(`📎 Appending audio to conversation ${conversationId}`);
       console.log(`📋 Found ${existingActionItems.length} existing action items`);
+      console.log(`🕸️ Found ${existingNodes.length} existing topics`);
 
       const result: ConversationFlowResult = await processAudio(
         aiService,
         audioBlob,
         conversationId,
-        existingActionItems
+        existingActionItems,
+        existingNodes
       );
 
       // Merge transcripts if we have existing content
@@ -90,6 +114,11 @@ export const handler: Handlers = {
         const combinedTranscript = `${existingTranscript}\n\n--- New Recording ---\n\n${result.transcript.text}`;
         result.transcript.text = combinedTranscript;
         result.conversation.transcript = combinedTranscript;
+      }
+
+      // Append summaries if we have existing summary
+      if (existingSummary && result.summary) {
+        result.summary = `${existingSummary}\n\n**Update from latest recording:**\n${result.summary}`;
       }
 
       // Process status updates from AI analysis
@@ -102,17 +131,27 @@ export const handler: Handlers = {
           update => update.id === item.id
         );
 
-        if (statusUpdate && statusUpdate.status === 'completed') {
-          console.log(`✓ Marking action item as completed: ${item.description}`);
-          return {
-            ...item,
-            status: 'completed' as const,
-            updated_at: new Date().toISOString(),
-            metadata: {
-              ...item.metadata,
-              completion_reason: statusUpdate.reason
-            }
-          };
+        // Handle bi-directional status updates (completed ↔ pending)
+        if (statusUpdate) {
+          if (statusUpdate.status === 'completed') {
+            console.log(`✓ Marking action item as completed: ${item.description}`);
+            return {
+              ...item,
+              status: 'completed' as const,
+              updated_at: new Date().toISOString(),
+              ai_checked: true,
+              checked_reason: statusUpdate.reason
+            };
+          } else if (statusUpdate.status === 'pending') {
+            console.log(`↺ Reverting action item to pending: ${item.description}`);
+            return {
+              ...item,
+              status: 'pending' as const,
+              updated_at: new Date().toISOString(),
+              ai_checked: true,
+              checked_reason: statusUpdate.reason
+            };
+          }
         }
 
         return item;

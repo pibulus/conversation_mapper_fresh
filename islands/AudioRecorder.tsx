@@ -45,6 +45,7 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
   const streamRef = useRef<MediaStream | null>(null);
   const recordingTimerRef = useRef<number | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  const currentObjectURLRef = useRef<string | null>(null); // Track object URLs for cleanup
 
   // Time constants
   const MAX_RECORDING_TIME = 10 * 60; // 10 minutes in seconds
@@ -171,7 +172,7 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
       formData.append("audio", audioBlob);
       formData.append("conversationId", conversationId);
 
-      // Pass existing transcript and action items for smart appending
+      // Pass existing transcript, action items, summary, and nodes for smart appending
       if (conversationData.value) {
         if (conversationData.value.transcript?.text) {
           formData.append("existingTranscript", conversationData.value.transcript.text);
@@ -179,6 +180,14 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
 
         if (conversationData.value.actionItems) {
           formData.append("existingActionItems", JSON.stringify(conversationData.value.actionItems));
+        }
+
+        if (conversationData.value.summary) {
+          formData.append("existingSummary", conversationData.value.summary);
+        }
+
+        if (conversationData.value.nodes) {
+          formData.append("existingNodes", JSON.stringify(conversationData.value.nodes));
         }
       }
 
@@ -245,6 +254,11 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
         audioElementRef.current.pause();
         audioElementRef.current.src = '';
       }
+      // Revoke object URL to free memory
+      if (currentObjectURLRef.current) {
+        URL.revokeObjectURL(currentObjectURLRef.current);
+        currentObjectURLRef.current = null;
+      }
       playingRecordingId.value = null;
     } else {
       // Stop any currently playing audio first
@@ -252,19 +266,36 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
         audioElementRef.current.pause();
         audioElementRef.current.src = '';
       }
+      // Revoke previous object URL
+      if (currentObjectURLRef.current) {
+        URL.revokeObjectURL(currentObjectURLRef.current);
+        currentObjectURLRef.current = null;
+      }
 
       // Create and play new audio
-      const audio = new Audio(URL.createObjectURL(recording.data));
+      const objectURL = URL.createObjectURL(recording.data);
+      currentObjectURLRef.current = objectURL;
+      const audio = new Audio(objectURL);
 
       audio.onended = () => {
         playingRecordingId.value = null;
         audioElementRef.current = null;
+        // Revoke URL when done playing
+        if (currentObjectURLRef.current) {
+          URL.revokeObjectURL(currentObjectURLRef.current);
+          currentObjectURLRef.current = null;
+        }
       };
 
       audio.onerror = (error) => {
         console.error('Error playing audio:', error);
         playingRecordingId.value = null;
         audioElementRef.current = null;
+        // Revoke URL on error
+        if (currentObjectURLRef.current) {
+          URL.revokeObjectURL(currentObjectURLRef.current);
+          currentObjectURLRef.current = null;
+        }
         alert('Error playing audio. The file may be corrupted.');
       };
 
@@ -272,6 +303,11 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
         console.error('Failed to play audio:', error);
         playingRecordingId.value = null;
         audioElementRef.current = null;
+        // Revoke URL on play error
+        if (currentObjectURLRef.current) {
+          URL.revokeObjectURL(currentObjectURLRef.current);
+          currentObjectURLRef.current = null;
+        }
         alert('Failed to play audio. Please check your browser settings.');
       });
 
@@ -298,7 +334,9 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
 
     a.download = fileName;
     a.click();
-    URL.revokeObjectURL(url);
+
+    // Revoke URL after a short delay to ensure download started
+    setTimeout(() => URL.revokeObjectURL(url), 100);
   }
 
   // Handle beforeunload and cleanup
@@ -321,6 +359,12 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
         audioElementRef.current.pause();
         audioElementRef.current.src = '';
         audioElementRef.current = null;
+      }
+
+      // Revoke any active object URLs
+      if (currentObjectURLRef.current) {
+        URL.revokeObjectURL(currentObjectURLRef.current);
+        currentObjectURLRef.current = null;
       }
 
       // Cleanup recording resources

@@ -5,6 +5,8 @@
  * Framework-agnostic, reusable across any implementation
  */
 
+import type { ActionItem, NodeInput } from '../types/index.ts';
+
 // ===================================================================
 // TRANSCRIPTION
 // ===================================================================
@@ -15,7 +17,7 @@ Return only the cleaned-up transcription, with no additional text.
 
 I want you to denote all the different speakers.
 If you can work out their names then use their name, otherwise use Speaker1, Speaker2 etc.
-Make sure you show each spekers name before their text.
+Make sure you show each speaker's name before their text.
 `;
 
 // ===================================================================
@@ -33,23 +35,32 @@ Return only a JSON array like this:
   }
 ]`;
 
-export const buildActionItemsPrompt = (input: string | Blob, speakers: string[] = []): string => {
+export const buildActionItemsPrompt = (
+	input: string | Blob,
+	speakers: string[] = [],
+	existingActionItems: ActionItem[] = []
+): string => {
+	// Build existing items context to avoid duplicates
+	const existingItemsContext = existingActionItems.length > 0
+		? `\n\nEXISTING ACTION ITEMS (do not duplicate these):\n${existingActionItems.map(item => `- ${item.description}`).join('\n')}\n\nIMPORTANT: Only extract NEW action items that are NOT already in the existing list above. If a new item is semantically the same as an existing one (even if worded differently), DO NOT include it.`
+		: '';
+
 	if (input instanceof Blob) {
-		return `Listen to this audio and ${ACTION_ITEMS_BASE_PROMPT}`;
+		return `Listen to this audio and ${ACTION_ITEMS_BASE_PROMPT}${existingItemsContext}`;
 	}
 
 	const speakerPrompt = speakers && speakers.length
 		? `\nAvailable speakers for assignment: ${speakers.join(', ')}`
 		: '';
 
-	return `Analyze this text and ${ACTION_ITEMS_BASE_PROMPT}${speakerPrompt}\n\nText: ${input}`;
+	return `Analyze this text and ${ACTION_ITEMS_BASE_PROMPT}${speakerPrompt}${existingItemsContext}\n\nText: ${input}`;
 };
 
 // ===================================================================
 // AI SELF-CHECKOFF (The Magic!)
 // ===================================================================
 
-export const buildActionItemStatusPrompt = (existingActionItems: any[]): string => {
+export const buildActionItemStatusPrompt = (existingActionItems: ActionItem[]): string => {
 	const actionItemsJSON = JSON.stringify(
 		existingActionItems.map((item) => ({
 			id: item.id,
@@ -93,7 +104,12 @@ TRANSCRIPT: ${transcript}`;
 // TOPIC/NODE EXTRACTION (Conversation Graph)
 // ===================================================================
 
-export const buildTopicExtractionPrompt = (text: string): string => {
+export const buildTopicExtractionPrompt = (text: string, existingNodes: NodeInput[] = []): string => {
+	// Build existing nodes context to reuse them
+	const existingNodesContext = existingNodes.length > 0
+		? `\n\nEXISTING TOPICS (reuse these if applicable):\n${existingNodes.map(node => `- ID: "${node.id}" | ${node.emoji} ${node.label}`).join('\n')}\n\nIMPORTANT: If you identify a topic that is the same as or very similar to an existing topic above, REUSE the existing node ID instead of creating a new one. Only create NEW node IDs for genuinely new topics that don't match any existing ones.`
+		: '';
+
 	return `Analyze the following conversation and extract the main topics and their relationships.
 I want a you to break down the conversation into the topics covered and how they are related.
 I'm not interested in a chronoliogical order, but rather the relationships of the topics.
@@ -132,7 +148,7 @@ Return a JSON object with the following structure:
 			"color": "#999999"
 		}
 	]
-}
+}${existingNodesContext}
 
 IMPORTANT: Only summarise the conversation which is the text below denoted as CONVERSATION.
 

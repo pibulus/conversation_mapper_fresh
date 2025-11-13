@@ -9,9 +9,11 @@
 
 import type { AIService } from '../ai/gemini.ts';
 import type {
+	ActionItem,
 	ActionItemInput,
 	ActionItemStatusUpdate,
-	ConversationGraph
+	ConversationGraph,
+	NodeInput
 } from '../types/index.ts';
 
 export interface AnalysisResult {
@@ -28,12 +30,13 @@ export async function analyzeText(
 	aiService: AIService,
 	text: string,
 	speakers: string[] = [],
-	existingActionItems: any[] = []
+	existingActionItems: ActionItem[] = [],
+	existingNodes: NodeInput[] = []
 ): Promise<AnalysisResult> {
 	// Run all AI operations in parallel
 	const [topics, actionItems, statusUpdates, summary] = await Promise.all([
-		aiService.extractTopics(text),
-		aiService.extractActionItems(text, speakers),
+		aiService.extractTopics(text, existingNodes),
+		aiService.extractActionItems(text, speakers, existingActionItems),
 		existingActionItems.length > 0
 			? aiService.checkActionItemStatus(text, existingActionItems)
 			: Promise.resolve([]),
@@ -54,15 +57,16 @@ export async function analyzeText(
 export async function analyzeAudio(
 	aiService: AIService,
 	audioBlob: Blob,
-	existingActionItems: any[] = []
+	existingActionItems: ActionItem[] = [],
+	existingNodes: NodeInput[] = []
 ): Promise<AnalysisResult & { transcription: { text: string; speakers: string[] } }> {
 	// First transcribe the audio
 	const transcription = await aiService.transcribeAudio(audioBlob);
 
 	// Then run parallel analysis on the transcribed text
 	const [topics, actionItems, statusUpdates, summary] = await Promise.all([
-		aiService.extractTopics(transcription.text),
-		aiService.extractActionItems(audioBlob, transcription.speakers),
+		aiService.extractTopics(transcription.text, existingNodes),
+		aiService.extractActionItems(audioBlob, transcription.speakers, existingActionItems),
 		existingActionItems.length > 0
 			? aiService.checkActionItemStatus(audioBlob, existingActionItems)
 			: Promise.resolve([]),
