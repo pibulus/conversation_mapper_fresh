@@ -16,16 +16,12 @@ export default function App({ Component }: PageProps) {
               const stored = localStorage.getItem('conversation-mapper-theme');
               if (stored) {
                 const theme = JSON.parse(stored);
-                Object.entries(theme.cssVars || {}).forEach(([key, value]) => {
-                  document.documentElement.style.setProperty(key, value);
+                // Apply all theme variables (OKLCH colors + gradient)
+                Object.entries(theme).forEach(([key, value]) => {
+                  if (key.startsWith('--color-') || key === '--gradient-bg') {
+                    document.documentElement.style.setProperty(key, value);
+                  }
                 });
-                // Set main theme vars
-                if (theme.base) document.documentElement.style.setProperty('--color-base', theme.base);
-                if (theme.secondary) document.documentElement.style.setProperty('--color-secondary', theme.secondary);
-                if (theme.accent) document.documentElement.style.setProperty('--color-accent', theme.accent);
-                if (theme.text) document.documentElement.style.setProperty('--color-text', theme.text);
-                if (theme.textSecondary) document.documentElement.style.setProperty('--color-text-secondary', theme.textSecondary);
-                if (theme.border) document.documentElement.style.setProperty('--color-border', theme.border);
               }
             } catch (e) {
               console.error('Error setting initial theme:', e);

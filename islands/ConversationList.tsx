@@ -71,8 +71,7 @@ export default function ConversationList() {
   const activeId = useComputed(() => conversationData.value?.conversation.id);
 
   return (
-    <div class="flex flex-col h-full" style={{
-      background: 'var(--color-secondary)',
+    <div class="flex flex-col h-full glass" style={{
       borderRight: `var(--border-width) solid var(--color-border)`
     }}>
       {/* Header */}
@@ -182,10 +181,9 @@ export default function ConversationList() {
       {/* Delete Confirmation Modal */}
       {showConfirmDelete.value && (
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="rounded-lg p-6 max-w-sm mx-4" style={{
-            background: 'var(--color-secondary)',
-            border: `var(--border-width) solid #EF4444`,
-            boxShadow: 'var(--shadow-lifted)'
+          <div class="glass-strong rounded-lg p-6 max-w-sm mx-4" style={{
+            border: `2px solid #EF4444`,
+            boxShadow: 'var(--shadow-xl)'
           }}>
             <h3 class="mb-3" style={{
               fontSize: 'calc(var(--heading-size) * 1.4)',

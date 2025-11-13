@@ -6,7 +6,9 @@
  */
 
 import { signal } from "@preact/signals";
+import { useEffect } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
+import { initializeTheme } from "../services/themeStore.ts";
 import UploadIsland from "./UploadIsland.tsx";
 import DashboardIsland from "./DashboardIsland.tsx";
 import ConversationList from "./ConversationList.tsx";
@@ -14,20 +16,24 @@ import MobileHistoryMenu from "./MobileHistoryMenu.tsx";
 import ShareButton from "./ShareButton.tsx";
 import MarkdownMakerDrawer from "./MarkdownMakerDrawer.tsx";
 import AudioRecorder from "./AudioRecorder.tsx";
-import JuicyThemes from "../components/JuicyThemes.tsx";
+import ThemeShuffler from "./ThemeShuffler.tsx";
 
 const drawerOpen = signal(false);
 
 export default function HomeIsland() {
+  // Initialize theme system on mount
+  useEffect(() => {
+    initializeTheme();
+  }, []);
+
   // Get transcript for MarkdownMaker
   const transcript = conversationData.value?.transcript?.text || '';
 
   return (
     <div class="min-h-screen" style={{ background: 'var(--gradient-bg)' }}>
       {/* Header - Dynamic based on conversation state */}
-      <header style={{
+      <header class="glass" style={{
         borderBottom: `var(--border-width) solid var(--color-border)`,
-        background: 'var(--color-secondary)',
         boxShadow: 'var(--shadow-lifted)'
       }}>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5">
@@ -121,13 +127,8 @@ export default function HomeIsland() {
                 {/* Share button */}
                 <ShareButton />
 
-                {/* Theme selector - hidden on small mobile */}
-                <div class="hidden sm:block">
-                  <JuicyThemes
-                    storageKey="conversation-mapper-theme"
-                    position="right"
-                  />
-                </div>
+                {/* Theme shuffler */}
+                <ThemeShuffler />
               </div>
             </div>
           ) : (
@@ -160,12 +161,7 @@ export default function HomeIsland() {
                   </p>
                 </div>
               </div>
-              <div class="hidden sm:block">
-                <JuicyThemes
-                  storageKey="conversation-mapper-theme"
-                  position="right"
-                />
-              </div>
+              <ThemeShuffler />
             </div>
           )}
         </div>
@@ -198,10 +194,9 @@ export default function HomeIsland() {
           <div class="max-w-7xl mx-auto grid gap-4 sm:gap-6">
             {/* Upload Section - Only show when NO data */}
             {!conversationData.value && (
-              <section class="rounded-lg p-6" style={{
-                background: 'var(--color-secondary)',
-                border: `var(--border-width) solid var(--color-border)`,
-                boxShadow: 'var(--shadow-soft)'
+              <section class="glass-strong p-6" style={{
+                borderRadius: 'var(--border-radius-lg)',
+                boxShadow: 'var(--shadow-lifted)'
               }}>
                 <h2 class="mb-4" style={{
                   fontSize: 'calc(var(--heading-size) * 1.4)',
