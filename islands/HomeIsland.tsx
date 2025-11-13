@@ -133,35 +133,25 @@ export default function HomeIsland() {
             </div>
           ) : (
             // Default header when no conversation loaded
-            <div class="flex items-center justify-between gap-3 sm:gap-4">
-              <div class="flex items-center gap-3 sm:gap-4">
-                <div style={{
-                  fontSize: 'clamp(2.5rem, 8vw, 4rem)',
-                  lineHeight: 1,
-                  filter: 'drop-shadow(3px 3px 0 rgba(0,0,0,0.1))'
-                }}>🧠</div>
-                <div>
-                  <h1 style={{
-                    fontSize: 'clamp(1.5rem, 5vw, calc(var(--heading-size) * 2.5))',
-                    fontWeight: '800',
-                    color: 'var(--color-accent)',
-                    letterSpacing: '-0.03em',
-                    lineHeight: 1.1,
-                    textShadow: '2px 2px 0 rgba(0,0,0,0.05)'
-                  }}>
-                    Conversation Mapper
-                  </h1>
-                  <p class="mt-1 sm:mt-2" style={{
-                    fontSize: 'clamp(0.875rem, 2.5vw, calc(var(--text-size) * 1.15))',
-                    color: 'var(--color-text-secondary)',
-                    fontWeight: '500',
-                    letterSpacing: '0.01em'
-                  }}>
-                    Meeting transcripts that make sense
-                  </p>
-                </div>
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex-1 text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-2 sm:mb-3" style={{
+                  color: 'var(--color-text)',
+                  letterSpacing: '-0.02em',
+                  lineHeight: 1.1
+                }}>
+                  Conversation Mapper
+                </h1>
+                <p class="text-lg md:text-xl opacity-80 max-w-2xl mx-auto" style={{
+                  color: 'var(--color-text-secondary)',
+                  lineHeight: 1.5
+                }}>
+                  Meeting transcripts that make sense
+                </p>
               </div>
-              <ThemeShuffler />
+              <div class="absolute right-4 top-4">
+                <ThemeShuffler />
+              </div>
             </div>
           )}
         </div>
@@ -194,17 +184,10 @@ export default function HomeIsland() {
           <div class="max-w-7xl mx-auto grid gap-4 sm:gap-6">
             {/* Upload Section - Only show when NO data */}
             {!conversationData.value && (
-              <section class="glass-strong p-6" style={{
-                borderRadius: 'var(--border-radius-lg)',
-                boxShadow: 'var(--shadow-lifted)'
+              <section class="glass-strong p-8 max-w-2xl mx-auto mt-8" style={{
+                borderRadius: 'var(--border-radius-xl)',
+                boxShadow: 'var(--shadow-xl)'
               }}>
-                <h2 class="mb-4" style={{
-                  fontSize: 'calc(var(--heading-size) * 1.4)',
-                  fontWeight: 'var(--heading-weight)',
-                  color: 'var(--color-accent)'
-                }}>
-                  📤 Upload Conversation
-                </h2>
                 <UploadIsland />
               </section>
             )}
