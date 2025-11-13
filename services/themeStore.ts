@@ -30,6 +30,9 @@ export const themeSignal = signal<Theme>(defaultTheme);
 // Storage key for localStorage
 const THEME_STORAGE_KEY = 'conversation-mapper-theme';
 
+// Track if theme system is initialized
+let isInitialized = false;
+
 /**
  * Load theme from localStorage
  */
@@ -65,6 +68,10 @@ export function saveThemeToStorage(theme: Theme): void {
  * Initialize theme system
  */
 export function initializeTheme(): void {
+  // Prevent duplicate initialization
+  if (isInitialized) return;
+  isInitialized = true;
+
   // Try to load from localStorage
   const stored = loadThemeFromStorage();
   if (stored) {

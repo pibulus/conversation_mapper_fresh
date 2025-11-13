@@ -67,22 +67,28 @@ export class ThemeRandomizerService {
       let min = 0;
       let max = chroma;
       const testEl = document.createElement('div');
-      document.body.appendChild(testEl);
 
-      for (let i = 0; i < 8; i++) { // 8 iterations is typically sufficient
-        adjustedChroma = (min + max) / 2;
-        testEl.style.color = `oklch(${lightness}% ${adjustedChroma} ${hue})`;
+      try {
+        document.body.appendChild(testEl);
 
-        // Check if computed style matches what we set
-        const computed = getComputedStyle(testEl).color;
-        if (computed !== 'rgba(0, 0, 0, 0)' && computed !== 'transparent') {
-          min = adjustedChroma;
-        } else {
-          max = adjustedChroma;
+        for (let i = 0; i < 8; i++) { // 8 iterations is typically sufficient
+          adjustedChroma = (min + max) / 2;
+          testEl.style.color = `oklch(${lightness}% ${adjustedChroma} ${hue})`;
+
+          // Check if computed style matches what we set
+          const computed = getComputedStyle(testEl).color;
+          if (computed !== 'rgba(0, 0, 0, 0)' && computed !== 'transparent') {
+            min = adjustedChroma;
+          } else {
+            max = adjustedChroma;
+          }
+        }
+      } finally {
+        // Ensure cleanup happens even if error occurs
+        if (testEl.parentNode) {
+          document.body.removeChild(testEl);
         }
       }
-
-      document.body.removeChild(testEl);
     }
 
     return `oklch(${lightness}% ${adjustedChroma} ${hue})`;
@@ -198,8 +204,9 @@ export class ThemeRandomizerService {
     const harmony = this.getColorHarmony();
     const hues = this.generateHues(baseHue, harmony);
 
-    const chromaBase = this.getRandomValue(0.1, 0.25);
-    const chromaAccent = chromaBase + this.getRandomValue(0.1, 0.2);
+    // Reduced chroma ranges for softer, less garish colors
+    const chromaBase = this.getRandomValue(0.05, 0.15);
+    const chromaAccent = chromaBase + this.getRandomValue(0.05, 0.12);
 
     // Base Colors with subtle hue variations
     const baseColors = {
@@ -226,17 +233,17 @@ export class ThemeRandomizerService {
     };
 
     const primaryColors = {
-      '--color-primary': this.generateOKLCHColor(60, chromaAccent, hues.primary),
+      '--color-primary': this.generateOKLCHColor(65, chromaAccent * 0.8, hues.primary),
       '--color-primary-content': this.generateOKLCHColor(95, chromaBase * 0.3, hues.primary)
     };
 
     const secondaryColors = {
-      '--color-secondary': this.generateOKLCHColor(65, chromaAccent * 0.9, hues.secondary),
+      '--color-secondary': this.generateOKLCHColor(70, chromaAccent * 0.7, hues.secondary),
       '--color-secondary-content': this.generateOKLCHColor(95, chromaBase * 0.3, hues.secondary)
     };
 
     const accentColors = {
-      '--color-accent': this.generateOKLCHColor(55, chromaAccent * 1.1, hues.accent),
+      '--color-accent': this.generateOKLCHColor(60, chromaAccent * 0.85, hues.accent),
       '--color-accent-content': this.generateOKLCHColor(95, chromaBase * 0.3, hues.accent)
     };
 

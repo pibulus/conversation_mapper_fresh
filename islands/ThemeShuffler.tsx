@@ -4,12 +4,28 @@
 // ===================================================================
 
 import { useSignal } from "@preact/signals";
+import { useEffect, useRef } from "preact/hooks";
 import { randomizeTheme, themeSignal } from "../services/themeStore.ts";
 
 export default function ThemeShuffler() {
   const isSpinning = useSignal(false);
+  const timeoutRef = useRef<number | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current !== null) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleShuffle = () => {
+    // Clear any existing timeout
+    if (timeoutRef.current !== null) {
+      clearTimeout(timeoutRef.current);
+    }
+
     // Trigger spin animation
     isSpinning.value = true;
 
@@ -17,9 +33,10 @@ export default function ThemeShuffler() {
     randomizeTheme();
 
     // Stop spinning after 1 second
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       isSpinning.value = false;
-    }, 1000);
+      timeoutRef.current = null;
+    }, 1000) as unknown as number;
   };
 
   return (
