@@ -6,7 +6,9 @@
  */
 
 import { signal } from "@preact/signals";
+import { useEffect } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
+import { initializeTheme } from "../services/themeStore.ts";
 import UploadIsland from "./UploadIsland.tsx";
 import DashboardIsland from "./DashboardIsland.tsx";
 import ConversationList from "./ConversationList.tsx";
@@ -14,20 +16,24 @@ import MobileHistoryMenu from "./MobileHistoryMenu.tsx";
 import ShareButton from "./ShareButton.tsx";
 import MarkdownMakerDrawer from "./MarkdownMakerDrawer.tsx";
 import AudioRecorder from "./AudioRecorder.tsx";
-import JuicyThemes from "../components/JuicyThemes.tsx";
+import ThemeShuffler from "./ThemeShuffler.tsx";
 
 const drawerOpen = signal(false);
 
 export default function HomeIsland() {
+  // Initialize theme system on mount
+  useEffect(() => {
+    initializeTheme();
+  }, []);
+
   // Get transcript for MarkdownMaker
   const transcript = conversationData.value?.transcript?.text || '';
 
   return (
     <div class="min-h-screen" style={{ background: 'var(--gradient-bg)' }}>
       {/* Header - Dynamic based on conversation state */}
-      <header style={{
+      <header class="glass" style={{
         borderBottom: `var(--border-width) solid var(--color-border)`,
-        background: 'var(--color-secondary)',
         boxShadow: 'var(--shadow-lifted)'
       }}>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5">
@@ -121,50 +127,30 @@ export default function HomeIsland() {
                 {/* Share button */}
                 <ShareButton />
 
-                {/* Theme selector - hidden on small mobile */}
-                <div class="hidden sm:block">
-                  <JuicyThemes
-                    storageKey="conversation-mapper-theme"
-                    position="right"
-                  />
-                </div>
+                {/* Theme shuffler */}
+                <ThemeShuffler />
               </div>
             </div>
           ) : (
             // Default header when no conversation loaded
-            <div class="flex items-center justify-between gap-3 sm:gap-4">
-              <div class="flex items-center gap-3 sm:gap-4">
-                <div style={{
-                  fontSize: 'clamp(2.5rem, 8vw, 4rem)',
-                  lineHeight: 1,
-                  filter: 'drop-shadow(3px 3px 0 rgba(0,0,0,0.1))'
-                }}>🧠</div>
-                <div>
-                  <h1 style={{
-                    fontSize: 'clamp(1.5rem, 5vw, calc(var(--heading-size) * 2.5))',
-                    fontWeight: '800',
-                    color: 'var(--color-accent)',
-                    letterSpacing: '-0.03em',
-                    lineHeight: 1.1,
-                    textShadow: '2px 2px 0 rgba(0,0,0,0.05)'
-                  }}>
-                    Conversation Mapper
-                  </h1>
-                  <p class="mt-1 sm:mt-2" style={{
-                    fontSize: 'clamp(0.875rem, 2.5vw, calc(var(--text-size) * 1.15))',
-                    color: 'var(--color-text-secondary)',
-                    fontWeight: '500',
-                    letterSpacing: '0.01em'
-                  }}>
-                    Meeting transcripts that make sense
-                  </p>
-                </div>
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex-1 text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-2 sm:mb-3" style={{
+                  color: 'var(--color-text)',
+                  letterSpacing: '-0.02em',
+                  lineHeight: 1.1
+                }}>
+                  Conversation Mapper
+                </h1>
+                <p class="text-lg md:text-xl opacity-80 max-w-2xl mx-auto" style={{
+                  color: 'var(--color-text-secondary)',
+                  lineHeight: 1.5
+                }}>
+                  Meeting transcripts that make sense
+                </p>
               </div>
-              <div class="hidden sm:block">
-                <JuicyThemes
-                  storageKey="conversation-mapper-theme"
-                  position="right"
-                />
+              <div class="absolute right-4 top-4">
+                <ThemeShuffler />
               </div>
             </div>
           )}
@@ -198,18 +184,10 @@ export default function HomeIsland() {
           <div class="max-w-7xl mx-auto grid gap-4 sm:gap-6">
             {/* Upload Section - Only show when NO data */}
             {!conversationData.value && (
-              <section class="rounded-lg p-6" style={{
-                background: 'var(--color-secondary)',
-                border: `var(--border-width) solid var(--color-border)`,
-                boxShadow: 'var(--shadow-soft)'
+              <section class="glass-strong p-8 max-w-2xl mx-auto mt-8" style={{
+                borderRadius: 'var(--border-radius-xl)',
+                boxShadow: 'var(--shadow-xl)'
               }}>
-                <h2 class="mb-4" style={{
-                  fontSize: 'calc(var(--heading-size) * 1.4)',
-                  fontWeight: 'var(--heading-weight)',
-                  color: 'var(--color-accent)'
-                }}>
-                  📤 Upload Conversation
-                </h2>
                 <UploadIsland />
               </section>
             )}

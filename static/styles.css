@@ -31,10 +31,11 @@
   --section-gap: clamp(1.25rem, 3vw, 1.5rem);
 
   /* Borders & Corners */
-  --border-width: 2px;
-  --border-radius: 12px;
+  --border-width: 1px;
+  --border-radius: 16px;
   --border-radius-sm: 8px;
-  --border-radius-lg: 16px;
+  --border-radius-lg: 24px;
+  --border-radius-xl: 32px;
 
   /* Typography */
   --heading-size: 1.125rem;
@@ -46,9 +47,17 @@
   --line-height: 1.6;
 
   /* Shadows - Softer, more subtle */
-  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-lifted: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lifted: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-bg-dark: rgba(0, 0, 0, 0.2);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-border-dark: rgba(255, 255, 255, 0.1);
+  --glass-blur: 10px;
 
   /* Animations */
   --transition-fast: 150ms ease;
@@ -105,4 +114,43 @@ body {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* ===================================================================
+   GLASSMORPHISM UTILITIES
+   ================================================================ */
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+.glass-dark {
+  background: var(--glass-bg-dark);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-dark);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+/* Hover state for glass cards */
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.7);
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lifted);
+}
+
+/* Animation for smooth glass transitions */
+.glass,
+.glass-dark,
+.glass-strong {
+  transition: all var(--transition-medium);
 }

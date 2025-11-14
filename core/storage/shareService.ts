@@ -94,11 +94,11 @@ export function createShare(data: ConversationData, expiresInDays?: number): str
 
   // Create minimal shareable data (exclude large audio blobs)
   const shareableData = {
-    title: data.title,
+    title: data.conversation.title,
     summary: data.summary,
     transcript: data.transcript,
     actionItems: data.actionItems,
-    timestamp: data.timestamp || new Date().toISOString(),
+    timestamp: data.conversation.created_at || new Date().toISOString(),
   };
 
   // Try to compress for URL sharing

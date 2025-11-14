@@ -371,11 +371,9 @@ export default function DashboardIsland() {
 
         {/* Card 1: Transcript */}
         <div class="w-full">
-          <div style={{
-            background: 'var(--color-secondary)',
-            borderRadius: 'var(--border-radius)',
-            border: `var(--border-width) solid var(--color-border)`,
-            boxShadow: 'var(--shadow-brutal)',
+          <div class="glass" style={{
+            borderRadius: 'var(--border-radius-lg)',
+            boxShadow: 'var(--shadow-lifted)',
             height: '100%'
           }}>
             <div style={{
@@ -461,11 +459,9 @@ export default function DashboardIsland() {
 
         {/* Card 2: Summary */}
         <div class="w-full">
-          <div style={{
-            background: 'var(--color-secondary)',
-            borderRadius: 'var(--border-radius)',
-            border: `var(--border-width) solid var(--color-border)`,
-            boxShadow: 'var(--shadow-brutal)',
+          <div class="glass" style={{
+            borderRadius: 'var(--border-radius-lg)',
+            boxShadow: 'var(--shadow-lifted)',
             height: '100%'
           }}>
             <div style={{
@@ -575,11 +571,9 @@ export default function DashboardIsland() {
 
         {/* Card 3: Action Items */}
         <div class="w-full">
-          <div style={{
-            background: 'var(--color-secondary)',
-            borderRadius: 'var(--border-radius)',
-            border: `var(--border-width) solid var(--color-border)`,
-            boxShadow: 'var(--shadow-brutal)',
+          <div class="glass" style={{
+            borderRadius: 'var(--border-radius-lg)',
+            boxShadow: 'var(--shadow-lifted)',
             height: '100%'
           }}>
             <div style={{
@@ -842,11 +836,9 @@ export default function DashboardIsland() {
 
         {/* Card 4: Topic Visualizations - FULL WIDTH (spans all columns) */}
         <div class="w-full lg:col-span-3">
-          <div style={{
-            background: 'var(--color-secondary)',
-            borderRadius: 'var(--border-radius)',
-            border: `var(--border-width) solid var(--color-border)`,
-            boxShadow: 'var(--shadow-brutal)',
+          <div class="glass" style={{
+            borderRadius: 'var(--border-radius-lg)',
+            boxShadow: 'var(--shadow-lifted)',
             height: '100%'
           }}>
             <div style={{
