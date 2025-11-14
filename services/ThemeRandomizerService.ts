@@ -204,9 +204,10 @@ export class ThemeRandomizerService {
     const harmony = this.getColorHarmony();
     const hues = this.generateHues(baseHue, harmony);
 
-    // Very calm chroma ranges - pastel punk but grown-up
-    const chromaBase = this.getRandomValue(0.04, 0.10);
-    const chromaAccent = chromaBase + this.getRandomValue(0.06, 0.14);
+    // JUICY chroma ranges - pastel punk with FLAVOR
+    // Peach fuzz, sunset sherbet, milk tea gold vibes
+    const chromaBase = this.getRandomValue(0.08, 0.14);
+    const chromaAccent = chromaBase + this.getRandomValue(0.10, 0.18);
 
     // Base Colors with subtle hue variations
     const baseColors = {
@@ -243,7 +244,7 @@ export class ThemeRandomizerService {
     };
 
     const accentColors = {
-      '--color-accent': this.generateOKLCHColor(68, chromaAccent * 0.75, hues.accent),
+      '--color-accent': this.generateOKLCHColor(72, chromaAccent * 0.85, hues.accent),
       '--color-accent-content': this.generateOKLCHColor(96, chromaBase * 0.3, hues.accent)
     };
 
@@ -367,19 +368,24 @@ export class ThemeRandomizerService {
   }
 
   /**
-   * Generates a simple, tasteful 2-color linear gradient.
-   * Very light, pastel backgrounds - calm and readable.
+   * Generates flavorful gradients - peach sorbet, flamingo dawn, sunset surf cafe
+   * More personality and joy while staying light and usable
    */
   static generateSimpleGradient(baseHue: number, secondaryHue: number): string {
     // Prefer gentle diagonal angles for warmth
     const angles = [135, 145, 155, 165, 180, 195, 205, 215, 225];
     const angle = angles[Math.floor(Math.random() * angles.length)];
 
-    // Very light, low-chroma colors for calm backgrounds
-    const color1 = this.generateOKLCHColor(96, this.getRandomValue(0.02, 0.06), baseHue);
-    const color2 = this.generateOKLCHColor(94, this.getRandomValue(0.03, 0.08), secondaryHue);
+    // FLAVORFUL light gradients - peach, flamingo, succulent vibes
+    // Higher chroma for more personality, but still light
+    const color1 = this.generateOKLCHColor(95, this.getRandomValue(0.06, 0.12), baseHue);
+    const color2 = this.generateOKLCHColor(93, this.getRandomValue(0.08, 0.15), secondaryHue);
 
-    return `linear-gradient(${angle}deg, ${color1}, ${color2})`;
+    // Add a third color stop for depth and flavor
+    const midHue = (baseHue + secondaryHue) / 2;
+    const color3 = this.generateOKLCHColor(94, this.getRandomValue(0.07, 0.13), midHue);
+
+    return `linear-gradient(${angle}deg, ${color1} 0%, ${color3} 50%, ${color2} 100%)`;
   }
 
   /**

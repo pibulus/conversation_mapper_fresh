@@ -42,14 +42,14 @@ export default function HomeIsland() {
 
   return (
     <div class="min-h-screen" style={{ background: 'var(--gradient-bg)' }}>
-      {/* Top Bar - Anchored with theme integration */}
+      {/* Top Bar - Brand presence */}
       <header style={{
-        background: 'rgba(255, 252, 248, 0.88)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: '2px solid rgba(0, 0, 0, 0.1)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-        height: '72px',
+        background: 'rgba(255, 250, 245, 0.92)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '2px solid rgba(0, 0, 0, 0.08)',
+        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)',
+        height: '80px',
         display: 'flex',
         alignItems: 'center',
         position: 'sticky',
@@ -81,10 +81,10 @@ export default function HomeIsland() {
                 <h1
                   class="truncate"
                   style={{
-                    fontSize: '19px',
-                    fontWeight: '700',
-                    color: '#1A1A1A',
-                    letterSpacing: '-0.02em'
+                    fontSize: '22px',
+                    fontWeight: '800',
+                    color: '#0A0A0A',
+                    letterSpacing: '-0.03em'
                   }}
                 >
                   {conversationData.value.conversation.title}
@@ -131,11 +131,12 @@ export default function HomeIsland() {
             // Default header - app name and theme shuffler
             <>
               <h1 style={{
-                fontSize: '19px',
-                fontWeight: '700',
-                color: '#1A1A1A',
-                letterSpacing: '-0.02em',
-                flex: 1
+                fontSize: '22px',
+                fontWeight: '800',
+                color: '#0A0A0A',
+                letterSpacing: '-0.03em',
+                flex: 1,
+                textTransform: 'none'
               }}>
                 Conversation Mapper
               </h1>
@@ -156,7 +157,7 @@ export default function HomeIsland() {
       )}
 
       {/* Main Layout - No sidebar, centered content */}
-      <div class="flex" style={{ minHeight: 'calc(100vh - 64px)' }}>
+      <div class="flex" style={{ minHeight: 'calc(100vh - 80px)' }}>
         {/* Mobile History Menu - Only show when NO data */}
         {!conversationData.value && <MobileHistoryMenu />}
 
@@ -166,68 +167,71 @@ export default function HomeIsland() {
             {/* Hero Section - Only show when NO data */}
             {!conversationData.value && (
               <div class="flex flex-col items-center justify-center" style={{
-                minHeight: 'max(550px, 65vh)',
-                paddingTop: 'clamp(4rem, 10vh, 6rem)',
-                paddingBottom: 'clamp(3rem, 8vh, 5rem)'
+                minHeight: 'max(650px, 75vh)',
+                paddingTop: 'clamp(5rem, 12vh, 8rem)',
+                paddingBottom: 'clamp(2rem, 6vh, 4rem)'
               }}>
-                {/* Hero Card - Intentional structure with personality */}
+                {/* Hero Card - Neo-brutalist with SOUL */}
                 <div style={{
                   width: '100%',
-                  maxWidth: '680px',
-                  background: 'rgba(255, 252, 248, 0.85)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  border: '2px solid rgba(0, 0, 0, 0.12)',
-                  borderRadius: '20px',
-                  boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.06), 0 4px 20px rgba(0, 0, 0, 0.08)',
-                  padding: 'clamp(2.5rem, 6vw, 4rem)',
+                  maxWidth: '780px',
+                  background: 'rgba(255, 250, 245, 0.92)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: '2.5px solid rgba(0, 0, 0, 0.18)',
+                  borderRadius: '16px',
+                  boxShadow: '8px 8px 0 0 rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.06)',
+                  padding: 'clamp(3rem, 7vw, 5rem) clamp(2.5rem, 6vw, 4rem)',
                   position: 'relative',
                   overflow: 'hidden'
                 }}>
-                  {/* Accent wash - subtle pastel flavor */}
+                  {/* Flavor gradient - peach sorbet melting */}
                   <div style={{
                     position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'linear-gradient(135deg, rgba(255, 230, 220, 0.3) 0%, rgba(255, 240, 245, 0.2) 50%, transparent 100%)',
+                    top: '-10%',
+                    left: '-5%',
+                    right: '-5%',
+                    height: '60%',
+                    background: 'radial-gradient(ellipse 140% 100% at 50% 0%, rgba(255, 215, 180, 0.35) 0%, rgba(255, 190, 200, 0.2) 45%, transparent 70%)',
                     pointerEvents: 'none',
                     zIndex: 0
                   }}></div>
 
                   {/* Content wrapper */}
                   <div style={{ position: 'relative', zIndex: 1 }}>
-                    {/* Card Header - Spunky copy! */}
-                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                    {/* Card Header - STATEMENT ENERGY */}
+                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                       <h2 style={{
-                        fontSize: 'clamp(2rem, 5vw, 2.75rem)',
-                        fontWeight: '800',
-                        color: '#1A1A1A',
-                        letterSpacing: '-0.04em',
-                        marginBottom: '1rem',
-                        lineHeight: '1.1'
+                        fontSize: 'clamp(2.5rem, 6.5vw, 3.5rem)',
+                        fontWeight: '900',
+                        color: '#0A0A0A',
+                        letterSpacing: '-0.05em',
+                        marginBottom: '1.25rem',
+                        lineHeight: '0.95',
+                        maxWidth: '620px',
+                        margin: '0 auto 1.25rem'
                       }}>
                         Let's map your conversation
                       </h2>
                       <p style={{
-                        fontSize: 'clamp(17px, 2vw, 19px)',
-                        color: '#4A4A4A',
+                        fontSize: 'clamp(18px, 2.2vw, 21px)',
+                        color: '#3A3A3A',
                         fontWeight: '500',
-                        lineHeight: '1.7',
-                        maxWidth: '480px',
-                        margin: '0 auto'
+                        lineHeight: '1.5',
+                        maxWidth: '500px',
+                        margin: '0 auto 0.875rem',
+                        letterSpacing: '-0.01em'
                       }}>
-                        Drop your thoughts, paste your chats, or just hit record.
+                        Capture the moment. Untangle the ideas.<br/>See what you're really saying.
                       </p>
                       <p style={{
-                        fontSize: '16px',
-                        color: '#8B7F77',
+                        fontSize: '15px',
+                        color: '#999',
                         fontWeight: '400',
-                        lineHeight: '1.6',
-                        marginTop: '0.75rem'
+                        lineHeight: '1.5',
+                        letterSpacing: '0.01em'
                       }}>
-                        We'll turn the chaos into clarity
+                        Drop audio, paste text, or just hit record
                       </p>
                     </div>
 
