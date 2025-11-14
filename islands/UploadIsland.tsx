@@ -267,24 +267,24 @@ export default function UploadIsland() {
             onClick={() => mode.value = tabMode}
             style={{
               flex: 1,
-              padding: '0.875rem 1rem',
-              fontSize: '1rem',
+              padding: 'clamp(0.625rem, 2vw, 0.875rem) clamp(0.75rem, 2.5vw, 1rem)',
+              fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
               fontWeight: '700',
               textTransform: 'uppercase',
               letterSpacing: '0.02em',
-              border: '3px solid var(--color-text)',
+              border: 'clamp(2px, 0.5vw, 3px) solid var(--color-text)',
               borderRadius: '8px',
               background: mode.value === tabMode ? 'var(--color-accent)' : 'white',
               color: mode.value === tabMode ? 'white' : 'var(--color-text)',
               cursor: 'pointer',
               transition: 'all 0.15s ease',
-              boxShadow: mode.value === tabMode ? '3px 3px 0 var(--color-text)' : 'none',
+              boxShadow: mode.value === tabMode ? 'clamp(2px, 0.75vw, 3px) clamp(2px, 0.75vw, 3px) 0 var(--color-text)' : 'none',
               transform: mode.value === tabMode ? 'translateY(-2px)' : 'none'
             }}
             onMouseEnter={(e) => {
               if (mode.value !== tabMode) {
                 e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '2px 2px 0 var(--color-text)';
+                e.currentTarget.style.boxShadow = 'clamp(1.5px, 0.5vw, 2px) clamp(1.5px, 0.5vw, 2px) 0 var(--color-text)';
               }
             }}
             onMouseLeave={(e) => {
@@ -307,40 +307,40 @@ export default function UploadIsland() {
             disabled={isProcessing.value && !isRecording.value}
             style={{
               width: '100%',
-              padding: '1.5rem 2rem',
-              fontSize: '1.25rem',
+              padding: 'clamp(1rem, 3vw, 1.5rem) clamp(1.5rem, 4vw, 2rem)',
+              fontSize: 'clamp(1rem, 3vw, 1.25rem)',
               fontWeight: '800',
               textTransform: 'uppercase',
               letterSpacing: '0.03em',
-              border: '4px solid var(--color-text)',
+              border: 'clamp(3px, 0.75vw, 4px) solid var(--color-text)',
               borderRadius: '12px',
               background: isRecording.value ? '#EF4444' : 'var(--color-accent)',
               color: 'white',
               cursor: isProcessing.value && !isRecording.value ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
-              boxShadow: '6px 6px 0 var(--color-text)',
+              boxShadow: 'clamp(4px, 1.25vw, 6px) clamp(4px, 1.25vw, 6px) 0 var(--color-text)',
               opacity: isProcessing.value && !isRecording.value ? 0.5 : 1
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '8px 8px 0 var(--color-text)';
+                e.currentTarget.style.boxShadow = 'clamp(6px, 1.75vw, 8px) clamp(6px, 1.75vw, 8px) 0 var(--color-text)';
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '6px 6px 0 var(--color-text)';
+              e.currentTarget.style.boxShadow = 'clamp(4px, 1.25vw, 6px) clamp(4px, 1.25vw, 6px) 0 var(--color-text)';
             }}
             onMouseDown={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
                 e.currentTarget.style.transform = 'translateY(2px)';
-                e.currentTarget.style.boxShadow = '3px 3px 0 var(--color-text)';
+                e.currentTarget.style.boxShadow = 'clamp(2px, 0.75vw, 3px) clamp(2px, 0.75vw, 3px) 0 var(--color-text)';
               }
             }}
             onMouseUp={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '8px 8px 0 var(--color-text)';
+                e.currentTarget.style.boxShadow = 'clamp(6px, 1.75vw, 8px) clamp(6px, 1.75vw, 8px) 0 var(--color-text)';
               }
             }}
           >
@@ -361,7 +361,7 @@ export default function UploadIsland() {
                   letterSpacing: '0.05em'
                 }}>Recording</div>
                 <div class="font-mono font-bold" style={{
-                  fontSize: '2.5rem',
+                  fontSize: 'clamp(2rem, 6vw, 2.5rem)',
                   color: 'var(--color-text)',
                   lineHeight: '1'
                 }}>
@@ -448,40 +448,40 @@ export default function UploadIsland() {
             disabled={isProcessing.value || !textInput.value.trim()}
             style={{
               width: '100%',
-              padding: '1.25rem 2rem',
-              fontSize: '1.125rem',
+              padding: 'clamp(1rem, 3vw, 1.25rem) clamp(1.5rem, 4vw, 2rem)',
+              fontSize: 'clamp(1rem, 3vw, 1.125rem)',
               fontWeight: '800',
               textTransform: 'uppercase',
               letterSpacing: '0.03em',
-              border: '4px solid var(--color-text)',
+              border: 'clamp(3px, 0.75vw, 4px) solid var(--color-text)',
               borderRadius: '12px',
               background: 'var(--color-accent)',
               color: 'white',
               cursor: isProcessing.value || !textInput.value.trim() ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
-              boxShadow: '6px 6px 0 var(--color-text)',
+              boxShadow: 'clamp(4px, 1.25vw, 6px) clamp(4px, 1.25vw, 6px) 0 var(--color-text)',
               opacity: isProcessing.value || !textInput.value.trim() ? 0.5 : 1
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '8px 8px 0 var(--color-text)';
+                e.currentTarget.style.boxShadow = 'clamp(6px, 1.75vw, 8px) clamp(6px, 1.75vw, 8px) 0 var(--color-text)';
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '6px 6px 0 var(--color-text)';
+              e.currentTarget.style.boxShadow = 'clamp(4px, 1.25vw, 6px) clamp(4px, 1.25vw, 6px) 0 var(--color-text)';
             }}
             onMouseDown={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
                 e.currentTarget.style.transform = 'translateY(2px)';
-                e.currentTarget.style.boxShadow = '3px 3px 0 var(--color-text)';
+                e.currentTarget.style.boxShadow = 'clamp(2px, 0.75vw, 3px) clamp(2px, 0.75vw, 3px) 0 var(--color-text)';
               }
             }}
             onMouseUp={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '8px 8px 0 var(--color-text)';
+                e.currentTarget.style.boxShadow = 'clamp(6px, 1.75vw, 8px) clamp(6px, 1.75vw, 8px) 0 var(--color-text)';
               }
             }}
           >

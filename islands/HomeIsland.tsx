@@ -210,9 +210,9 @@ export default function HomeIsland() {
                   width: '100%',
                   maxWidth: '580px',
                   background: 'white',
-                  border: '3px solid var(--color-text)',
+                  border: 'clamp(2px, 0.5vw, 3px) solid var(--color-text)',
                   borderRadius: '16px',
-                  boxShadow: '6px 6px 0 var(--color-text)',
+                  boxShadow: 'clamp(4px, 1.5vw, 6px) clamp(4px, 1.5vw, 6px) 0 var(--color-text)',
                   padding: 'clamp(1.75rem, 4vw, 2.5rem)'
                 }}>
                   <UploadIsland />
