@@ -178,58 +178,47 @@ export default function HomeIsland() {
           <div class="max-w-7xl mx-auto grid gap-4 sm:gap-6">
             {/* Hero + Upload Section - Only show when NO data */}
             {!conversationData.value && (
-              <div class="flex flex-col items-center justify-center text-center" style={{
-                minHeight: 'max(500px, 60vh)',
-                paddingTop: 'clamp(2rem, 8vh, 4rem)',
+              <div class="flex flex-col items-center justify-center" style={{
+                minHeight: 'max(550px, 65vh)',
+                paddingTop: 'clamp(3rem, 10vh, 6rem)',
                 paddingBottom: 'clamp(3rem, 10vh, 6rem)'
               }}>
-                {/* Simple abstract mark */}
-                <div style={{
-                  width: '80px',
-                  height: '80px',
-                  marginBottom: '2.5rem',
-                  borderRadius: '22px',
-                  background: 'var(--color-accent)',
-                  border: '4px solid var(--color-text)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '2.5rem',
-                  fontWeight: '900',
-                  color: 'white',
-                  boxShadow: '0 10px 20px rgba(0,0,0,0.12)',
-                  transform: 'rotate(-3deg)'
-                }}>
-                  →
-                </div>
-
-                {/* Main title - chonky and confident */}
+                {/* Main title - heavy and confident */}
                 <h1 style={{
-                  fontSize: 'clamp(2.75rem, 9vw, 5.5rem)',
+                  fontSize: 'clamp(3rem, 10vw, 6rem)',
                   fontWeight: '900',
                   color: 'var(--color-text)',
                   letterSpacing: '-0.04em',
-                  lineHeight: '0.95',
-                  marginBottom: '1.5rem',
-                  maxWidth: '16ch'
+                  lineHeight: '0.9',
+                  marginBottom: '1rem',
+                  textAlign: 'center'
                 }}>
                   Conversation Mapper
                 </h1>
 
-                {/* Subtitle - simple and clear */}
+                {/* Subtitle - clear and simple */}
                 <p style={{
-                  fontSize: 'clamp(1.125rem, 3vw, 1.625rem)',
+                  fontSize: 'clamp(1rem, 2.5vw, 1.375rem)',
                   fontWeight: '500',
                   color: 'var(--color-text-secondary)',
-                  lineHeight: '1.4',
-                  marginBottom: '4rem',
-                  maxWidth: '30ch'
+                  lineHeight: '1.5',
+                  marginBottom: '3rem',
+                  textAlign: 'center',
+                  maxWidth: '32ch'
                 }}>
-                  Turn your conversations into clarity
+                  Turn conversations into clarity
                 </p>
 
-                {/* Upload card - centered and prominent */}
-                <div class="w-full max-w-xl">
+                {/* Neo-brutalist Upload Card */}
+                <div style={{
+                  width: '100%',
+                  maxWidth: '580px',
+                  background: 'white',
+                  border: '3px solid var(--color-text)',
+                  borderRadius: '16px',
+                  boxShadow: '6px 6px 0 var(--color-text)',
+                  padding: 'clamp(1.75rem, 4vw, 2.5rem)'
+                }}>
                   <UploadIsland />
                 </div>
               </div>
