@@ -84,13 +84,13 @@ export default function MobileHistoryMenu() {
         onClick={toggleMenu}
         class="fixed bottom-6 right-6 flex items-center justify-center z-40 transition-all"
         style={{
-          background: 'rgba(255, 255, 255, 0.75)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          border: '3px solid rgba(44, 44, 44, 0.2)',
+          background: 'rgba(255, 252, 248, 0.85)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '2px solid rgba(0, 0, 0, 0.15)',
           borderRadius: '16px',
           padding: '14px 18px',
-          boxShadow: '0 6px 0 0 rgba(0, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.12)',
+          boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.1)',
           cursor: 'pointer',
           fontWeight: '700',
           fontSize: '15px',
@@ -98,12 +98,12 @@ export default function MobileHistoryMenu() {
           gap: '8px'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-3px)';
-          e.currentTarget.style.boxShadow = '0 9px 0 0 rgba(0, 0, 0, 0.1), 0 12px 32px rgba(0, 0, 0, 0.15)';
+          e.currentTarget.style.transform = 'translate(-2px, -2px)';
+          e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.1)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(0, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.12)';
+          e.currentTarget.style.transform = 'translate(0, 0)';
+          e.currentTarget.style.boxShadow = '4px 4px 0 0 rgba(0, 0, 0, 0.1)';
         }}
         aria-label="Open conversation history"
         title="View saved conversations"
@@ -134,11 +134,11 @@ export default function MobileHistoryMenu() {
           isOpen.value ? "translate-x-0" : "translate-x-full"
         }`}
         style={{
-          background: 'rgba(255, 255, 255, 0.95)',
+          background: 'rgba(255, 252, 248, 0.95)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderLeft: '3px solid rgba(255, 255, 255, 0.4)',
-          boxShadow: '-8px 0 32px rgba(0, 0, 0, 0.12)'
+          borderLeft: '2px solid rgba(0, 0, 0, 0.1)',
+          boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.12)'
         }}
       >
         {/* Header */}
@@ -195,33 +195,33 @@ export default function MobileHistoryMenu() {
               padding: '14px 20px',
               fontSize: '16px',
               fontWeight: '700',
-              border: '3px solid #2C2C2C',
+              border: '2px solid #1A1A1A',
               borderRadius: '12px',
-              background: '#2C2C2C',
+              background: '#1A1A1A',
               color: 'white',
               cursor: 'pointer',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: '0 4px 0 0 rgba(0, 0, 0, 0.15)',
+              boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.12)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(0, 0, 0, 0.15)';
+              e.currentTarget.style.transform = 'translate(-2px, -2px)';
+              e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.12)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 0 0 rgba(0, 0, 0, 0.15)';
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = '4px 4px 0 0 rgba(0, 0, 0, 0.12)';
             }}
             onMouseDown={(e) => {
-              e.currentTarget.style.transform = 'translateY(2px)';
-              e.currentTarget.style.boxShadow = '0 2px 0 0 rgba(0, 0, 0, 0.15)';
+              e.currentTarget.style.transform = 'translate(2px, 2px)';
+              e.currentTarget.style.boxShadow = '2px 2px 0 0 rgba(0, 0, 0, 0.12)';
             }}
             onMouseUp={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(0, 0, 0, 0.15)';
+              e.currentTarget.style.transform = 'translate(-2px, -2px)';
+              e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.12)';
             }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

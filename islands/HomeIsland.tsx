@@ -42,14 +42,14 @@ export default function HomeIsland() {
 
   return (
     <div class="min-h-screen" style={{ background: 'var(--gradient-bg)' }}>
-      {/* Top Bar - Slim, solid, clean */}
+      {/* Top Bar - Anchored with theme integration */}
       <header style={{
-        background: 'rgba(255, 255, 255, 0.92)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
-        height: '64px',
+        background: 'rgba(255, 252, 248, 0.88)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderBottom: '2px solid rgba(0, 0, 0, 0.1)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+        height: '72px',
         display: 'flex',
         alignItems: 'center',
         position: 'sticky',
@@ -81,10 +81,10 @@ export default function HomeIsland() {
                 <h1
                   class="truncate"
                   style={{
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#2C2C2C',
-                    letterSpacing: '-0.01em'
+                    fontSize: '19px',
+                    fontWeight: '700',
+                    color: '#1A1A1A',
+                    letterSpacing: '-0.02em'
                   }}
                 >
                   {conversationData.value.conversation.title}
@@ -101,14 +101,20 @@ export default function HomeIsland() {
                   onClick={() => drawerOpen.value = !drawerOpen.value}
                   class="px-3 py-1.5 rounded-lg transition-all hidden sm:block"
                   style={{
-                    background: '#2C2C2C',
+                    background: '#1A1A1A',
                     color: 'white',
                     fontSize: '14px',
-                    fontWeight: '500',
+                    fontWeight: '600',
                     border: 'none'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#3D3D3D'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = '#2C2C2C'}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#2C2C2C';
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = '#1A1A1A';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
                   title="Export"
                 >
                   Export
@@ -125,10 +131,10 @@ export default function HomeIsland() {
             // Default header - app name and theme shuffler
             <>
               <h1 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#2C2C2C',
-                letterSpacing: '-0.01em',
+                fontSize: '19px',
+                fontWeight: '700',
+                color: '#1A1A1A',
+                letterSpacing: '-0.02em',
                 flex: 1
               }}>
                 Conversation Mapper
@@ -160,32 +166,32 @@ export default function HomeIsland() {
             {/* Hero Section - Only show when NO data */}
             {!conversationData.value && (
               <div class="flex flex-col items-center justify-center" style={{
-                minHeight: 'max(500px, 60vh)',
-                paddingTop: 'clamp(3rem, 8vh, 5rem)',
-                paddingBottom: 'clamp(4rem, 12vh, 8rem)'
+                minHeight: 'max(550px, 65vh)',
+                paddingTop: 'clamp(4rem, 10vh, 6rem)',
+                paddingBottom: 'clamp(3rem, 8vh, 5rem)'
               }}>
-                {/* Hero Card - Enhanced glassmorphism */}
+                {/* Hero Card - Intentional structure with personality */}
                 <div style={{
                   width: '100%',
                   maxWidth: '680px',
-                  background: 'rgba(255, 255, 255, 0.65)',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                  border: '3px solid rgba(255, 255, 255, 0.4)',
-                  borderRadius: '24px',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)',
+                  background: 'rgba(255, 252, 248, 0.85)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  border: '2px solid rgba(0, 0, 0, 0.12)',
+                  borderRadius: '20px',
+                  boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.06), 0 4px 20px rgba(0, 0, 0, 0.08)',
                   padding: 'clamp(2.5rem, 6vw, 4rem)',
                   position: 'relative',
                   overflow: 'hidden'
                 }}>
-                  {/* Subtle gradient overlay for depth */}
+                  {/* Accent wash - subtle pastel flavor */}
                   <div style={{
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: 'radial-gradient(circle at top right, rgba(255, 182, 193, 0.15), transparent 60%)',
+                    background: 'linear-gradient(135deg, rgba(255, 230, 220, 0.3) 0%, rgba(255, 240, 245, 0.2) 50%, transparent 100%)',
                     pointerEvents: 'none',
                     zIndex: 0
                   }}></div>
@@ -196,30 +202,32 @@ export default function HomeIsland() {
                     <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                       <h2 style={{
                         fontSize: 'clamp(2rem, 5vw, 2.75rem)',
-                        fontWeight: '700',
-                        color: '#2C2C2C',
-                        letterSpacing: '-0.03em',
-                        marginBottom: '0.75rem',
+                        fontWeight: '800',
+                        color: '#1A1A1A',
+                        letterSpacing: '-0.04em',
+                        marginBottom: '1rem',
                         lineHeight: '1.1'
                       }}>
                         Let's map your conversation
                       </h2>
                       <p style={{
-                        fontSize: 'clamp(16px, 2vw, 18px)',
-                        color: '#6B6B6B',
+                        fontSize: 'clamp(17px, 2vw, 19px)',
+                        color: '#4A4A4A',
                         fontWeight: '500',
-                        lineHeight: '1.6',
-                        maxWidth: '500px',
+                        lineHeight: '1.7',
+                        maxWidth: '480px',
                         margin: '0 auto'
                       }}>
-                        Drop your thoughts, paste your chats, or just hit record. <br/>
-                        <span style={{
-                          color: '#8B7F77',
-                          fontSize: '15px',
-                          fontWeight: '400'
-                        }}>
-                          We'll turn the chaos into clarity ✨
-                        </span>
+                        Drop your thoughts, paste your chats, or just hit record.
+                      </p>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#8B7F77',
+                        fontWeight: '400',
+                        lineHeight: '1.6',
+                        marginTop: '0.75rem'
+                      }}>
+                        We'll turn the chaos into clarity
                       </p>
                     </div>
 

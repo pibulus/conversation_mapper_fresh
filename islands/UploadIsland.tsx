@@ -277,7 +277,7 @@ export default function UploadIsland() {
               fontWeight: '500',
               border: 'none',
               borderRadius: '8px',
-              background: mode.value === tabMode ? '#2C2C2C' : 'transparent',
+              background: mode.value === tabMode ? '#1A1A1A' : 'transparent',
               color: mode.value === tabMode ? 'white' : '#6B6B6B',
               cursor: 'pointer',
               transition: 'all 0.15s ease'
@@ -285,7 +285,7 @@ export default function UploadIsland() {
             onMouseEnter={(e) => {
               if (mode.value !== tabMode) {
                 e.currentTarget.style.background = 'rgba(0, 0, 0, 0.05)';
-                e.currentTarget.style.color = '#2C2C2C';
+                e.currentTarget.style.color = '#1A1A1A';
               }
             }}
             onMouseLeave={(e) => {
@@ -311,36 +311,36 @@ export default function UploadIsland() {
               padding: '18px 28px',
               fontSize: '17px',
               fontWeight: '700',
-              border: '3px solid',
-              borderColor: isRecording.value ? '#DC2626' : '#2C2C2C',
+              border: '2px solid',
+              borderColor: isRecording.value ? '#DC2626' : 'var(--color-accent)',
               borderRadius: '14px',
-              background: isRecording.value ? '#EF4444' : '#2C2C2C',
+              background: isRecording.value ? '#EF4444' : 'var(--color-accent)',
               color: 'white',
               cursor: isProcessing.value && !isRecording.value ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               opacity: isProcessing.value && !isRecording.value ? 0.5 : 1,
-              boxShadow: '0 4px 0 0 rgba(0, 0, 0, 0.15)'
+              boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.12)'
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(0, 0, 0, 0.15)';
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.12)';
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 0 0 rgba(0, 0, 0, 0.15)';
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = '4px 4px 0 0 rgba(0, 0, 0, 0.12)';
             }}
             onMouseDown={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translateY(2px)';
-                e.currentTarget.style.boxShadow = '0 2px 0 0 rgba(0, 0, 0, 0.15)';
+                e.currentTarget.style.transform = 'translate(2px, 2px)';
+                e.currentTarget.style.boxShadow = '2px 2px 0 0 rgba(0, 0, 0, 0.12)';
               }
             }}
             onMouseUp={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(0, 0, 0, 0.15)';
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.12)';
               }
             }}
           >
@@ -451,35 +451,35 @@ export default function UploadIsland() {
               padding: '18px 28px',
               fontSize: '17px',
               fontWeight: '700',
-              border: '3px solid #2C2C2C',
+              border: '2px solid var(--color-accent)',
               borderRadius: '14px',
-              background: '#2C2C2C',
+              background: 'var(--color-accent)',
               color: 'white',
               cursor: isProcessing.value || !textInput.value.trim() ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               opacity: isProcessing.value || !textInput.value.trim() ? 0.5 : 1,
-              boxShadow: '0 4px 0 0 rgba(0, 0, 0, 0.15)'
+              boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.12)'
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(0, 0, 0, 0.15)';
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.12)';
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 0 0 rgba(0, 0, 0, 0.15)';
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = '4px 4px 0 0 rgba(0, 0, 0, 0.12)';
             }}
             onMouseDown={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translateY(2px)';
-                e.currentTarget.style.boxShadow = '0 2px 0 0 rgba(0, 0, 0, 0.15)';
+                e.currentTarget.style.transform = 'translate(2px, 2px)';
+                e.currentTarget.style.boxShadow = '2px 2px 0 0 rgba(0, 0, 0, 0.12)';
               }
             }}
             onMouseUp={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(0, 0, 0, 0.15)';
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.12)';
               }
             }}
           >
