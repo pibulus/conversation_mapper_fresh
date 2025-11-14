@@ -171,67 +171,59 @@ export default function HomeIsland() {
                 paddingTop: 'clamp(5rem, 12vh, 8rem)',
                 paddingBottom: 'clamp(2rem, 6vh, 4rem)'
               }}>
-                {/* Hero Card - Neo-brutalist with SOUL */}
+                {/* Hero Card - SoftStack billboard */}
                 <div style={{
                   width: '100%',
                   maxWidth: '780px',
-                  background: 'rgba(255, 250, 245, 0.92)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  border: '2.5px solid rgba(0, 0, 0, 0.18)',
-                  borderRadius: '16px',
-                  boxShadow: '8px 8px 0 0 rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.06)',
-                  padding: 'clamp(3rem, 7vw, 5rem) clamp(2.5rem, 6vw, 4rem)',
+                  background: 'rgba(255, 250, 245, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  border: '2px solid rgba(255, 215, 180, 0.4)',
+                  borderRadius: '18px',
+                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.04)',
+                  padding: 'clamp(3.5rem, 8vw, 5.5rem) clamp(2.5rem, 6vw, 4rem)',
                   position: 'relative',
                   overflow: 'hidden'
                 }}>
-                  {/* Flavor gradient - peach sorbet melting */}
+                  {/* Subtle inner gradient - warm atmosphere */}
                   <div style={{
                     position: 'absolute',
-                    top: '-10%',
-                    left: '-5%',
-                    right: '-5%',
-                    height: '60%',
-                    background: 'radial-gradient(ellipse 140% 100% at 50% 0%, rgba(255, 215, 180, 0.35) 0%, rgba(255, 190, 200, 0.2) 45%, transparent 70%)',
+                    top: '-20%',
+                    left: '-10%',
+                    right: '-10%',
+                    height: '70%',
+                    background: 'radial-gradient(ellipse 130% 90% at 50% 0%, rgba(255, 225, 200, 0.25) 0%, rgba(255, 240, 220, 0.12) 50%, transparent 75%)',
                     pointerEvents: 'none',
                     zIndex: 0
                   }}></div>
 
                   {/* Content wrapper */}
                   <div style={{ position: 'relative', zIndex: 1 }}>
-                    {/* Card Header - STATEMENT ENERGY */}
-                    <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                    {/* Card Header - Clean hierarchy */}
+                    <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
                       <h2 style={{
-                        fontSize: 'clamp(2.5rem, 6.5vw, 3.5rem)',
-                        fontWeight: '900',
+                        fontSize: 'clamp(2.5rem, 6.5vw, 3.25rem)',
+                        fontWeight: '800',
                         color: '#0A0A0A',
-                        letterSpacing: '-0.05em',
-                        marginBottom: '1.25rem',
-                        lineHeight: '0.95',
-                        maxWidth: '620px',
-                        margin: '0 auto 1.25rem'
+                        letterSpacing: '-0.04em',
+                        marginBottom: '1.75rem',
+                        lineHeight: '1.05',
+                        maxWidth: '550px',
+                        margin: '0 auto 1.75rem'
                       }}>
-                        Let's map your conversation
+                        See what you're really saying
                       </h2>
                       <p style={{
-                        fontSize: 'clamp(18px, 2.2vw, 21px)',
-                        color: '#3A3A3A',
+                        fontSize: 'clamp(17px, 2vw, 19px)',
+                        color: '#4A4A4A',
                         fontWeight: '500',
-                        lineHeight: '1.5',
-                        maxWidth: '500px',
-                        margin: '0 auto 0.875rem',
-                        letterSpacing: '-0.01em'
+                        lineHeight: '1.65',
+                        maxWidth: '480px',
+                        margin: '0 auto',
+                        letterSpacing: '-0.005em'
                       }}>
-                        Capture the moment. Untangle the ideas.<br/>See what you're really saying.
-                      </p>
-                      <p style={{
-                        fontSize: '15px',
-                        color: '#999',
-                        fontWeight: '400',
-                        lineHeight: '1.5',
-                        letterSpacing: '0.01em'
-                      }}>
-                        Drop audio, paste text, or just hit record
+                        Drop text or audio. Watch the insights appear.<br/>
+                        Map conversations. Capture clarity.
                       </p>
                     </div>
 

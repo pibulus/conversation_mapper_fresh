@@ -368,24 +368,46 @@ export class ThemeRandomizerService {
   }
 
   /**
-   * Generates flavorful gradients - peach sorbet, flamingo dawn, sunset surf cafe
-   * More personality and joy while staying light and usable
+   * Generates flavorful but CONSTRAINED gradients
+   * Warm triads only - pink/peach/mint, no mud
+   * All same luminosity to prevent accidental browns
    */
   static generateSimpleGradient(baseHue: number, secondaryHue: number): string {
-    // Prefer gentle diagonal angles for warmth
-    const angles = [135, 145, 155, 165, 180, 195, 205, 215, 225];
-    const angle = angles[Math.floor(Math.random() * angles.length)];
+    // Constrain to warm spectrum: 330-60 (pink through peach to warm yellow)
+    // OR cool mint: 150-180
+    // This prevents muddy intermediates
 
-    // FLAVORFUL light gradients - peach, flamingo, succulent vibes
-    // Higher chroma for more personality, but still light
-    const color1 = this.generateOKLCHColor(95, this.getRandomValue(0.06, 0.12), baseHue);
-    const color2 = this.generateOKLCHColor(93, this.getRandomValue(0.08, 0.15), secondaryHue);
+    const isWarm = Math.random() > 0.3; // Prefer warm 70% of time
 
-    // Add a third color stop for depth and flavor
-    const midHue = (baseHue + secondaryHue) / 2;
-    const color3 = this.generateOKLCHColor(94, this.getRandomValue(0.07, 0.13), midHue);
+    let hue1, hue2, hue3;
 
-    return `linear-gradient(${angle}deg, ${color1} 0%, ${color3} 50%, ${color2} 100%)`;
+    if (isWarm) {
+      // WARM TRIAD: Pink → Peach → Melon
+      // All in 330-40 range (wrapping around 0)
+      const warmBase = 350 + (Math.random() * 30); // 350-380 (wraps to 350-20)
+      hue1 = warmBase % 360;
+      hue2 = (warmBase + 15) % 360;
+      hue3 = (warmBase + 30) % 360;
+    } else {
+      // COOL ACCENT: Mint → Seafoam
+      // 150-180 range only
+      const coolBase = 155 + (Math.random() * 20);
+      hue1 = coolBase;
+      hue2 = coolBase + 10;
+      hue3 = coolBase + 15;
+    }
+
+    // Prefer diagonal for warmth
+    const angle = 135 + (Math.random() * 90); // 135-225
+
+    // SAME LUMINOSITY - prevents mud
+    // Higher chroma for flavor but still light
+    const baseLightness = 94;
+    const color1 = this.generateOKLCHColor(baseLightness, this.getRandomValue(0.08, 0.14), hue1);
+    const color2 = this.generateOKLCHColor(baseLightness + 1, this.getRandomValue(0.09, 0.15), hue2);
+    const color3 = this.generateOKLCHColor(baseLightness, this.getRandomValue(0.08, 0.13), hue3);
+
+    return `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 50%, ${color3} 100%)`;
   }
 
   /**

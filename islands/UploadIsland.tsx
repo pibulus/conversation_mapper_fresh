@@ -259,12 +259,14 @@ export default function UploadIsland() {
 
   return (
     <div>
-      {/* Mode Selector - Clean pills */}
-      <div class="flex gap-2 mb-6" style={{
+      {/* Mode Selector - Compact pills */}
+      <div class="flex gap-2 mb-5" style={{
         background: 'rgba(0, 0, 0, 0.03)',
         padding: '4px',
         borderRadius: '10px',
-        border: '1px solid rgba(0, 0, 0, 0.06)'
+        border: '1px solid rgba(0, 0, 0, 0.06)',
+        maxWidth: '360px',
+        margin: '0 auto 1.5rem'
       }}>
         {(['record', 'text', 'audio'] as const).map((tabMode) => (
           <button
@@ -308,39 +310,39 @@ export default function UploadIsland() {
             disabled={isProcessing.value && !isRecording.value}
             style={{
               width: '100%',
-              padding: '18px 28px',
+              padding: '18px 32px',
               fontSize: '17px',
               fontWeight: '700',
-              border: '2px solid',
-              borderColor: isRecording.value ? '#DC2626' : 'var(--color-accent)',
+              border: '2px solid rgba(0, 0, 0, 0.12)',
               borderRadius: '14px',
-              background: isRecording.value ? '#EF4444' : 'var(--color-accent)',
+              background: isRecording.value ? '#EF4444' : '#181818',
               color: 'white',
               cursor: isProcessing.value && !isRecording.value ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
               opacity: isProcessing.value && !isRecording.value ? 0.5 : 1,
-              boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.12)'
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
+              position: 'relative'
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translate(-2px, -2px)';
-                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.12)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--color-accent)';
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translate(0, 0)';
-              e.currentTarget.style.boxShadow = '4px 4px 0 0 rgba(0, 0, 0, 0.12)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)';
             }}
             onMouseDown={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translate(2px, 2px)';
-                e.currentTarget.style.boxShadow = '2px 2px 0 0 rgba(0, 0, 0, 0.12)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.12)';
               }
             }}
             onMouseUp={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translate(-2px, -2px)';
-                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.12)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--color-accent)';
               }
             }}
           >
@@ -448,38 +450,38 @@ export default function UploadIsland() {
             disabled={isProcessing.value || !textInput.value.trim()}
             style={{
               width: '100%',
-              padding: '18px 28px',
+              padding: '18px 32px',
               fontSize: '17px',
               fontWeight: '700',
-              border: '2px solid var(--color-accent)',
+              border: '2px solid rgba(0, 0, 0, 0.12)',
               borderRadius: '14px',
-              background: 'var(--color-accent)',
+              background: '#181818',
               color: 'white',
               cursor: isProcessing.value || !textInput.value.trim() ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
               opacity: isProcessing.value || !textInput.value.trim() ? 0.5 : 1,
-              boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.12)'
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)'
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translate(-2px, -2px)';
-                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.12)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--color-accent)';
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translate(0, 0)';
-              e.currentTarget.style.boxShadow = '4px 4px 0 0 rgba(0, 0, 0, 0.12)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)';
             }}
             onMouseDown={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translate(2px, 2px)';
-                e.currentTarget.style.boxShadow = '2px 2px 0 0 rgba(0, 0, 0, 0.12)';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.12)';
               }
             }}
             onMouseUp={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translate(-2px, -2px)';
-                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.12)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--color-accent)';
               }
             }}
           >
