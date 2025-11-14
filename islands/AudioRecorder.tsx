@@ -372,6 +372,20 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
     };
   }, []);
 
+  // Handle ESC key to close panel (but not while recording)
+  useEffect(() => {
+    if (!isExpanded.value) return;
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape' && !isRecording.value) {
+        isExpanded.value = false;
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isExpanded.value, isRecording.value]);
+
   return (
     <div class="relative">
       {/* Compact button in header */}

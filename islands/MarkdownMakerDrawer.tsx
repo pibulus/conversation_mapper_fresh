@@ -87,6 +87,20 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
     };
   }, [isOpen, onClose]);
 
+  // Handle ESC key to close
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
   // Load saved outputs from localStorage
   function loadSavedOutputs() {
     try {

@@ -76,6 +76,23 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     };
   }, [activeAssigneeDropdown.value]);
 
+  // Keyboard navigation: ESC to close modal
+  useEffect(() => {
+    if (!showAddModal.value) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        showAddModal.value = false;
+        newItemDescription.value = '';
+        newItemAssignee.value = '';
+        newItemDueDate.value = '';
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showAddModal.value]);
+
   // Filter and sort action items (memoized for performance)
   const sortedActionItems = useComputed(() => {
     let filteredItems = [...actionItems];
@@ -545,6 +562,12 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                   type="text"
                   value={newItemDescription.value}
                   onInput={(e) => newItemDescription.value = (e.target as HTMLInputElement).value}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newItemDescription.value.trim()) {
+                      e.preventDefault();
+                      addNewItem();
+                    }
+                  }}
                   placeholder="What's the move?"
                   class="w-full rounded px-3 py-2"
                   style={{

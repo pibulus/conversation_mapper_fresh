@@ -387,6 +387,12 @@ export default function UploadIsland() {
             placeholder="Text goes here"
             value={textInput.value}
             onInput={(e) => textInput.value = (e.target as HTMLTextAreaElement).value}
+            onKeyDown={(e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && textInput.value.trim()) {
+                e.preventDefault();
+                handleTextSubmit();
+              }
+            }}
           />
           <button
             onClick={handleTextSubmit}
