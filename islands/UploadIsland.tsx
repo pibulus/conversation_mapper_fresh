@@ -303,8 +303,7 @@ export default function UploadIsland() {
     <div class="mapper-input-lab">
       <section class="mapper-capture-block mapper-capture-unified">
         <div class="mapper-block-header">
-          <span class="mapper-block-pill">Conversation input</span>
-          <div class="mapper-block-meta">Record, paste, or drop audio — one slab.</div>
+          <span class="mapper-block-pill">Input board</span>
         </div>
 
         <div
@@ -352,7 +351,7 @@ export default function UploadIsland() {
                 </button>
               </div>
             ) : (
-              <span>Drop audio or paste text</span>
+              <span>Drop audio • paste text</span>
             )}
             <button
               type="button"
@@ -362,7 +361,7 @@ export default function UploadIsland() {
                 fileInputRef.current?.click();
               }}
             >
-              Browse file
+              Browse
             </button>
           </div>
         </div>
@@ -398,8 +397,8 @@ export default function UploadIsland() {
           >
             {primaryLabel.value}
           </button>
-          {(hasText.value || selectedFile.value || isRecording.value) && lastUploadName.value && !selectedFile.value && !isRecording.value && (
-            <span class="mapper-block-meta">Last mapped: {lastUploadName.value}</span>
+          {lastUploadName.value && !selectedFile.value && !isRecording.value && !hasText.value && (
+            <span class="mapper-block-meta">Last: {lastUploadName.value}</span>
           )}
         </div>
       </section>

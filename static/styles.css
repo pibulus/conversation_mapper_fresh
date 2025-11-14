@@ -317,10 +317,11 @@ body {
 }
 
 .mapper-card:hover {
-  transform: translate(-4px, -4px);
+  transform: translate(-2px, -2px);
   box-shadow:
-    14px 16px 0 rgba(14, 11, 8, 0.18),
-    0 40px 70px rgba(12, 8, 6, 0.18);
+    12px 14px 0 rgba(14, 11, 8, 0.18),
+    0 45px 80px rgba(12, 8, 6, 0.22),
+    0 0 45px rgba(255, 92, 141, 0.25);
 }
 
 .mapper-card__inner {
@@ -417,9 +418,9 @@ body {
 .mapper-block-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .mapper-block-pill {
@@ -431,8 +432,8 @@ body {
 }
 
 .mapper-block-meta {
-  font-size: 0.85rem;
-  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.5);
   line-height: 1.4;
 }
 .mapper-capture-actions {
@@ -448,10 +449,12 @@ body {
 }
 
 .mapper-unified-input {
-  border: 2px solid rgba(0, 0, 0, 0.1);
+  border: 2px dashed rgba(0, 0, 0, 0.15);
   border-radius: 18px;
   padding: 1rem;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  background: rgba(255, 255, 255, 0.75);
+  cursor: text;
 }
 
 .mapper-unified-input textarea {
@@ -462,7 +465,12 @@ body {
 
 .mapper-unified-input.is-drop {
   border-color: var(--accent-electric);
+  background: rgba(255, 92, 141, 0.08);
   box-shadow: 0 0 0 2px rgba(255, 92, 141, 0.15), 0 25px 50px rgba(255, 92, 141, 0.15);
+}
+
+.mapper-unified-input.has-file textarea {
+  background: rgba(0, 0, 0, 0.03);
 }
 
 .mapper-input-hint {
@@ -478,7 +486,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.08);
   border-radius: 999px;
   padding: 0.2rem 0.75rem;
   font-size: 0.85rem;
