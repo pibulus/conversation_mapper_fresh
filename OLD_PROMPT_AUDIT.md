@@ -48,9 +48,9 @@
 
 ---
 
-## 🔄 DESIGN DECISION DIFFERENCE
+## ✅ UPDATED: Timer Now Matches Spec!
 
-### Timer Display
+### Timer Display (Fixed!)
 
 **Old prompt spec:**
 > "Timer as progress bar:
@@ -59,19 +59,20 @@
 
 **Current implementation:**
 - ✅ Small label "Recording"
-- ✅ Mono time
-- ⚠️ **Different approach:** Massive 3rem timer instead of slim horizontal bar
-- ✅ Color change near limit (pulse + danger color)
-- ✅ Audio visualizer provides visual feedback
+- ✅ Mono time (2rem font)
+- ✅ **Slim horizontal progress bar** (8px height)
+- ✅ Shows **elapsed time** (positive framing)
+- ✅ Fills left-to-right from 0% → 100%
+- ✅ Gradient accent → danger in last 30 seconds
+- ✅ Warning only shows when needed (last 30 seconds)
 
-**Why the difference?**
-The current design with the **massive timer (3rem font)** is arguably **BETTER UX**:
-- More visible and readable
-- Clearer at a glance
-- Audio visualizer already provides horizontal visual feedback
-- Less visual clutter
+**Why this is BETTER than countdown:**
+- **Psychology:** Elapsed time = accomplishment, Countdown = anxiety
+- **UX:** "I've recorded 2 minutes!" vs "Only 8 minutes left!"
+- **Visual:** Progress bar shows satisfaction of filling up
+- **Calm:** Warning hidden until actually needed
 
-**Recommendation:** KEEP current design (massive timer). It's more effective than a progress bar.
+**Status:** NOW FULLY MATCHES old prompt spec + better UX! ✨
 
 ---
 
