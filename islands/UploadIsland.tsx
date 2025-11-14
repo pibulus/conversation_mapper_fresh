@@ -4,6 +4,12 @@ import { conversationData } from "../signals/conversationStore.ts";
 import LoadingModal from "../components/LoadingModal.tsx";
 import AudioVisualizer from "./AudioVisualizer.tsx";
 
+const MODE_TABS = [
+  { key: 'record', label: 'Record' },
+  { key: 'text', label: 'Paste' },
+  { key: 'audio', label: 'Upload' }
+] as const;
+
 export default function UploadIsland() {
   const mode = useSignal<'text' | 'audio' | 'record'>('record');
   const textInput = useSignal('');
@@ -19,6 +25,7 @@ export default function UploadIsland() {
   const recordingTimerRef = useRef<number | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const MAX_RECORDING_TIME = 10 * 60; // 10 minutes in seconds
   const WARNING_TIME = 30; // 30 seconds before limit
@@ -258,176 +265,113 @@ export default function UploadIsland() {
   }, []);
 
   return (
-    <div>
-      {/* Mode Selector - Small outlined tabs */}
-      <div class="flex gap-2 mb-5" style={{
-        maxWidth: '320px',
-        margin: '0 auto 1.5rem',
-        justifyContent: 'center'
-      }}>
-        {(['record', 'text', 'audio'] as const).map((tabMode) => (
+    <div class="softstack-input-lab">
+      <div class="softstack-mode-tabs" role="tablist" aria-label="Capture mode">
+        {MODE_TABS.map(({ key, label }) => (
           <button
-            key={tabMode}
-            onClick={() => mode.value = tabMode}
-            style={{
-              padding: '7px 18px',
-              fontSize: '13px',
-              fontWeight: '600',
-              border: mode.value === tabMode ? '1.5px solid #1A1A1A' : '1px solid rgba(0, 0, 0, 0.15)',
-              borderRadius: '8px',
-              background: mode.value === tabMode ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
-              color: mode.value === tabMode ? '#0A0A0A' : '#666',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              letterSpacing: '0.01em'
-            }}
-            onMouseEnter={(e) => {
-              if (mode.value !== tabMode) {
-                e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.3)';
-                e.currentTarget.style.color = '#1A1A1A';
-              } else {
-                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.06)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (mode.value !== tabMode) {
-                e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
-                e.currentTarget.style.color = '#666';
-              } else {
-                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.04)';
-              }
-            }}
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={mode.value === key}
+            class={`softstack-mode-tab${mode.value === key ? ' is-active' : ''}`}
+            onClick={() => mode.value = key}
           >
-            {tabMode === 'record' ? 'Record' : tabMode === 'text' ? 'Text' : 'Upload'}
+            {label}
           </button>
         ))}
       </div>
 
-      {/* Record Mode */}
       {mode.value === 'record' && (
-        <div class="space-y-4">
+        <div class="softstack-panel-body">
           <button
             onClick={isRecording.value ? stopRecording : startRecording}
             disabled={isProcessing.value && !isRecording.value}
-            style={{
-              width: '100%',
-              padding: '18px 32px',
-              fontSize: '17px',
-              fontWeight: '700',
-              border: '2px solid rgba(0, 0, 0, 0.2)',
-              borderRadius: '10px',
-              background: isRecording.value ? '#C97B6B' : '#1A1A1A',
-              color: 'white',
-              cursor: isProcessing.value && !isRecording.value ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              opacity: isProcessing.value && !isRecording.value ? 0.5 : 1,
-              boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.1)',
-              position: 'relative',
-              letterSpacing: '-0.01em'
-            }}
-            onMouseEnter={(e) => {
-              if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translate(-2px, -2px)';
-                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.15), 0 0 0 2px var(--color-accent)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translate(0, 0)';
-              e.currentTarget.style.boxShadow = '4px 4px 0 0 rgba(0, 0, 0, 0.1)';
-            }}
-            onMouseDown={(e) => {
-              if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translate(1px, 1px)';
-                e.currentTarget.style.boxShadow = '2px 2px 0 0 rgba(0, 0, 0, 0.12)';
-              }
-            }}
-            onMouseUp={(e) => {
-              if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translate(-2px, -2px)';
-                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.15), 0 0 0 2px var(--color-accent)';
-              }
-            }}
+            class={`softstack-slab-button${isRecording.value ? ' is-accent' : ''}`}
           >
-            {isRecording.value ? 'Stop Recording' : 'Start Recording'}
+            {isRecording.value ? 'Stop' : 'Record'}
           </button>
-
-          {/* Recording Timer & Progress Bar */}
-          {isRecording.value && (
-            <div class="space-y-4 pt-2">
-              {/* Elapsed time display */}
-              <div class="text-center">
-                <div style={{
-                  fontSize: '0.875rem',
-                  color: 'var(--color-text-secondary)',
-                  marginBottom: '0.5rem',
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em'
-                }}>Recording</div>
-                <div class="font-mono font-bold" style={{
-                  fontSize: 'clamp(2rem, 6vw, 2.5rem)',
-                  color: 'var(--color-text)',
-                  lineHeight: '1'
-                }}>
-                  {formatTime(recordingTime.value)}
+          <div class="softstack-panel-scroll">
+            <div class="softstack-info-note">Live capture</div>
+            {isRecording.value ? (
+              <div class="space-y-4 pt-2">
+                <div class="text-center">
+                  <div style={{
+                    fontSize: '0.875rem',
+                    color: 'var(--color-text-secondary)',
+                    marginBottom: '0.5rem',
+                    fontWeight: '600',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>Recording</div>
+                  <div class="font-mono font-bold" style={{
+                    fontSize: 'clamp(2rem, 6vw, 2.5rem)',
+                    color: 'var(--color-text)',
+                    lineHeight: '1'
+                  }}>
+                    {formatTime(recordingTime.value)}
+                  </div>
                 </div>
+                <div style={{
+                  width: '100%',
+                  height: '12px',
+                  background: '#E5E7EB',
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  border: '2px solid var(--color-text)'
+                }}>
+                  <div style={{
+                    width: `${(recordingTime.value / MAX_RECORDING_TIME) * 100}%`,
+                    height: '100%',
+                    background: showTimeWarning.value ? '#EF4444' : 'var(--color-accent)',
+                    transition: 'width 0.3s ease-out, background 0.5s ease'
+                  }}></div>
+                </div>
+                {showTimeWarning.value && (
+                  <div style={{
+                    padding: '1rem',
+                    background: '#FEE2E2',
+                    border: '2px solid #DC2626',
+                    borderRadius: '8px',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    color: '#991B1B',
+                    textAlign: 'center'
+                  }}>
+                    Don't leave while recording
+                  </div>
+                )}
+                <AudioVisualizer analyser={analyserRef.current} />
               </div>
-
-              {/* Progress bar */}
-              <div style={{
-                width: '100%',
-                height: '12px',
-                background: '#E5E7EB',
-                borderRadius: '6px',
-                overflow: 'hidden',
-                border: '2px solid var(--color-text)'
+            ) : (
+              <p style={{
+                fontSize: '0.9rem',
+                lineHeight: '1.5',
+                color: 'rgba(0, 0, 0, 0.65)'
               }}>
-                <div style={{
-                  width: `${(recordingTime.value / MAX_RECORDING_TIME) * 100}%`,
-                  height: '100%',
-                  background: showTimeWarning.value ? '#EF4444' : 'var(--color-accent)',
-                  transition: 'width 0.3s ease-out, background 0.5s ease'
-                }}></div>
-              </div>
-
-              {/* Warning (only show when near limit) */}
-              {showTimeWarning.value && (
-                <div style={{
-                  padding: '1rem',
-                  background: '#FEE2E2',
-                  border: '2px solid #DC2626',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  color: '#991B1B',
-                  textAlign: 'center'
-                }}>
-                  Don't leave while recording
-                </div>
-              )}
-
-              {/* Real-time Audio Visualizer */}
-              <AudioVisualizer analyser={analyserRef.current} />
-            </div>
-          )}
+                Ten-minute limit. We warn you with 30 seconds left and keep
+                everything inside your browser.
+              </p>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Text Input Mode */}
       {mode.value === 'text' && (
-        <div class="space-y-4">
+        <div class="softstack-panel-body">
+          <div class="softstack-info-note">Paste transcript</div>
           <textarea
             class="w-full resize-none focus:outline-none"
             rows={8}
             style={{
-              padding: '16px',
+              padding: '18px',
               fontSize: '15px',
               lineHeight: '1.5',
-              border: '1px solid rgba(0, 0, 0, 0.1)',
-              borderRadius: '10px',
+              border: '2px solid var(--softstack-ink)',
+              borderRadius: '14px',
               background: 'rgba(0, 0, 0, 0.02)',
               color: '#2C2C2C',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              boxShadow: 'inset 0 4px 0 rgba(0, 0, 0, 0.05)'
             }}
             placeholder="Paste your conversation here..."
             value={textInput.value}
@@ -439,109 +383,96 @@ export default function UploadIsland() {
               }
             }}
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.2)';
+              e.currentTarget.style.borderColor = 'var(--color-accent)';
               e.currentTarget.style.background = 'white';
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.borderColor = 'var(--softstack-ink)';
               e.currentTarget.style.background = 'rgba(0, 0, 0, 0.02)';
             }}
           />
           <button
             onClick={handleTextSubmit}
             disabled={isProcessing.value || !textInput.value.trim()}
-            style={{
-              width: '100%',
-              padding: '18px 32px',
-              fontSize: '17px',
-              fontWeight: '700',
-              border: '2px solid rgba(0, 0, 0, 0.2)',
-              borderRadius: '10px',
-              background: '#1A1A1A',
-              color: 'white',
-              cursor: isProcessing.value || !textInput.value.trim() ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              opacity: isProcessing.value || !textInput.value.trim() ? 0.5 : 1,
-              boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.1)',
-              letterSpacing: '-0.01em'
-            }}
-            onMouseEnter={(e) => {
-              if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translate(-2px, -2px)';
-                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.15), 0 0 0 2px var(--color-accent)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translate(0, 0)';
-              e.currentTarget.style.boxShadow = '4px 4px 0 0 rgba(0, 0, 0, 0.1)';
-            }}
-            onMouseDown={(e) => {
-              if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translate(1px, 1px)';
-                e.currentTarget.style.boxShadow = '2px 2px 0 0 rgba(0, 0, 0, 0.12)';
-              }
-            }}
-            onMouseUp={(e) => {
-              if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translate(-2px, -2px)';
-                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.15), 0 0 0 2px var(--color-accent)';
-              }
-            }}
+            class="softstack-slab-button is-accent"
+            style={{ opacity: isProcessing.value || !textInput.value.trim() ? 0.5 : 1 }}
           >
-            {isProcessing.value ? 'Processing...' : 'Analyze Text'}
+            {isProcessing.value ? 'Processing...' : 'Paste'}
           </button>
         </div>
       )}
 
-      {/* Audio Upload Mode */}
       {mode.value === 'audio' && (
-        <div class="space-y-4">
-          <label
+        <div class="softstack-panel-body">
+          <div class="softstack-info-note">Upload audio</div>
+          <input
+            type="file"
+            accept="audio/*"
+            ref={fileInputRef}
+            onChange={handleAudioUpload}
+            disabled={isProcessing.value}
+            style={{ display: 'none' }}
+          />
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => !isProcessing.value && fileInputRef.current?.click()}
+            onKeyDown={(e) => {
+              if ((e.key === 'Enter' || e.key === ' ') && !isProcessing.value) {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
             style={{
-              display: 'block',
               padding: '3rem 2rem',
               textAlign: 'center',
-              border: '2px dashed rgba(0, 0, 0, 0.15)',
-              borderRadius: '10px',
-              background: 'rgba(0, 0, 0, 0.02)',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              border: '3px dashed var(--softstack-ink)',
+              borderRadius: '14px',
+              background: 'rgba(0, 0, 0, 0.03)',
+              cursor: isProcessing.value ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.4)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.3)';
-              e.currentTarget.style.background = 'white';
+              if (!isProcessing.value) {
+                e.currentTarget.style.borderColor = 'var(--color-accent)';
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.85)';
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
-              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.02)';
+              e.currentTarget.style.borderColor = 'var(--softstack-ink)';
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.03)';
             }}
           >
-            <input
-              type="file"
-              accept="audio/*"
-              onChange={handleAudioUpload}
-              disabled={isProcessing.value}
-              style={{ display: 'none' }}
-            />
             <div style={{
-              fontSize: '16px',
-              fontWeight: '600',
+              fontSize: '1rem',
+              fontWeight: '700',
               color: '#2C2C2C',
-              marginBottom: '0.5rem'
+              marginBottom: '0.5rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em'
             }}>
               Drop audio file here
             </div>
             <div style={{
-              fontSize: '14px',
+              fontSize: '0.9rem',
               color: '#666'
             }}>
-              or click to browse
+              We accept anything your browser can decode.
             </div>
-          </label>
+          </div>
+          <button
+            type="button"
+            class="softstack-slab-button"
+            disabled={isProcessing.value}
+            style={{ opacity: isProcessing.value ? 0.5 : 1 }}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {isProcessing.value ? 'Processing...' : 'Upload'}
+          </button>
         </div>
       )}
 
-      {/* Loading Modal */}
       {isProcessing.value && <LoadingModal />}
     </div>
   );
