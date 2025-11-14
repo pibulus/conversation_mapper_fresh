@@ -71,38 +71,43 @@ export default function ConversationList() {
   const activeId = useComputed(() => conversationData.value?.conversation.id);
 
   return (
-    <div class="flex flex-col h-full glass" style={{
-      borderRight: `var(--border-width) solid var(--color-border)`
+    <div class="flex flex-col h-full" style={{
+      background: 'rgba(255, 255, 255, 0.5)',
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
+      borderRight: '1px solid rgba(0, 0, 0, 0.06)'
     }}>
       {/* Header */}
       <div style={{
-        background: 'var(--color-accent)',
-        padding: 'var(--card-padding)',
-        borderBottom: `var(--border-width) solid var(--color-border)`
+        padding: '20px',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.06)'
       }}>
         <h2 style={{
-          fontSize: 'var(--heading-size)',
-          fontWeight: 'var(--heading-weight)',
-          color: 'white'
-        }}>📚 Conversations</h2>
+          fontSize: '16px',
+          fontWeight: '600',
+          color: '#111'
+        }}>Conversations</h2>
       </div>
 
       {/* New Conversation Button */}
       <div class="p-3" style={{
-        borderBottom: `2px solid var(--color-border)`
+        borderBottom: '1px solid rgba(0, 0, 0, 0.06)'
       }}>
         <button
           onClick={handleNew}
-          class="w-full font-bold py-2 px-4 rounded-lg"
+          class="w-full py-2 px-4 rounded-lg"
           style={{
-            background: 'var(--color-accent)',
+            background: '#111',
             color: 'white',
-            border: `2px solid var(--color-border)`,
-            fontSize: 'var(--text-size)',
-            transition: 'var(--transition-fast)'
+            border: 'none',
+            fontSize: '14px',
+            fontWeight: '500',
+            transition: 'all 0.15s ease'
           }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#333'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#111'}
         >
-          ➕ New Conversation
+          New Conversation
         </button>
       </div>
 
@@ -110,11 +115,12 @@ export default function ConversationList() {
       <div class="flex-1 overflow-y-auto p-3 space-y-2">
         {conversations.value.length === 0 ? (
           <p class="text-center py-8" style={{
-            fontSize: 'var(--small-size)',
-            color: 'var(--color-text-secondary)'
+            fontSize: '14px',
+            color: '#666',
+            lineHeight: '1.5'
           }}>
             No saved conversations yet.<br/>
-            Upload audio or text to begin!
+            Upload audio or text to begin.
           </p>
         ) : (
           conversations.value.map((conv) => {
@@ -126,11 +132,22 @@ export default function ConversationList() {
                 key={conv.id}
                 class="p-3 rounded-lg"
                 style={{
-                  border: `2px solid ${isActive ? 'var(--color-accent)' : 'var(--color-border)'}`,
-                  background: isActive ? 'var(--color-base-solid)' : 'transparent',
-                  boxShadow: isActive ? 'var(--shadow-soft)' : 'none',
-                  transition: 'var(--transition-medium)',
-                  opacity: isActive ? 1 : 0.7
+                  border: `1px solid ${isActive ? '#111' : 'rgba(0, 0, 0, 0.08)'}`,
+                  background: isActive ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.6)',
+                  transition: 'all 0.15s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                    e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)';
+                    e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+                  }
                 }}
               >
                 <div class="flex items-start justify-between gap-2">
@@ -138,23 +155,26 @@ export default function ConversationList() {
                     onClick={() => handleLoad(conv.id)}
                     class="flex-1 text-left"
                   >
-                    <h3 class="font-semibold truncate" style={{
-                      fontSize: 'var(--text-size)',
-                      color: 'var(--color-text)'
+                    <h3 class="truncate" style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#111',
+                      marginBottom: '4px'
                     }}>
                       {truncatedTitle}
                     </h3>
-                    <div class="flex items-center gap-2 mt-1" style={{
-                      fontSize: 'var(--tiny-size)',
-                      color: 'var(--color-text-secondary)'
+                    <div class="flex items-center gap-2" style={{
+                      fontSize: '12px',
+                      color: '#666'
                     }}>
-                      <span>📊 {conv.nodes.length} topics</span>
+                      <span>{conv.nodes.length} topics</span>
                       <span>•</span>
-                      <span>✅ {conv.actionItems.length} items</span>
+                      <span>{conv.actionItems.length} items</span>
                     </div>
-                    <p class="mt-1" style={{
-                      fontSize: 'var(--tiny-size)',
-                      color: 'var(--color-text-secondary)'
+                    <p style={{
+                      fontSize: '11px',
+                      color: '#999',
+                      marginTop: '4px'
                     }}>
                       {new Date(conv.updatedAt).toLocaleDateString()}
                     </p>
@@ -162,14 +182,18 @@ export default function ConversationList() {
 
                   <button
                     onClick={() => handleDelete(conv.id)}
-                    class="p-1 hover:opacity-70"
+                    class="p-1"
                     style={{
                       color: '#EF4444',
-                      transition: 'var(--transition-fast)'
+                      fontSize: '14px',
+                      transition: 'opacity 0.15s ease',
+                      opacity: 0.5
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
                     title="Delete conversation"
                   >
-                    🗑️
+                    <i class="fa fa-trash"></i>
                   </button>
                 </div>
               </div>
@@ -180,19 +204,25 @@ export default function ConversationList() {
 
       {/* Delete Confirmation Modal */}
       {showConfirmDelete.value && (
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="glass-strong rounded-lg p-6 max-w-sm mx-4" style={{
-            border: `2px solid #EF4444`,
-            boxShadow: 'var(--shadow-xl)'
-          }}>
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={cancelDelete}>
+          <div
+            class="rounded-lg p-6 max-w-sm mx-4"
+            style={{
+              background: 'white',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 class="mb-3" style={{
-              fontSize: 'calc(var(--heading-size) * 1.4)',
-              fontWeight: 'var(--heading-weight)',
-              color: 'var(--color-text)'
-            }}>🗑️ Delete Conversation?</h3>
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#111'
+            }}>Delete Conversation?</h3>
             <p class="mb-6" style={{
-              fontSize: 'var(--text-size)',
-              color: 'var(--color-text-secondary)'
+              fontSize: '14px',
+              color: '#666',
+              lineHeight: '1.5'
             }}>
               This will permanently delete this conversation and all its data.
               This action cannot be undone.
@@ -200,27 +230,33 @@ export default function ConversationList() {
             <div class="flex gap-2">
               <button
                 onClick={confirmDelete}
-                class="flex-1 font-bold py-2 px-4 rounded"
+                class="flex-1 py-2 px-4 rounded-lg"
                 style={{
                   background: '#EF4444',
                   color: 'white',
-                  border: `2px solid #B91C1C`,
-                  fontSize: 'var(--text-size)',
-                  transition: 'var(--transition-fast)'
+                  border: 'none',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'all 0.15s ease'
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#DC2626'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#EF4444'}
               >
                 Delete
               </button>
               <button
                 onClick={cancelDelete}
-                class="flex-1 font-bold py-2 px-4 rounded"
+                class="flex-1 py-2 px-4 rounded-lg"
                 style={{
-                  background: 'var(--color-secondary)',
-                  color: 'var(--color-text)',
-                  border: `2px solid var(--color-border)`,
-                  fontSize: 'var(--text-size)',
-                  transition: 'var(--transition-fast)'
+                  background: 'rgba(0, 0, 0, 0.05)',
+                  color: '#111',
+                  border: '1px solid rgba(0, 0, 0, 0.1)',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'all 0.15s ease'
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 0, 0, 0.08)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 0, 0, 0.05)'}
               >
                 Cancel
               </button>

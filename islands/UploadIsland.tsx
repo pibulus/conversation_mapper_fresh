@@ -259,38 +259,39 @@ export default function UploadIsland() {
 
   return (
     <div>
-      {/* Mode Selector - Neo-brutalist tabs */}
-      <div class="flex gap-2 mb-6">
+      {/* Mode Selector - Clean pills */}
+      <div class="flex gap-2 mb-6" style={{
+        background: 'rgba(0, 0, 0, 0.03)',
+        padding: '4px',
+        borderRadius: '10px',
+        border: '1px solid rgba(0, 0, 0, 0.06)'
+      }}>
         {(['record', 'text', 'audio'] as const).map((tabMode) => (
           <button
             key={tabMode}
             onClick={() => mode.value = tabMode}
             style={{
               flex: 1,
-              padding: 'clamp(0.625rem, 2vw, 0.875rem) clamp(0.75rem, 2.5vw, 1rem)',
-              fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-              fontWeight: '700',
-              textTransform: 'uppercase',
-              letterSpacing: '0.02em',
-              border: 'clamp(2px, 0.5vw, 3px) solid var(--color-text)',
+              padding: '10px 16px',
+              fontSize: '14px',
+              fontWeight: '500',
+              border: 'none',
               borderRadius: '8px',
-              background: mode.value === tabMode ? 'var(--color-accent)' : 'white',
-              color: mode.value === tabMode ? 'white' : 'var(--color-text)',
+              background: mode.value === tabMode ? '#111' : 'transparent',
+              color: mode.value === tabMode ? 'white' : '#666',
               cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              boxShadow: mode.value === tabMode ? 'clamp(2px, 0.75vw, 3px) clamp(2px, 0.75vw, 3px) 0 var(--color-text)' : 'none',
-              transform: mode.value === tabMode ? 'translateY(-2px)' : 'none'
+              transition: 'all 0.15s ease'
             }}
             onMouseEnter={(e) => {
               if (mode.value !== tabMode) {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = 'clamp(1.5px, 0.5vw, 2px) clamp(1.5px, 0.5vw, 2px) 0 var(--color-text)';
+                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.05)';
+                e.currentTarget.style.color = '#111';
               }
             }}
             onMouseLeave={(e) => {
               if (mode.value !== tabMode) {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#666';
               }
             }}
           >
@@ -307,41 +308,26 @@ export default function UploadIsland() {
             disabled={isProcessing.value && !isRecording.value}
             style={{
               width: '100%',
-              padding: 'clamp(1rem, 3vw, 1.5rem) clamp(1.5rem, 4vw, 2rem)',
-              fontSize: 'clamp(1rem, 3vw, 1.25rem)',
-              fontWeight: '800',
-              textTransform: 'uppercase',
-              letterSpacing: '0.03em',
-              border: 'clamp(3px, 0.75vw, 4px) solid var(--color-text)',
-              borderRadius: '12px',
-              background: isRecording.value ? '#EF4444' : 'var(--color-accent)',
+              padding: '16px 24px',
+              fontSize: '16px',
+              fontWeight: '600',
+              border: 'none',
+              borderRadius: '10px',
+              background: isRecording.value ? '#EF4444' : '#111',
               color: 'white',
               cursor: isProcessing.value && !isRecording.value ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
-              boxShadow: 'clamp(4px, 1.25vw, 6px) clamp(4px, 1.25vw, 6px) 0 var(--color-text)',
               opacity: isProcessing.value && !isRecording.value ? 0.5 : 1
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = 'clamp(6px, 1.75vw, 8px) clamp(6px, 1.75vw, 8px) 0 var(--color-text)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'clamp(4px, 1.25vw, 6px) clamp(4px, 1.25vw, 6px) 0 var(--color-text)';
-            }}
-            onMouseDown={(e) => {
-              if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translateY(2px)';
-                e.currentTarget.style.boxShadow = 'clamp(2px, 0.75vw, 3px) clamp(2px, 0.75vw, 3px) 0 var(--color-text)';
-              }
-            }}
-            onMouseUp={(e) => {
-              if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = 'clamp(6px, 1.75vw, 8px) clamp(6px, 1.75vw, 8px) 0 var(--color-text)';
-              }
+              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             {isRecording.value ? 'Stop Recording' : 'Start Recording'}
@@ -416,13 +402,13 @@ export default function UploadIsland() {
             class="w-full resize-none focus:outline-none"
             rows={8}
             style={{
-              padding: '1.25rem',
-              fontSize: '1rem',
-              lineHeight: '1.6',
-              border: '3px solid var(--color-text)',
-              borderRadius: '12px',
-              background: '#F9FAFB',
-              color: 'var(--color-text)',
+              padding: '16px',
+              fontSize: '15px',
+              lineHeight: '1.5',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              borderRadius: '10px',
+              background: 'rgba(0, 0, 0, 0.02)',
+              color: '#111',
               transition: 'all 0.2s ease'
             }}
             placeholder="Paste your conversation here..."
@@ -435,12 +421,12 @@ export default function UploadIsland() {
               }
             }}
             onFocus={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-accent)';
+              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.2)';
               e.currentTarget.style.background = 'white';
             }}
             onBlur={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-text)';
-              e.currentTarget.style.background = '#F9FAFB';
+              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.02)';
             }}
           />
           <button
@@ -448,41 +434,26 @@ export default function UploadIsland() {
             disabled={isProcessing.value || !textInput.value.trim()}
             style={{
               width: '100%',
-              padding: 'clamp(1rem, 3vw, 1.25rem) clamp(1.5rem, 4vw, 2rem)',
-              fontSize: 'clamp(1rem, 3vw, 1.125rem)',
-              fontWeight: '800',
-              textTransform: 'uppercase',
-              letterSpacing: '0.03em',
-              border: 'clamp(3px, 0.75vw, 4px) solid var(--color-text)',
-              borderRadius: '12px',
-              background: 'var(--color-accent)',
+              padding: '16px 24px',
+              fontSize: '16px',
+              fontWeight: '600',
+              border: 'none',
+              borderRadius: '10px',
+              background: '#111',
               color: 'white',
               cursor: isProcessing.value || !textInput.value.trim() ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
-              boxShadow: 'clamp(4px, 1.25vw, 6px) clamp(4px, 1.25vw, 6px) 0 var(--color-text)',
               opacity: isProcessing.value || !textInput.value.trim() ? 0.5 : 1
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = 'clamp(6px, 1.75vw, 8px) clamp(6px, 1.75vw, 8px) 0 var(--color-text)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'clamp(4px, 1.25vw, 6px) clamp(4px, 1.25vw, 6px) 0 var(--color-text)';
-            }}
-            onMouseDown={(e) => {
-              if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translateY(2px)';
-                e.currentTarget.style.boxShadow = 'clamp(2px, 0.75vw, 3px) clamp(2px, 0.75vw, 3px) 0 var(--color-text)';
-              }
-            }}
-            onMouseUp={(e) => {
-              if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = 'clamp(6px, 1.75vw, 8px) clamp(6px, 1.75vw, 8px) 0 var(--color-text)';
-              }
+              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             {isProcessing.value ? 'Processing...' : 'Analyze Text'}
@@ -498,21 +469,19 @@ export default function UploadIsland() {
               display: 'block',
               padding: '3rem 2rem',
               textAlign: 'center',
-              border: '3px dashed var(--color-text)',
-              borderRadius: '12px',
-              background: '#F9FAFB',
+              border: '2px dashed rgba(0, 0, 0, 0.15)',
+              borderRadius: '10px',
+              background: 'rgba(0, 0, 0, 0.02)',
               cursor: 'pointer',
               transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-accent)';
+              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.3)';
               e.currentTarget.style.background = 'white';
-              e.currentTarget.style.transform = 'translateY(-2px)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-text)';
-              e.currentTarget.style.background = '#F9FAFB';
-              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.02)';
             }}
           >
             <input
@@ -523,17 +492,16 @@ export default function UploadIsland() {
               style={{ display: 'none' }}
             />
             <div style={{
-              fontSize: '1.125rem',
-              fontWeight: '700',
-              color: 'var(--color-text)',
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#111',
               marginBottom: '0.5rem'
             }}>
               Drop audio file here
             </div>
             <div style={{
-              fontSize: '0.875rem',
-              color: 'var(--color-text-secondary)',
-              fontWeight: '500'
+              fontSize: '14px',
+              color: '#666'
             }}>
               or click to browse
             </div>

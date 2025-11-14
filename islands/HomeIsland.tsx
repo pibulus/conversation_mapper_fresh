@@ -42,97 +42,76 @@ export default function HomeIsland() {
 
   return (
     <div class="min-h-screen" style={{ background: 'var(--gradient-bg)' }}>
-      {/* Header - Dynamic based on conversation state */}
-      <header class="glass" style={{
-        borderBottom: `var(--border-width) solid var(--color-border)`,
-        boxShadow: 'var(--shadow-lifted)'
+      {/* Top Bar - Slim, solid, clean */}
+      <header style={{
+        background: 'rgba(255, 255, 255, 0.92)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
+        height: '64px',
+        display: 'flex',
+        alignItems: 'center',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50
       }}>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 w-full" style={{
+          display: 'flex',
+          alignItems: 'center',
+          height: '100%'
+        }}>
           {conversationData.value ? (
-            // Conversation-specific header with title + utilities
-            <div class="flex items-center justify-between gap-3 sm:gap-4">
-              <div class="flex-1 min-w-0">
-                {/* Title with back button */}
-                <div class="flex items-center gap-2 sm:gap-3 mb-1">
-                  <button
-                    onClick={() => {
-                      conversationData.value = null;
-                      window.history.pushState({}, '', '/');
-                    }}
-                    class="flex-shrink-0 flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-lg hover:bg-white/10 transition-all"
-                    style={{
-                      border: `2px solid var(--color-border)`,
-                      color: 'var(--color-accent)'
-                    }}
-                    title="Back to home"
-                  >
-                    <i class="fa fa-arrow-left text-xs sm:text-sm"></i>
-                  </button>
-                  <h1
-                    class="truncate"
-                    style={{
-                      fontSize: 'clamp(1.25rem, 4vw, calc(var(--heading-size) * 1.8))',
-                      fontWeight: '700',
-                      color: 'var(--color-text)',
-                      lineHeight: '1.2',
-                      letterSpacing: '-0.02em'
-                    }}
-                  >
-                    {conversationData.value.conversation.title}
-                  </h1>
-                </div>
-                {/* Metadata row */}
-                <div class="flex flex-wrap items-center gap-2 sm:gap-3 pl-10 sm:pl-12" style={{
-                  fontSize: 'clamp(0.6875rem, 2vw, var(--tiny-size))',
-                  color: 'var(--color-text-secondary)'
-                }}>
-                  <span class="flex items-center gap-1.5 whitespace-nowrap">
-                    <i class={conversationData.value.conversation.source === 'audio' ? 'fa fa-microphone' : 'fa fa-file-text-o'}></i>
-                    <span class="hidden xs:inline">{conversationData.value.conversation.source === 'audio' ? 'Audio' : 'Text'}</span>
-                  </span>
-                  <span class="hidden xs:inline">•</span>
-                  <span class="flex items-center gap-1.5 whitespace-nowrap">
-                    <i class="fa fa-calendar-o"></i>
-                    <span class="hidden sm:inline">
-                      {conversationData.value.conversation.created_at
-                        ? new Date(conversationData.value.conversation.created_at).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })
-                        : 'Unknown date'
-                      }
-                    </span>
-                  </span>
-                  <span class="hidden sm:inline">•</span>
-                  <span class="flex items-center gap-1.5 whitespace-nowrap">
-                    <i class="fa fa-hashtag"></i>
-                    {conversationData.value.nodes.length}
-                  </span>
-                </div>
+            // Conversation header - clean and slim
+            <>
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <button
+                  onClick={() => {
+                    conversationData.value = null;
+                    window.history.pushState({}, '', '/');
+                  }}
+                  class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg hover:bg-black/5 transition-all"
+                  style={{
+                    border: '1px solid rgba(0, 0, 0, 0.1)'
+                  }}
+                  title="Back to home"
+                >
+                  <i class="fa fa-arrow-left" style={{ fontSize: '14px', color: '#111' }}></i>
+                </button>
+                <h1
+                  class="truncate"
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#111',
+                    letterSpacing: '-0.01em'
+                  }}
+                >
+                  {conversationData.value.conversation.title}
+                </h1>
               </div>
-              <div class="flex items-center gap-1.5 sm:gap-2">
+              <div class="flex items-center gap-2">
                 {/* Audio Recorder - NEW! */}
                 <AudioRecorder
                   conversationId={conversationData.value.conversation.id || ''}
                 />
 
-                {/* Markdown Maker Drawer Toggle */}
+                {/* Export button */}
                 <button
                   onClick={() => drawerOpen.value = !drawerOpen.value}
-                  class="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 rounded-lg hover:brightness-110 transition-all"
+                  class="px-3 py-1.5 rounded-lg transition-all hidden sm:block"
                   style={{
-                    background: 'var(--color-accent)',
-                    border: `2px solid var(--color-border)`,
+                    background: '#111',
                     color: 'white',
-                    fontWeight: '600',
-                    fontSize: 'clamp(0.875rem, 2vw, var(--text-size))',
-                    boxShadow: 'var(--shadow-soft)'
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    border: 'none'
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#333'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#111'}
                   title="Export"
                 >
-                  <i class={drawerOpen.value ? "fa fa-times" : "fa fa-bars"}></i>
-                  <span class="hidden sm:inline">Export</span>
+                  Export
                 </button>
 
                 {/* Share button */}
@@ -141,21 +120,21 @@ export default function HomeIsland() {
                 {/* Theme shuffler */}
                 <ThemeShuffler />
               </div>
-            </div>
+            </>
           ) : (
-            // Default header with app title
-            <div class="flex items-center justify-between gap-4">
+            // Default header - app name and theme shuffler
+            <>
               <h1 style={{
-                fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
-                fontWeight: '900',
-                color: 'var(--color-text)',
-                letterSpacing: '-0.03em',
-                lineHeight: '1'
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#111',
+                letterSpacing: '-0.01em',
+                flex: 1
               }}>
                 Conversation Mapper
               </h1>
               <ThemeShuffler />
-            </div>
+            </>
           )}
         </div>
       </header>
@@ -171,7 +150,7 @@ export default function HomeIsland() {
       )}
 
       {/* Main Layout with Conditional Sidebar */}
-      <div class="flex h-[calc(100vh-88px)]">
+      <div class="flex" style={{ minHeight: 'calc(100vh - 64px)' }}>
         {/* Left Sidebar - Only show when NO data (hidden on mobile) */}
         {!conversationData.value && (
           <aside class="hidden md:block w-80 flex-shrink-0 overflow-hidden">
@@ -185,36 +164,47 @@ export default function HomeIsland() {
         {/* Right Content Area */}
         <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8">
           <div class="max-w-7xl mx-auto grid gap-4 sm:gap-6">
-            {/* Upload Section - Only show when NO data */}
+            {/* Hero Section - Only show when NO data */}
             {!conversationData.value && (
               <div class="flex flex-col items-center justify-center" style={{
                 minHeight: 'max(500px, 60vh)',
-                paddingTop: 'clamp(2rem, 6vh, 4rem)',
-                paddingBottom: 'clamp(3rem, 10vh, 6rem)'
+                paddingTop: 'clamp(3rem, 8vh, 5rem)',
+                paddingBottom: 'clamp(4rem, 12vh, 8rem)'
               }}>
-                {/* Subtitle - clear and simple */}
-                <p style={{
-                  fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
-                  fontWeight: '500',
-                  color: 'var(--color-text-secondary)',
-                  lineHeight: '1.4',
-                  marginBottom: '2.5rem',
-                  textAlign: 'center',
-                  maxWidth: '32ch'
-                }}>
-                  Turn conversations into clarity
-                </p>
-
-                {/* Neo-brutalist Upload Card */}
+                {/* Hero Card */}
                 <div style={{
                   width: '100%',
-                  maxWidth: '580px',
-                  background: 'white',
-                  border: 'clamp(2px, 0.5vw, 3px) solid var(--color-text)',
+                  maxWidth: '640px',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  border: '2px solid rgba(0, 0, 0, 0.08)',
                   borderRadius: '16px',
-                  boxShadow: 'clamp(4px, 1.5vw, 6px) clamp(4px, 1.5vw, 6px) 0 var(--color-text)',
-                  padding: 'clamp(1.75rem, 4vw, 2.5rem)'
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
+                  padding: 'clamp(2rem, 5vw, 3rem)'
                 }}>
+                  {/* Card Header */}
+                  <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                    <h2 style={{
+                      fontSize: 'clamp(1.75rem, 4vw, 2.25rem)',
+                      fontWeight: '700',
+                      color: '#111',
+                      letterSpacing: '-0.02em',
+                      marginBottom: '0.5rem'
+                    }}>
+                      Start a new conversation
+                    </h2>
+                    <p style={{
+                      fontSize: '15px',
+                      color: '#666',
+                      fontWeight: '400',
+                      lineHeight: '1.4'
+                    }}>
+                      Record, paste, or upload your conversation
+                    </p>
+                  </div>
+
+                  {/* Upload Controls */}
                   <UploadIsland />
                 </div>
               </div>
