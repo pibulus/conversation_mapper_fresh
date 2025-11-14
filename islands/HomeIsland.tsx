@@ -182,103 +182,102 @@ export default function HomeIsland() {
           <div class="max-w-7xl mx-auto grid gap-4 sm:gap-6">
             {/* Hero Section - Only show when NO data */}
             {!conversationData.value && (
-              <div class="flex flex-col items-center justify-center" style={{
+              <div style={{
                 minHeight: 'max(650px, 75vh)',
-                paddingTop: 'clamp(5rem, 12vh, 8rem)',
-                paddingBottom: 'clamp(2rem, 6vh, 4rem)'
+                paddingTop: 'clamp(3rem, 8vh, 5rem)',
+                paddingBottom: 'clamp(2rem, 6vh, 4rem)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
-                {/* Hero Card - SoftStack billboard with SOUL */}
+                {/* Split Hero - Left message / Right action */}
                 <div style={{
                   width: '100%',
-                  maxWidth: '820px',
-                  background: 'rgba(255, 250, 245, 0.88)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  border: '2px solid rgba(255, 200, 170, 0.3)',
-                  borderRadius: '20px',
-                  boxShadow: '0 24px 80px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.5) inset',
-                  padding: 'clamp(3.5rem, 8vw, 5rem) clamp(2.5rem, 6vw, 4.5rem)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  transition: 'all 0.4s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 32px 100px rgba(0, 0, 0, 0.08), 0 0 0 2px rgba(var(--color-accent), 0.2) inset, 0 0 40px rgba(var(--color-accent), 0.15)';
-                  e.currentTarget.style.transform = 'translateY(-4px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 24px 80px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.5) inset';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-                >
-                  {/* Warm gradient wash - more personality */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '-15%',
-                    left: '-8%',
-                    right: '-8%',
-                    height: '60%',
-                    background: 'radial-gradient(ellipse 120% 80% at 45% 0%, rgba(255, 210, 180, 0.35) 0%, rgba(255, 230, 200, 0.18) 40%, transparent 70%)',
-                    pointerEvents: 'none',
-                    zIndex: 0
-                  }}></div>
+                  maxWidth: '1100px',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                  gap: 'clamp(2rem, 5vw, 4rem)',
+                  alignItems: 'center'
+                }}>
+                  {/* LEFT: Billboard Message */}
+                  <div style={{ padding: '0 1rem' }}>
+                    {/* Big Bold Headline */}
+                    <h1 style={{
+                      fontSize: 'clamp(2.75rem, 6.5vw, 4.5rem)',
+                      fontWeight: '900',
+                      color: '#0A0A0A',
+                      letterSpacing: '-0.05em',
+                      lineHeight: '0.95',
+                      marginBottom: '1.5rem',
+                      maxWidth: '520px'
+                    }}>
+                      See what you're really saying
+                    </h1>
 
-                  {/* Content wrapper */}
-                  <div style={{ position: 'relative', zIndex: 1 }}>
-                    {/* Card Header - LEFT ALIGNED, proper hierarchy */}
-                    <div style={{ marginBottom: '3rem' }}>
-                      {/* Eyebrow - what this is */}
+                    {/* Value Prop */}
+                    <p style={{
+                      fontSize: 'clamp(18px, 2.2vw, 22px)',
+                      color: '#3A3A3A',
+                      fontWeight: '500',
+                      lineHeight: '1.5',
+                      marginBottom: '1.25rem',
+                      maxWidth: '480px',
+                      letterSpacing: '-0.01em'
+                    }}>
+                      Turn messy conversations into clear maps.
+                    </p>
+
+                    {/* Supporting Details */}
+                    <p style={{
+                      fontSize: '16px',
+                      color: '#666',
+                      fontWeight: '400',
+                      lineHeight: '1.65',
+                      maxWidth: '440px'
+                    }}>
+                      Record, paste, or upload any conversation. Get instant summaries, action items, and visual topic maps. No signup. Everything stays private in your browser.
+                    </p>
+                  </div>
+
+                  {/* RIGHT: Action Card */}
+                  <div>
+                    <div style={{
+                      background: 'rgba(255, 250, 245, 0.75)',
+                      backdropFilter: 'blur(20px)',
+                      WebkitBackdropFilter: 'blur(20px)',
+                      border: '2px solid rgba(255, 200, 170, 0.35)',
+                      borderRadius: '24px',
+                      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.6) inset',
+                      padding: 'clamp(2rem, 4vw, 3rem)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      transition: 'all 0.4s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow = '0 28px 80px rgba(0, 0, 0, 0.1), 0 0 0 2px rgba(var(--color-accent), 0.25) inset, 0 0 32px rgba(var(--color-accent), 0.12)';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.6) inset';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
+                    >
+                      {/* Warm cream glow */}
                       <div style={{
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        color: 'var(--color-accent)',
-                        letterSpacing: '0.08em',
-                        textTransform: 'uppercase',
-                        marginBottom: '1rem'
-                      }}>
-                        AI-Powered Analysis
+                        position: 'absolute',
+                        top: '-20%',
+                        left: '-10%',
+                        right: '-10%',
+                        height: '70%',
+                        background: 'radial-gradient(ellipse 110% 70% at 50% 0%, rgba(255, 235, 215, 0.4) 0%, rgba(255, 245, 230, 0.2) 50%, transparent 75%)',
+                        pointerEvents: 'none',
+                        zIndex: 0
+                      }}></div>
+
+                      <div style={{ position: 'relative', zIndex: 1 }}>
+                        <UploadIsland />
                       </div>
-
-                      {/* Main Headline - BIG and left-aligned */}
-                      <h1 style={{
-                        fontSize: 'clamp(2.75rem, 7vw, 4rem)',
-                        fontWeight: '900',
-                        color: '#0A0A0A',
-                        letterSpacing: '-0.045em',
-                        marginBottom: '1.25rem',
-                        lineHeight: '1',
-                        maxWidth: '600px'
-                      }}>
-                        Turn conversations into insights
-                      </h1>
-
-                      {/* Subheading - clear value prop */}
-                      <p style={{
-                        fontSize: 'clamp(18px, 2.2vw, 21px)',
-                        color: '#3A3A3A',
-                        fontWeight: '500',
-                        lineHeight: '1.5',
-                        maxWidth: '520px',
-                        marginBottom: '0.75rem',
-                        letterSpacing: '-0.01em'
-                      }}>
-                        Record, paste, or upload any conversation. Get instant summaries, action items, and topic maps.
-                      </p>
-
-                      {/* Supporting copy */}
-                      <p style={{
-                        fontSize: '15px',
-                        color: '#666',
-                        fontWeight: '400',
-                        lineHeight: '1.6',
-                        maxWidth: '480px'
-                      }}>
-                        No signup required. Everything stays private in your browser.
-                      </p>
                     </div>
-
-                    {/* Upload Controls */}
-                    <UploadIsland />
                   </div>
                 </div>
               </div>
