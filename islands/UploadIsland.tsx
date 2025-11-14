@@ -315,23 +315,23 @@ export default function UploadIsland() {
               fontWeight: '700',
               border: '2px solid rgba(0, 0, 0, 0.12)',
               borderRadius: '14px',
-              background: isRecording.value ? '#EF4444' : '#181818',
+              background: isRecording.value ? '#EF4444' : '#2A2A2A',
               color: 'white',
               cursor: isProcessing.value && !isRecording.value ? 'not-allowed' : 'pointer',
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
               opacity: isProcessing.value && !isRecording.value ? 0.5 : 1,
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
               position: 'relative'
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--color-accent)';
+                e.currentTarget.style.boxShadow = '0 8px 28px rgba(0, 0, 0, 0.14), 0 0 0 2px var(--color-accent)';
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)';
             }}
             onMouseDown={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
@@ -455,22 +455,22 @@ export default function UploadIsland() {
               fontWeight: '700',
               border: '2px solid rgba(0, 0, 0, 0.12)',
               borderRadius: '14px',
-              background: '#181818',
+              background: '#2A2A2A',
               color: 'white',
               cursor: isProcessing.value || !textInput.value.trim() ? 'not-allowed' : 'pointer',
               transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
               opacity: isProcessing.value || !textInput.value.trim() ? 0.5 : 1,
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)'
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--color-accent)';
+                e.currentTarget.style.boxShadow = '0 8px 28px rgba(0, 0, 0, 0.14), 0 0 0 2px var(--color-accent)';
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.12)';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)';
             }}
             onMouseDown={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {

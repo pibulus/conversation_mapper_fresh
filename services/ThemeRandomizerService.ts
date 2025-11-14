@@ -369,43 +369,40 @@ export class ThemeRandomizerService {
 
   /**
    * Generates flavorful but CONSTRAINED gradients
-   * Warm triads only - pink/peach/mint, no mud
-   * All same luminosity to prevent accidental browns
+   * Warm triads with MORE personality - still no mud
    */
   static generateSimpleGradient(baseHue: number, secondaryHue: number): string {
-    // Constrain to warm spectrum: 330-60 (pink through peach to warm yellow)
-    // OR cool mint: 150-180
-    // This prevents muddy intermediates
+    // Warm spectrum: 320-50 (wider range for more variety)
+    // Cool spectrum: 140-200 (mint through cyan)
 
-    const isWarm = Math.random() > 0.3; // Prefer warm 70% of time
+    const isWarm = Math.random() > 0.25; // 75% warm
 
     let hue1, hue2, hue3;
 
     if (isWarm) {
-      // WARM TRIAD: Pink → Peach → Melon
-      // All in 330-40 range (wrapping around 0)
-      const warmBase = 350 + (Math.random() * 30); // 350-380 (wraps to 350-20)
+      // WARM PALETTE: Peach → Coral → Melon → Gold
+      // Range: 320-50 (wrapping)
+      const warmBase = 340 + (Math.random() * 50); // 340-390 (wraps to 340-30)
       hue1 = warmBase % 360;
-      hue2 = (warmBase + 15) % 360;
-      hue3 = (warmBase + 30) % 360;
+      hue2 = (warmBase + 20) % 360;
+      hue3 = (warmBase + 35) % 360;
     } else {
-      // COOL ACCENT: Mint → Seafoam
-      // 150-180 range only
-      const coolBase = 155 + (Math.random() * 20);
+      // COOL PALETTE: Mint → Seafoam → Sky
+      // Range: 140-200
+      const coolBase = 150 + (Math.random() * 40);
       hue1 = coolBase;
-      hue2 = coolBase + 10;
-      hue3 = coolBase + 15;
+      hue2 = coolBase + 15;
+      hue3 = coolBase + 25;
     }
 
-    // Prefer diagonal for warmth
-    const angle = 135 + (Math.random() * 90); // 135-225
+    // Diagonal warmth
+    const angle = 125 + (Math.random() * 110); // 125-235
 
-    // SAME LUMINOSITY - prevents mud
-    // Higher chroma for flavor but still light
-    const baseLightness = 94;
-    const color1 = this.generateOKLCHColor(baseLightness, this.getRandomValue(0.08, 0.14), hue1);
-    const color2 = this.generateOKLCHColor(baseLightness + 1, this.getRandomValue(0.09, 0.15), hue2);
-    const color3 = this.generateOKLCHColor(baseLightness, this.getRandomValue(0.08, 0.13), hue3);
+    // Same luminosity (prevents mud) but MORE CHROMA for flavor
+    const baseLightness = 93;
+    const color1 = this.generateOKLCHColor(baseLightness, this.getRandomValue(0.10, 0.16), hue1);
+    const color2 = this.generateOKLCHColor(baseLightness + 2, this.getRandomValue(0.12, 0.18), hue2);
+    const color3 = this.generateOKLCHColor(baseLightness + 1, this.getRandomValue(0.10, 0.15), hue3);
 
     return `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 50%, ${color3} 100%)`;
   }

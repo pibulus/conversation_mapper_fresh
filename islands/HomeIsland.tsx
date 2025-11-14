@@ -130,16 +130,32 @@ export default function HomeIsland() {
           ) : (
             // Default header - app name and theme shuffler
             <>
-              <h1 style={{
-                fontSize: '22px',
-                fontWeight: '800',
-                color: '#0A0A0A',
-                letterSpacing: '-0.03em',
-                flex: 1,
-                textTransform: 'none'
-              }}>
+              <a
+                href="/"
+                style={{
+                  fontSize: '22px',
+                  fontWeight: '800',
+                  color: '#0A0A0A',
+                  letterSpacing: '-0.03em',
+                  flex: 1,
+                  textDecoration: 'none',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s ease',
+                  display: 'inline-block',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(var(--color-accent), 0.08)';
+                  e.currentTarget.style.transform = 'translateX(2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
                 Conversation Mapper
-              </h1>
+              </a>
               <ThemeShuffler />
             </>
           )}
@@ -171,59 +187,93 @@ export default function HomeIsland() {
                 paddingTop: 'clamp(5rem, 12vh, 8rem)',
                 paddingBottom: 'clamp(2rem, 6vh, 4rem)'
               }}>
-                {/* Hero Card - SoftStack billboard */}
+                {/* Hero Card - SoftStack billboard with SOUL */}
                 <div style={{
                   width: '100%',
-                  maxWidth: '780px',
-                  background: 'rgba(255, 250, 245, 0.95)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  border: '2px solid rgba(255, 215, 180, 0.4)',
-                  borderRadius: '18px',
-                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.04)',
-                  padding: 'clamp(3.5rem, 8vw, 5.5rem) clamp(2.5rem, 6vw, 4rem)',
+                  maxWidth: '820px',
+                  background: 'rgba(255, 250, 245, 0.88)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  border: '2px solid rgba(255, 200, 170, 0.3)',
+                  borderRadius: '20px',
+                  boxShadow: '0 24px 80px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.5) inset',
+                  padding: 'clamp(3.5rem, 8vw, 5rem) clamp(2.5rem, 6vw, 4.5rem)',
                   position: 'relative',
-                  overflow: 'hidden'
-                }}>
-                  {/* Subtle inner gradient - warm atmosphere */}
+                  overflow: 'hidden',
+                  transition: 'all 0.4s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 32px 100px rgba(0, 0, 0, 0.08), 0 0 0 2px rgba(var(--color-accent), 0.2) inset, 0 0 40px rgba(var(--color-accent), 0.15)';
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 24px 80px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.5) inset';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+                >
+                  {/* Warm gradient wash - more personality */}
                   <div style={{
                     position: 'absolute',
-                    top: '-20%',
-                    left: '-10%',
-                    right: '-10%',
-                    height: '70%',
-                    background: 'radial-gradient(ellipse 130% 90% at 50% 0%, rgba(255, 225, 200, 0.25) 0%, rgba(255, 240, 220, 0.12) 50%, transparent 75%)',
+                    top: '-15%',
+                    left: '-8%',
+                    right: '-8%',
+                    height: '60%',
+                    background: 'radial-gradient(ellipse 120% 80% at 45% 0%, rgba(255, 210, 180, 0.35) 0%, rgba(255, 230, 200, 0.18) 40%, transparent 70%)',
                     pointerEvents: 'none',
                     zIndex: 0
                   }}></div>
 
                   {/* Content wrapper */}
                   <div style={{ position: 'relative', zIndex: 1 }}>
-                    {/* Card Header - Clean hierarchy */}
-                    <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-                      <h2 style={{
-                        fontSize: 'clamp(2.5rem, 6.5vw, 3.25rem)',
-                        fontWeight: '800',
+                    {/* Card Header - LEFT ALIGNED, proper hierarchy */}
+                    <div style={{ marginBottom: '3rem' }}>
+                      {/* Eyebrow - what this is */}
+                      <div style={{
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        color: 'var(--color-accent)',
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        marginBottom: '1rem'
+                      }}>
+                        AI-Powered Analysis
+                      </div>
+
+                      {/* Main Headline - BIG and left-aligned */}
+                      <h1 style={{
+                        fontSize: 'clamp(2.75rem, 7vw, 4rem)',
+                        fontWeight: '900',
                         color: '#0A0A0A',
-                        letterSpacing: '-0.04em',
-                        marginBottom: '1.75rem',
-                        lineHeight: '1.05',
-                        maxWidth: '550px',
-                        margin: '0 auto 1.75rem'
+                        letterSpacing: '-0.045em',
+                        marginBottom: '1.25rem',
+                        lineHeight: '1',
+                        maxWidth: '600px'
                       }}>
-                        See what you're really saying
-                      </h2>
+                        Turn conversations into insights
+                      </h1>
+
+                      {/* Subheading - clear value prop */}
                       <p style={{
-                        fontSize: 'clamp(17px, 2vw, 19px)',
-                        color: '#4A4A4A',
+                        fontSize: 'clamp(18px, 2.2vw, 21px)',
+                        color: '#3A3A3A',
                         fontWeight: '500',
-                        lineHeight: '1.65',
-                        maxWidth: '480px',
-                        margin: '0 auto',
-                        letterSpacing: '-0.005em'
+                        lineHeight: '1.5',
+                        maxWidth: '520px',
+                        marginBottom: '0.75rem',
+                        letterSpacing: '-0.01em'
                       }}>
-                        Drop text or audio. Watch the insights appear.<br/>
-                        Map conversations. Capture clarity.
+                        Record, paste, or upload any conversation. Get instant summaries, action items, and topic maps.
+                      </p>
+
+                      {/* Supporting copy */}
+                      <p style={{
+                        fontSize: '15px',
+                        color: '#666',
+                        fontWeight: '400',
+                        lineHeight: '1.6',
+                        maxWidth: '480px'
+                      }}>
+                        No signup required. Everything stays private in your browser.
                       </p>
                     </div>
 
