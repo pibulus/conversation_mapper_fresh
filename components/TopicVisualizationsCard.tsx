@@ -1,19 +1,61 @@
 /**
  * TopicVisualizationsCard Component
- * Wrapper card for topic visualizations
+ * Wrapper card for topic visualizations with lazy loading
  */
 
+import { useSignal } from "@preact/signals";
+import { useEffect, useRef } from "preact/hooks";
 import VisualizationSelector from "../islands/VisualizationSelector.tsx";
 
 export default function TopicVisualizationsCard() {
+  const isVisible = useSignal(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Lazy load visualization when card becomes visible
+  useEffect(() => {
+    if (!cardRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          isVisible.value = true;
+          // Once loaded, stop observing
+          observer.disconnect();
+        }
+      },
+      {
+        rootMargin: '100px', // Load slightly before it comes into view
+        threshold: 0.1
+      }
+    );
+
+    observer.observe(cardRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div class="w-full lg:col-span-3">
+    <div ref={cardRef} class="w-full lg:col-span-3">
       <div class="dashboard-card">
         <div class="dashboard-card-header">
           <h3>Topic Visualizations</h3>
         </div>
         <div style={{ padding: 'var(--card-padding)', minHeight: '500px' }}>
-          <VisualizationSelector />
+          {isVisible.value ? (
+            <VisualizationSelector />
+          ) : (
+            // Loading placeholder
+            <div class="flex items-center justify-center" style={{ minHeight: '500px' }}>
+              <div style={{
+                textAlign: 'center',
+                color: 'var(--color-text-secondary)',
+                fontSize: 'var(--text-size)'
+              }}>
+                <div class="mb-2" style={{ fontSize: '2rem' }}>📊</div>
+                <div>Loading visualization...</div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

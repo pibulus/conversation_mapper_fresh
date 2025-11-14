@@ -3,9 +3,8 @@
  * Manages and displays action items with full CRUD, drag-and-drop, and sorting
  */
 
-import { useSignal } from "@preact/signals";
+import { useSignal, useComputed } from "@preact/signals";
 import { useEffect, useRef } from "preact/hooks";
-import { Signal } from "@preact/signals";
 
 interface ActionItem {
   id: string;
@@ -77,8 +76,8 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     };
   }, [activeAssigneeDropdown.value]);
 
-  // Filter and sort action items
-  const sortedActionItems = (() => {
+  // Filter and sort action items (memoized for performance)
+  const sortedActionItems = useComputed(() => {
     let filteredItems = [...actionItems];
 
     // Apply search filter
@@ -114,7 +113,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     };
 
     return [...sortGroup(pending), ...sortGroup(completed)];
-  })();
+  });
 
   // Handlers
   function toggleActionItem(itemId: string) {
