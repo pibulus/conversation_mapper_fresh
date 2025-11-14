@@ -359,8 +359,8 @@ export default function UploadIsland() {
                 onFocus={() => isDragActive.value = false}
               />
 
-              <div class="mapper-input-hint" aria-hidden="true">
-                {selectedFile.value && (
+              {selectedFile.value && (
+                <div class="mapper-input-hint" aria-hidden="true">
                   <div class="mapper-file-chip">
                     <span>{selectedFile.value.name}</span>
                     <button
@@ -374,18 +374,20 @@ export default function UploadIsland() {
                       ×
                     </button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
               <button
                 type="button"
-                class="mapper-link-btn"
+                class="mapper-clip-btn"
                 aria-label="Browse file"
                 onClick={(event) => {
                   event.stopPropagation();
                   fileInputRef.current?.click();
                 }}
               >
-                +
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.5V7a5 5 0 0 0-5-5 5 5 0 0 0-5 5v10a3 3 0 0 1-6 0V8" />
+                </svg>
               </button>
             </>
           )}
