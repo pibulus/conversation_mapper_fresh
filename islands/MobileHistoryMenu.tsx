@@ -79,58 +79,175 @@ export default function MobileHistoryMenu() {
 
   return (
     <>
-      {/* Floating Menu Button (Mobile Only) */}
+      {/* Floating Menu Button - Now works on all screens! */}
       <button
         onClick={toggleMenu}
-        class="md:hidden fixed bottom-6 right-6 bg-purple-500 text-white rounded-full w-14 h-14 shadow-brutal flex items-center justify-center z-40 border-3 border-purple-700 hover:bg-purple-600 transition-colors"
+        class="fixed bottom-6 right-6 flex items-center justify-center z-40 transition-all"
+        style={{
+          background: 'rgba(255, 255, 255, 0.75)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '3px solid rgba(44, 44, 44, 0.2)',
+          borderRadius: '16px',
+          padding: '14px 18px',
+          boxShadow: '0 6px 0 0 rgba(0, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.12)',
+          cursor: 'pointer',
+          fontWeight: '700',
+          fontSize: '15px',
+          color: '#2C2C2C',
+          gap: '8px'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-3px)';
+          e.currentTarget.style.boxShadow = '0 9px 0 0 rgba(0, 0, 0, 0.1), 0 12px 32px rgba(0, 0, 0, 0.15)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(0, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.12)';
+        }}
         aria-label="Open conversation history"
+        title="View saved conversations"
       >
-        {isOpen.value ? "✕" : "📚"}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span class="hidden sm:inline">History</span>
       </button>
 
       {/* Backdrop */}
       {isOpen.value && (
         <div
-          class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          class="fixed inset-0 z-30"
+          style={{
+            background: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)'
+          }}
           onClick={() => (isOpen.value = false)}
         />
       )}
 
       {/* Slide-out Drawer */}
       <div
-        class={`md:hidden fixed inset-y-0 right-0 w-80 max-w-[80vw] bg-white transform transition-transform duration-300 ease-out z-40 shadow-brutal ${
+        class={`fixed inset-y-0 right-0 w-96 max-w-[85vw] transform transition-all duration-300 ease-out z-40 ${
           isOpen.value ? "translate-x-0" : "translate-x-full"
         }`}
+        style={{
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderLeft: '3px solid rgba(255, 255, 255, 0.4)',
+          boxShadow: '-8px 0 32px rgba(0, 0, 0, 0.12)'
+        }}
       >
         {/* Header */}
-        <div class="bg-purple-400 px-4 py-4 border-b-4 border-purple-500 flex justify-between items-center">
-          <h2 class="font-bold text-white text-lg">📚 History</h2>
+        <div style={{
+          background: 'rgba(232, 131, 156, 0.15)',
+          borderBottom: '2px solid rgba(232, 131, 156, 0.3)',
+          padding: '1.25rem 1.5rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <h2 style={{
+            fontWeight: '700',
+            fontSize: '1.25rem',
+            color: '#2C2C2C',
+            letterSpacing: '-0.01em'
+          }}>Your Conversations</h2>
           <button
             onClick={() => (isOpen.value = false)}
-            class="text-white text-2xl hover:bg-purple-500 rounded px-2"
+            style={{
+              background: 'rgba(0, 0, 0, 0.05)',
+              border: '2px solid rgba(0, 0, 0, 0.1)',
+              borderRadius: '8px',
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              color: '#2C2C2C',
+              fontSize: '18px',
+              fontWeight: '600'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.05)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
           >
             ✕
           </button>
         </div>
 
         {/* New Conversation Button */}
-        <div class="p-4 border-b-2 border-purple-200">
+        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(0, 0, 0, 0.06)' }}>
           <button
             onClick={handleNew}
-            class="w-full bg-terminal-green text-soft-black font-bold py-3 px-4 rounded-lg border-2 border-green-700 hover:bg-green-400 transition-colors text-lg"
+            style={{
+              width: '100%',
+              padding: '14px 20px',
+              fontSize: '16px',
+              fontWeight: '700',
+              border: '3px solid #2C2C2C',
+              borderRadius: '12px',
+              background: '#2C2C2C',
+              color: 'white',
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              boxShadow: '0 4px 0 0 rgba(0, 0, 0, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 0 0 rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseDown={(e) => {
+              e.currentTarget.style.transform = 'translateY(2px)';
+              e.currentTarget.style.boxShadow = '0 2px 0 0 rgba(0, 0, 0, 0.15)';
+            }}
+            onMouseUp={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(0, 0, 0, 0.15)';
+            }}
           >
-            ➕ New Conversation
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            New Conversation
           </button>
         </div>
 
         {/* Conversation List */}
-        <div class="flex-1 overflow-y-auto p-4 space-y-3 h-[calc(100vh-180px)]">
+        <div class="flex-1 overflow-y-auto space-y-3 h-[calc(100vh-180px)]" style={{ padding: '1.25rem 1.5rem' }}>
           {!hasConversations ? (
-            <div class="text-center py-8">
-              <div class="text-4xl mb-4">📭</div>
-              <p class="text-sm text-gray-500">
-                No saved conversations yet.<br/>
-                Upload audio or text to begin!
+            <div style={{
+              textAlign: 'center',
+              padding: '3rem 1rem',
+              color: '#6B6B6B'
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.4 }}>✨</div>
+              <p style={{
+                fontSize: '15px',
+                fontWeight: '500',
+                lineHeight: '1.6'
+              }}>
+                No conversations yet.<br/>
+                Start creating some magic!
               </p>
             </div>
           ) : (
@@ -148,29 +265,83 @@ export default function MobileHistoryMenu() {
               return (
                 <div
                   key={conv.id}
-                  class={`p-4 rounded-lg border-3 transition-all ${
-                    isActive
-                      ? "bg-purple-100 border-purple-400 shadow-lg"
-                      : "bg-gray-50 border-gray-300 hover:border-purple-300 hover:bg-purple-50"
-                  }`}
+                  style={{
+                    padding: '1rem',
+                    borderRadius: '12px',
+                    border: isActive ? '3px solid rgba(232, 131, 156, 0.5)' : '2px solid rgba(0, 0, 0, 0.08)',
+                    background: isActive ? 'rgba(232, 131, 156, 0.08)' : 'rgba(255, 255, 255, 0.6)',
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.borderColor = 'rgba(232, 131, 156, 0.3)';
+                      e.currentTarget.style.background = 'rgba(232, 131, 156, 0.04)';
+                      e.currentTarget.style.transform = 'translateX(-2px)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)';
+                      e.currentTarget.style.transform = 'translateX(0)';
+                    }
+                  }}
                 >
-                  <div class="flex items-start justify-between gap-3">
+                  <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', gap: '0.75rem' }}>
                     <button
                       onClick={() => handleLoad(conv.id)}
-                      class="flex-1 text-left"
+                      style={{
+                        flex: 1,
+                        textAlign: 'left',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0
+                      }}
                     >
-                      <h3 class="font-bold text-gray-800 text-base">
+                      <h3 style={{
+                        fontWeight: '700',
+                        color: '#2C2C2C',
+                        fontSize: '15px',
+                        marginBottom: '0.5rem',
+                        lineHeight: '1.3'
+                      }}>
                         {truncatedTitle}
                       </h3>
-                      <div class="flex flex-wrap items-center gap-2 mt-2 text-xs">
-                        <span class="bg-blue-100 px-2 py-1 rounded">
-                          📊 {conv.nodes.length} topics
+                      <div style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        marginTop: '0.5rem',
+                        fontSize: '12px'
+                      }}>
+                        <span style={{
+                          background: 'rgba(59, 130, 246, 0.12)',
+                          color: '#2563EB',
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          fontWeight: '600'
+                        }}>
+                          {conv.nodes.length} topics
                         </span>
-                        <span class="bg-green-100 px-2 py-1 rounded">
-                          ✅ {conv.actionItems.length} items
+                        <span style={{
+                          background: 'rgba(34, 197, 94, 0.12)',
+                          color: '#16A34A',
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          fontWeight: '600'
+                        }}>
+                          {conv.actionItems.length} items
                         </span>
                       </div>
-                      <p class="text-xs text-gray-500 mt-2">
+                      <p style={{
+                        fontSize: '12px',
+                        color: '#8B7F77',
+                        marginTop: '0.5rem',
+                        fontWeight: '500'
+                      }}>
                         {dateStr}
                       </p>
                     </button>
@@ -180,7 +351,28 @@ export default function MobileHistoryMenu() {
                         e.stopPropagation();
                         handleDelete(conv.id);
                       }}
-                      class="text-red-500 hover:text-red-700 p-2 text-xl"
+                      style={{
+                        background: 'rgba(239, 68, 68, 0.1)',
+                        border: '2px solid rgba(239, 68, 68, 0.2)',
+                        borderRadius: '8px',
+                        padding: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        fontSize: '16px',
+                        width: '36px',
+                        height: '36px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
                       title="Delete conversation"
                     >
                       🗑️
@@ -193,8 +385,17 @@ export default function MobileHistoryMenu() {
         </div>
 
         {/* Storage Info */}
-        <div class="p-3 border-t-2 border-gray-200 bg-gray-50">
-          <p class="text-xs text-gray-600 text-center">
+        <div style={{
+          padding: '1rem 1.5rem',
+          borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+          background: 'rgba(0, 0, 0, 0.02)'
+        }}>
+          <p style={{
+            fontSize: '13px',
+            color: '#8B7F77',
+            textAlign: 'center',
+            fontWeight: '500'
+          }}>
             {conversations.value.length} conversation{conversations.value.length !== 1 ? 's' : ''} saved locally
           </p>
         </div>
@@ -202,23 +403,87 @@ export default function MobileHistoryMenu() {
 
       {/* Delete Confirmation Modal */}
       {showConfirmDelete.value && (
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <div class="bg-white rounded-lg border-4 border-red-400 shadow-brutal p-6 max-w-sm w-full">
-            <h3 class="text-xl font-bold mb-3">🗑️ Delete Conversation?</h3>
-            <p class="text-sm text-gray-700 mb-6">
-              This will permanently delete this conversation and all its data.
-              This action cannot be undone.
+        <div class="fixed inset-0 flex items-center justify-center z-50 px-4" style={{
+          background: 'rgba(0, 0, 0, 0.5)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)'
+        }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.98)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderRadius: '20px',
+            border: '3px solid rgba(239, 68, 68, 0.3)',
+            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.2)',
+            padding: '2rem',
+            maxWidth: '400px',
+            width: '100%'
+          }}>
+            <h3 style={{
+              fontSize: '1.5rem',
+              fontWeight: '700',
+              marginBottom: '0.75rem',
+              color: '#2C2C2C',
+              lineHeight: '1.2'
+            }}>Delete this conversation?</h3>
+            <p style={{
+              fontSize: '15px',
+              color: '#6B6B6B',
+              marginBottom: '1.5rem',
+              lineHeight: '1.6'
+            }}>
+              This will permanently delete this conversation and all its data. This action cannot be undone.
             </p>
-            <div class="flex gap-2">
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button
                 onClick={confirmDelete}
-                class="flex-1 bg-red-500 text-white font-bold py-3 px-4 rounded-lg border-2 border-red-700 hover:bg-red-600 text-base"
+                style={{
+                  flex: 1,
+                  padding: '14px 20px',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  border: '3px solid #DC2626',
+                  borderRadius: '12px',
+                  background: '#EF4444',
+                  color: 'white',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 0 0 rgba(220, 38, 38, 0.3)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(220, 38, 38, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 0 0 rgba(220, 38, 38, 0.3)';
+                }}
               >
                 Delete
               </button>
               <button
                 onClick={cancelDelete}
-                class="flex-1 bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg border-2 border-gray-400 hover:bg-gray-300 text-base"
+                style={{
+                  flex: 1,
+                  padding: '14px 20px',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  border: '3px solid rgba(0, 0, 0, 0.15)',
+                  borderRadius: '12px',
+                  background: 'rgba(0, 0, 0, 0.05)',
+                  color: '#2C2C2C',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 0 0 rgba(0, 0, 0, 0.08)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 0 0 rgba(0, 0, 0, 0.08)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 0 0 rgba(0, 0, 0, 0.08)';
+                }}
               >
                 Cancel
               </button>

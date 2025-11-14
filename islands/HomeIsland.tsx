@@ -76,14 +76,14 @@ export default function HomeIsland() {
                   }}
                   title="Back to home"
                 >
-                  <i class="fa fa-arrow-left" style={{ fontSize: '14px', color: '#111' }}></i>
+                  <i class="fa fa-arrow-left" style={{ fontSize: '14px', color: '#2C2C2C' }}></i>
                 </button>
                 <h1
                   class="truncate"
                   style={{
                     fontSize: '18px',
                     fontWeight: '600',
-                    color: '#111',
+                    color: '#2C2C2C',
                     letterSpacing: '-0.01em'
                   }}
                 >
@@ -101,14 +101,14 @@ export default function HomeIsland() {
                   onClick={() => drawerOpen.value = !drawerOpen.value}
                   class="px-3 py-1.5 rounded-lg transition-all hidden sm:block"
                   style={{
-                    background: '#111',
+                    background: '#2C2C2C',
                     color: 'white',
                     fontSize: '14px',
                     fontWeight: '500',
                     border: 'none'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = '#333'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = '#111'}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#3D3D3D'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#2C2C2C'}
                   title="Export"
                 >
                   Export
@@ -127,7 +127,7 @@ export default function HomeIsland() {
               <h1 style={{
                 fontSize: '18px',
                 fontWeight: '600',
-                color: '#111',
+                color: '#2C2C2C',
                 letterSpacing: '-0.01em',
                 flex: 1
               }}>
@@ -149,19 +149,12 @@ export default function HomeIsland() {
         />
       )}
 
-      {/* Main Layout with Conditional Sidebar */}
+      {/* Main Layout - No sidebar, centered content */}
       <div class="flex" style={{ minHeight: 'calc(100vh - 64px)' }}>
-        {/* Left Sidebar - Only show when NO data (hidden on mobile) */}
-        {!conversationData.value && (
-          <aside class="hidden md:block w-80 flex-shrink-0 overflow-hidden">
-            <ConversationList />
-          </aside>
-        )}
-
         {/* Mobile History Menu - Only show when NO data */}
         {!conversationData.value && <MobileHistoryMenu />}
 
-        {/* Right Content Area */}
+        {/* Content Area - Full width, centered */}
         <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8">
           <div class="max-w-7xl mx-auto grid gap-4 sm:gap-6">
             {/* Hero Section - Only show when NO data */}
@@ -171,41 +164,68 @@ export default function HomeIsland() {
                 paddingTop: 'clamp(3rem, 8vh, 5rem)',
                 paddingBottom: 'clamp(4rem, 12vh, 8rem)'
               }}>
-                {/* Hero Card */}
+                {/* Hero Card - Enhanced glassmorphism */}
                 <div style={{
                   width: '100%',
-                  maxWidth: '640px',
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  border: '2px solid rgba(0, 0, 0, 0.08)',
-                  borderRadius: '16px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
-                  padding: 'clamp(2rem, 5vw, 3rem)'
+                  maxWidth: '680px',
+                  background: 'rgba(255, 255, 255, 0.65)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: '3px solid rgba(255, 255, 255, 0.4)',
+                  borderRadius: '24px',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)',
+                  padding: 'clamp(2.5rem, 6vw, 4rem)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}>
-                  {/* Card Header */}
-                  <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-                    <h2 style={{
-                      fontSize: 'clamp(1.75rem, 4vw, 2.25rem)',
-                      fontWeight: '700',
-                      color: '#111',
-                      letterSpacing: '-0.02em',
-                      marginBottom: '0.5rem'
-                    }}>
-                      Start a new conversation
-                    </h2>
-                    <p style={{
-                      fontSize: '15px',
-                      color: '#666',
-                      fontWeight: '400',
-                      lineHeight: '1.4'
-                    }}>
-                      Record, paste, or upload your conversation
-                    </p>
-                  </div>
+                  {/* Subtle gradient overlay for depth */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'radial-gradient(circle at top right, rgba(255, 182, 193, 0.15), transparent 60%)',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                  }}></div>
 
-                  {/* Upload Controls */}
-                  <UploadIsland />
+                  {/* Content wrapper */}
+                  <div style={{ position: 'relative', zIndex: 1 }}>
+                    {/* Card Header - Spunky copy! */}
+                    <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+                      <h2 style={{
+                        fontSize: 'clamp(2rem, 5vw, 2.75rem)',
+                        fontWeight: '700',
+                        color: '#2C2C2C',
+                        letterSpacing: '-0.03em',
+                        marginBottom: '0.75rem',
+                        lineHeight: '1.1'
+                      }}>
+                        Let's map your conversation
+                      </h2>
+                      <p style={{
+                        fontSize: 'clamp(16px, 2vw, 18px)',
+                        color: '#6B6B6B',
+                        fontWeight: '500',
+                        lineHeight: '1.6',
+                        maxWidth: '500px',
+                        margin: '0 auto'
+                      }}>
+                        Drop your thoughts, paste your chats, or just hit record. <br/>
+                        <span style={{
+                          color: '#8B7F77',
+                          fontSize: '15px',
+                          fontWeight: '400'
+                        }}>
+                          We'll turn the chaos into clarity ✨
+                        </span>
+                      </p>
+                    </div>
+
+                    {/* Upload Controls */}
+                    <UploadIsland />
+                  </div>
                 </div>
               </div>
             )}
