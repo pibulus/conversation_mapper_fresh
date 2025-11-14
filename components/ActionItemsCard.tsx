@@ -545,7 +545,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                   type="text"
                   value={newItemDescription.value}
                   onInput={(e) => newItemDescription.value = (e.target as HTMLInputElement).value}
-                  placeholder="What to do"
+                  placeholder="What's the move?"
                   class="w-full rounded px-3 py-2"
                   style={{
                     fontSize: 'var(--text-size)',
@@ -576,7 +576,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                         dropdownTimeoutRef.current = null;
                       }, 200) as unknown as number;
                     }}
-                    placeholder="Who"
+                    placeholder="Who's on it?"
                     class="w-full rounded px-3 py-2 pr-8"
                     style={{
                       fontSize: 'var(--text-size)',

@@ -142,18 +142,24 @@ export default function HomeIsland() {
                 }}>
                   🧠
                 </div>
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-2 sm:mb-3" style={{
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4" style={{
                   color: 'var(--color-text)',
                   letterSpacing: '-0.02em',
                   lineHeight: 1.1
                 }}>
                   Conversation Mapper
                 </h1>
-                <p class="text-2xl md:text-3xl font-bold opacity-90 max-w-2xl mx-auto" style={{
+                <p class="text-xl md:text-2xl font-bold mb-2" style={{
                   color: 'var(--color-accent)',
-                  lineHeight: 1.2
+                  lineHeight: 1.3
                 }}>
-                  Clarity
+                  Talk. Map. Track.
+                </p>
+                <p class="text-base md:text-lg max-w-lg mx-auto" style={{
+                  color: 'var(--color-text-secondary)',
+                  lineHeight: 1.5
+                }}>
+                  Messy conversations become clear action
                 </p>
               </div>
               <div class="absolute right-4 top-4">

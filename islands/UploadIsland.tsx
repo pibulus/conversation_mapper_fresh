@@ -384,7 +384,7 @@ export default function UploadIsland() {
               fontSize: 'var(--text-size)',
               transition: 'var(--transition-fast)'
             }}
-            placeholder="Paste text"
+            placeholder="Text goes here"
             value={textInput.value}
             onInput={(e) => textInput.value = (e.target as HTMLTextAreaElement).value}
           />
@@ -431,7 +431,7 @@ export default function UploadIsland() {
               fontWeight: '500',
               marginBottom: '0.25rem'
             }}>
-              Drop audio file to upload
+              Drag and drop. Click works too.
             </p>
             <p style={{
               fontSize: 'var(--small-size)',

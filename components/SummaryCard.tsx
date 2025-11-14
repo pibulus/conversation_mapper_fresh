@@ -70,7 +70,7 @@ export default function SummaryCard({ summary, nodes, conversationSource }: Summ
           {!summary || summary === "No summary generated" ? (
             <div class="empty-state">
               <div class="empty-state-icon">📋</div>
-              <div class="empty-state-text">Nothing yet</div>
+              <div class="empty-state-text">Waiting here</div>
             </div>
           ) : (
             <div>
