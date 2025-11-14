@@ -366,11 +366,10 @@ export class ThemeRandomizerService {
         }
       }
 
-      const ink = this.pickSolid(theme['--color-text'], '#15110f');
       const shell = this.pickSolid(theme['--color-base-solid'], '#FFF9F2');
       const wash = this.pickSolid(theme['--color-secondary'], 'rgba(255,255,255,0.7)');
 
-      root.style.setProperty('--module-ink', ink);
+      root.style.setProperty('--module-ink', '#1a130f');
       root.style.setProperty('--module-shell', shell);
       root.style.setProperty('--module-wash', wash);
     });

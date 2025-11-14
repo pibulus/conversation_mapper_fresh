@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@property --mapper-scale {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+
 /* ===================================================================
    CONVERSATION MAPPER - Clean Pastel Aesthetic
    Matching the original Svelte design
@@ -74,9 +80,9 @@
   --color-danger-text: #B91C1C;
 
   /* Module tokens */
-  --module-ink: #15110f;
-  --module-shell: rgba(255, 255, 255, 0.94);
-  --module-wash: rgba(255, 245, 232, 0.6);
+  --module-ink: #1a130f;
+  --module-shell: rgba(255, 255, 255, 0.96);
+  --module-wash: rgba(250, 244, 233, 0.6);
 }
 
 /* ===================================================================
@@ -261,6 +267,7 @@ body {
   min-height: clamp(420px, 58vh, 520px);
   overflow: hidden;
   transition: transform 280ms cubic-bezier(0.2, 0.75, 0.25, 1), box-shadow 280ms ease;
+  will-change: transform;
 }
 
 .mapper-card::before {
@@ -334,6 +341,7 @@ body {
   height: 100%;
 }
 
+
 .mapper-input-lab {
   height: 100%;
   display: flex;
@@ -345,6 +353,9 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
+  align-items: stretch;
+  justify-content: flex-start;
+  width: 100%;
 }
 
 .mapper-mode-tab {
@@ -359,6 +370,9 @@ body {
   background: rgba(20, 16, 13, 0.05);
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
   transition: transform 140ms ease, box-shadow 140ms ease, background 200ms ease;
+  flex: 1 1 110px;
+  min-width: 110px;
+  text-align: center;
 }
 
 .mapper-mode-tab.is-active {
@@ -386,6 +400,7 @@ body {
   flex: 1;
   overflow-y: auto;
   padding-right: 4px;
+  min-height: 240px;
 }
 
 .mapper-slab-button {
@@ -401,6 +416,11 @@ body {
   text-transform: uppercase;
   box-shadow: 0 12px 0 rgba(0, 0, 0, 0.16);
   transition: transform 120ms ease, box-shadow 120ms ease, background 200ms ease;
+  will-change: transform;
+  --mapper-scale: 1;
+  --mapper-translate-x: 0px;
+  --mapper-translate-y: 0px;
+  transform: translate(var(--mapper-translate-x), var(--mapper-translate-y)) scale(var(--mapper-scale));
 }
 
 .mapper-slab-button.is-accent {
@@ -415,13 +435,32 @@ body {
 }
 
 .mapper-slab-button:not(:disabled):hover {
-  transform: translate(-2px, -2px);
+  --mapper-translate-x: -2px;
+  --mapper-translate-y: -2px;
   box-shadow: 0 15px 0 rgba(0, 0, 0, 0.2);
 }
 
 .mapper-slab-button:not(:disabled):active {
-  transform: translate(1px, 1px);
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.18);
+  animation: mapperSpring 0.6s linear(
+    0, 0.006, 0.025 0.9%, 0.101 1.8%, 0.539 6.5%, 0.826 10%,
+    0.967 11.8%, 1.037 13.1%, 1.078 14.2%, 1.103 15.3%,
+    1.115 16.2%, 1.118 17.7%, 1.114 18.9%, 1.106 20%, 1.094 21.2%,
+    1.08 22.3%, 1.064 23.5%, 1.046 24.6%, 1.028 25.8%,
+    1.01 26.9%, 0.992 28.1%, 0.975 29.2%, 0.959 30.4%,
+    0.945 31.5%, 0.931 32.8%, 0.92 33.9%, 0.91 35%,
+    0.901 36.2%, 0.894 37.3%, 0.888 38.5%, 0.883 39.6%,
+    0.88 40.8%, 0.877 42.2%, 0.875 43.5%, 0.875 44.9%,
+    0.875 46.2%, 0.877 47.6%, 0.88 48.9%, 0.883 50.3%,
+    0.888 51.6%, 0.893 53%, 0.9 54.5%, 0.907 56%,
+    0.915 57.6%, 0.924 59.1%, 0.933 60.7%, 0.943 62.2%,
+    0.954 63.8%, 0.964 65.3%, 0.975 67%, 0.986 69%,
+    0.996 71%, 1.005 73.1%, 1.013 75.2%, 1.02 77.2%,
+    1.026 79.3%, 1.03 81.4%, 1.034 83.5%, 1.036 85.5%,
+    1.037 87.6%, 1.037 89.7%, 1.036 91.8%, 1.034 93.9%,
+    1.032 95.9%, 1.029 97.5%, 1.026 98.5%, 1.024 99.1%,
+    1.022 99.5%, 1.021 99.8%, 1.02 100%
+  ) forwards;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18);
 }
 
 .mapper-info-note {
@@ -464,6 +503,30 @@ body {
   border-color: var(--color-accent);
   background: white;
   outline: none;
+}
+
+@keyframes mapperSpring {
+  0% { --mapper-scale: 1; }
+  35% { --mapper-scale: 0.95; }
+  55% { --mapper-scale: 1.08; }
+  75% { --mapper-scale: 0.99; }
+  100% { --mapper-scale: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapper-scene::before,
+  .mapper-card,
+  .mapper-slab-button,
+  .mapper-mode-tab {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .mapper-card:hover,
+  .mapper-slab-button:not(:disabled):hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
 }
 
 @media (max-width: 1024px) {
