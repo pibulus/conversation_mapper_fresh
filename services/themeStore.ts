@@ -1,10 +1,12 @@
 // ===================================================================
 // THEME STORE
 // Preact signals-based theme management with localStorage persistence
+// Now locked to Golden Master SoftStack aesthetic
 // ===================================================================
 
 import { signal, effect } from "@preact/signals";
 import { ThemeRandomizerService } from "./ThemeRandomizerService.ts";
+import { GOLDEN_MASTER_THEME } from "./GoldenMasterTheme.ts";
 
 // Type for theme data
 export interface Theme {
@@ -12,16 +14,9 @@ export interface Theme {
   [key: string]: string | undefined;
 }
 
-// Default theme
+// Default theme = Golden Master (canonical SoftStack aesthetic)
 const defaultTheme: Theme = {
-  '--color-base': 'linear-gradient(135deg, #FFEBD4 0%, #FFD9B8 100%)',
-  '--color-base-solid': '#FFEBD4',
-  '--color-secondary': 'rgba(255, 255, 255, 0.6)',
-  '--color-accent': '#E8839C',
-  '--color-text': '#3D3935',
-  '--color-text-secondary': '#8B7F77',
-  '--color-border': 'rgba(61, 57, 53, 0.1)',
-  '--gradient-bg': 'linear-gradient(to bottom right, #FFE5D4, #FF9A76)'
+  ...GOLDEN_MASTER_THEME,
 };
 
 // Create the theme signal
