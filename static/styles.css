@@ -95,11 +95,11 @@
   --accent-electric: #ff5c8d;
 
   /* ===================================================================
-     SOFTSTACK COLOR SYSTEM - Unified neutrals for pastel punk consistency
+     SOFTSTACK COLOR SYSTEM - Golden Master (no pure white, no cold greys)
      ================================================================ */
   --soft-black: #1E1714;           /* Main dark neutral - use for headlines, borders, button backgrounds */
   --soft-brown: #3A2A22;           /* Secondary warm dark - use for accents/secondary text */
-  --soft-cream: #FFF8F1;           /* Warm off-white for input backgrounds */
+  --soft-cream: #FFF7EF;           /* Warm cream for input backgrounds - NOT pure white */
   --soft-cream-dark: #FAF3E9;      /* Slightly darker cream for subtle inset areas */
 }
 
@@ -411,14 +411,14 @@ body {
 }
 
 .mapper-capture-block {
-  border: 2px solid rgba(30, 23, 20, 0.08); /* lighter border using soft-black tint */
+  border: 2px solid rgba(30, 23, 20, 0.12); /* slightly darker for proper contrast */
   border-radius: 18px;
   padding: 1.35rem;
   background: color-mix(in srgb, var(--module-shell, #fff8f1) 85%, #ffffff);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  /* Much lighter shadow - hero card is the main slab, this sits inside it */
-  box-shadow: 0 4px 12px rgba(30, 23, 20, 0.04);
+  /* Medium shadow - sits below hero, above button */
+  box-shadow: 0 6px 14px rgba(30, 23, 20, 0.10);
 }
 
 .mapper-block-header {
@@ -456,33 +456,51 @@ body {
 }
 
 .mapper-unified-input {
-  border: 2px solid rgba(30, 23, 20, 0.12); /* soft-black tint for unified system */
-  border-radius: 16px;
+  border: 2px solid rgba(30, 23, 20, 0.18); /* DARKER border - proper contrast */
+  border-radius: 12px; /* tighter radius for intentional shape */
   padding: 1.1rem;
   transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
-  background: var(--soft-cream); /* warm cream, not stark white - feels like a surface */
+  background: var(--soft-cream); /* warm cream golden master */
   cursor: text;
   position: relative;
-  /* Subtle inner shadow to hint at a "canvas" surface */
-  box-shadow: inset 0 1px 3px rgba(30, 23, 20, 0.04);
+  /* Proper inner framing - gives it texture and depth */
+  box-shadow:
+    inset 0 1px 2px rgba(30, 23, 20, 0.06),
+    inset 0 0 0 1px rgba(30, 23, 20, 0.08);
 }
 
 .mapper-unified-input:not(.is-recording):hover {
-  border-color: rgba(30, 23, 20, 0.22);
-  background: var(--soft-cream-dark); /* slightly darker cream on hover */
+  border-color: rgba(30, 23, 20, 0.28); /* even darker on hover */
+  background: var(--soft-cream-dark);
   box-shadow:
-    inset 0 1px 3px rgba(30, 23, 20, 0.06),
-    0 8px 20px rgba(30, 23, 20, 0.06);
+    inset 0 1px 2px rgba(30, 23, 20, 0.08),
+    inset 0 0 0 1px rgba(30, 23, 20, 0.10),
+    0 6px 16px rgba(30, 23, 20, 0.08);
 }
 
 .mapper-unified-input textarea {
   min-height: 160px;
-  border-radius: 12px;
+  border-radius: 10px;
   border: none;
   background: transparent; /* sits directly on the cream surface */
-  padding-right: 3rem;
-  /* Slightly more generous line-height for a "thinking space" feel */
-  line-height: 1.65;
+  padding-right: 3.5rem;
+  /* Thinking mode line-height - not stiff paragraph mode */
+  line-height: 1.5;
+  font-size: 15px; /* slightly larger for better presence */
+  color: var(--soft-black);
+}
+
+/* PLACEHOLDER STYLING - friendly, confident, warm (NOT timid hospital grey) */
+.mapper-unified-input textarea::placeholder {
+  color: rgba(30, 23, 20, 0.62); /* warm brown-grey, NOT cold grey - 62% opacity for presence */
+  font-size: 15px; /* same as body text - NOT microscopic */
+  line-height: 1.5;
+  font-weight: 500; /* slightly bolder for clarity */
+  opacity: 1; /* override browser defaults */
+}
+
+.mapper-unified-input textarea:focus::placeholder {
+  opacity: 0.5; /* fade slightly when typing */
 }
 
 .mapper-unified-input.is-drop {
@@ -536,36 +554,45 @@ body {
   color: rgba(0, 0, 0, 0.6);
 }
 
-/* Inline paperclip control lives inside the unified input slab */
+/* Inline paperclip control - MUST be visible and intentional, not a ghost */
 .mapper-clip-btn {
   position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  width: 40px;
-  height: 40px;
+  bottom: 12px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
   border-radius: 10px;
-  border: 2px solid var(--soft-brown); /* use soft-brown for visual clarity */
-  background: rgba(255, 255, 255, 0.95);
+  /* DARKER border for actual presence - not a ghost outline */
+  border: 2px solid rgba(30, 23, 20, 0.20);
+  background: var(--soft-cream-dark);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--soft-black); /* clear icon color using unified system */
+  /* Icon must be CLEARLY VISIBLE */
+  color: var(--soft-black);
   cursor: pointer;
   transition: all 150ms ease;
-  /* Tiny shadow so it pops slightly from the canvas */
-  box-shadow: 0 2px 6px rgba(30, 23, 20, 0.08);
+  /* Stronger shadow so it doesn't disappear into the background */
+  box-shadow: 0 3px 8px rgba(30, 23, 20, 0.12);
 }
 
 .mapper-clip-btn i {
-  font-size: 16px;
+  font-size: 18px; /* larger icon for clarity */
+  opacity: 0.85;
 }
 
 .mapper-clip-btn:hover,
 .mapper-clip-btn:focus-visible {
   border-color: var(--accent-electric);
-  transform: scale(1.08); /* playful scale instead of translate */
-  box-shadow: 0 4px 10px rgba(255, 92, 141, 0.15);
+  background: rgba(255, 255, 255, 0.95);
+  transform: scale(1.05); /* subtle playful scale */
+  box-shadow: 0 4px 12px rgba(255, 92, 141, 0.20);
   outline: none;
+}
+
+.mapper-clip-btn:hover i {
+  opacity: 1;
+  color: var(--accent-electric);
 }
 
 .mapper-record-visual {
@@ -629,8 +656,8 @@ body {
   font-weight: 800;
   letter-spacing: 0.1em; /* slightly more tracking for readability */
   text-transform: uppercase;
-  /* Practical shadow - button should be obvious but not louder than hero card */
-  box-shadow: 0 4px 10px rgba(30, 23, 20, 0.15);
+  /* LIGHTEST shadow in hierarchy - button is just a tool, not the star */
+  box-shadow: 0 3px 8px rgba(30, 23, 20, 0.14);
   transition: transform 120ms ease, box-shadow 120ms ease, background 200ms ease;
   will-change: transform;
   --mapper-scale: 1;
@@ -683,13 +710,13 @@ body {
   background: var(--soft-black); /* use unified color system */
   border-color: var(--soft-black);
   color: #fff;
-  /* Toned down - button sits lightly, not screaming louder than hero */
-  box-shadow: 0 6px 16px rgba(30, 23, 20, 0.18);
+  /* Same base shadow as all buttons - consistency in hierarchy */
+  box-shadow: 0 3px 8px rgba(30, 23, 20, 0.14);
 }
 
 .mapper-slab-button--record:not(:disabled):hover {
-  /* Subtle pink hint on hover, but much less aggressive */
-  box-shadow: 0 8px 20px rgba(255, 92, 141, 0.25);
+  /* Subtle pink hint on hover */
+  box-shadow: 0 5px 14px rgba(255, 92, 141, 0.22);
 }
 
 .mapper-info-note {
@@ -720,17 +747,17 @@ body {
   padding: 18px;
   font-size: 15px;
   line-height: 1.5;
-  border: 2px solid var(--module-ink);
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.02);
-  color: #2c2c2c;
+  border: none; /* border is handled by .mapper-unified-input wrapper */
+  border-radius: 10px;
+  background: transparent; /* sits on cream surface of parent */
+  color: var(--soft-black); /* use unified color system */
   transition: border-color 160ms ease, background 160ms ease;
-  box-shadow: inset 0 4px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: none; /* shadow is on parent wrapper */
+  outline: none; /* no default outline, parent handles focus states */
 }
 
 .mapper-textarea:focus {
-  border-color: var(--color-accent);
-  background: white;
+  background: transparent; /* stay transparent on cream */
   outline: none;
 }
 
