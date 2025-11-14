@@ -57,6 +57,7 @@ export default function App({ Component }: PageProps) {
         }} />
       </head>
       <body>
+        <div class="scroll-progress" aria-hidden="true"></div>
         <Component />
       </body>
     </html>

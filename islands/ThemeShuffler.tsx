@@ -52,8 +52,10 @@ export default function ThemeShuffler() {
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: '1.25rem',
-        opacity: 0.7,
-        position: 'relative'
+        opacity: 0.85,
+        position: 'relative',
+        border: '1px solid rgba(255, 92, 141, 0.35)',
+        boxShadow: '0 8px 20px rgba(255, 92, 141, 0.2)'
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.opacity = '1';

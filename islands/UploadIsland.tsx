@@ -4,19 +4,13 @@ import { conversationData } from "../signals/conversationStore.ts";
 import LoadingModal from "../components/LoadingModal.tsx";
 import AudioVisualizer from "./AudioVisualizer.tsx";
 
-const MODE_TABS = [
-  { key: 'record', label: 'Record' },
-  { key: 'text', label: 'Paste' },
-  { key: 'audio', label: 'Upload' }
-] as const;
-
 export default function UploadIsland() {
-  const mode = useSignal<'text' | 'audio' | 'record'>('record');
   const textInput = useSignal('');
   const isProcessing = useSignal(false);
   const isRecording = useSignal(false);
   const recordingTime = useSignal(0);
   const showTimeWarning = useSignal(false);
+  const lastUploadName = useSignal('');
 
   // Audio recording refs (stored outside signals to avoid reactivity issues)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -247,6 +241,7 @@ export default function UploadIsland() {
       console.log('✅ Processing complete:', result);
 
       conversationData.value = result;
+      lastUploadName.value = file.name;
       alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
       input.value = '';
     } catch (error) {
@@ -266,153 +261,139 @@ export default function UploadIsland() {
 
   return (
     <div class="mapper-input-lab">
-      <div class="mapper-mode-tabs" role="tablist" aria-label="Capture mode">
-        {MODE_TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={mode.value === key}
-            class={`mapper-mode-tab${mode.value === key ? ' is-active' : ''}`}
-            onClick={() => mode.value = key}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {mode.value === 'record' && (
-        <div class="mapper-panel-body">
+      <section class="mapper-capture-block">
+        <div class="mapper-block-header">
+          <span class="mapper-block-pill">Record</span>
+          <div class="mapper-block-meta">Live mic capture · 10 minute limit · stays local</div>
+        </div>
+        <div class="mapper-capture-actions" style={{ marginBottom: '1rem' }}>
           <button
             onClick={isRecording.value ? stopRecording : startRecording}
             disabled={isProcessing.value && !isRecording.value}
             class="mapper-slab-button mapper-slab-button--record"
           >
-            {isRecording.value ? 'Stop' : 'Record'}
+            {isRecording.value ? 'Stop Recording' : 'Start Recording'}
           </button>
-          <div class="mapper-panel-scroll">
-            {isRecording.value ? (
-              <div class="space-y-4 pt-2">
-                <div class="text-center">
-                  <div style={{
-                    fontSize: '0.875rem',
-                    color: 'var(--color-text-secondary)',
-                    marginBottom: '0.5rem',
-                    fontWeight: '600',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>Recording</div>
-                  <div class="font-mono font-bold" style={{
-                    fontSize: 'clamp(2rem, 6vw, 2.5rem)',
-                    color: 'var(--color-text)',
-                    lineHeight: '1'
-                  }}>
-                    {formatTime(recordingTime.value)}
-                  </div>
-                </div>
-                <div style={{
-                  width: '100%',
-                  height: '12px',
-                  background: '#E5E7EB',
-                  borderRadius: '6px',
-                  overflow: 'hidden',
-                  border: '2px solid var(--color-text)'
-                }}>
-                  <div style={{
-                    width: `${(recordingTime.value / MAX_RECORDING_TIME) * 100}%`,
-                    height: '100%',
-                    background: showTimeWarning.value ? '#EF4444' : 'var(--color-accent)',
-                    transition: 'width 0.3s ease-out, background 0.5s ease'
-                  }}></div>
-                </div>
-                {showTimeWarning.value && (
-                  <div style={{
-                    padding: '1rem',
-                    background: '#FEE2E2',
-                    border: '2px solid #DC2626',
-                    borderRadius: '8px',
-                    fontSize: '0.875rem',
-                    fontWeight: '600',
-                    color: '#991B1B',
-                    textAlign: 'center'
-                  }}>
-                    Don't leave while recording
-                  </div>
-                )}
-                <AudioVisualizer analyser={analyserRef.current} />
-              </div>
-            ) : (
-              <div style={{ minHeight: '220px' }}></div>
-            )}
-          </div>
         </div>
-      )}
+        {isRecording.value && (
+          <div class="space-y-4">
+            <div class="text-center">
+              <div style={{
+                fontSize: '0.8rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: 'var(--color-text-secondary)',
+                marginBottom: '0.5rem'
+              }}>Recording</div>
+              <div class="font-mono font-bold" style={{
+                fontSize: 'clamp(2rem, 6vw, 2.4rem)',
+                color: 'var(--color-text)'
+              }}>{formatTime(recordingTime.value)}</div>
+            </div>
+            <div style={{
+              width: '100%',
+              height: '12px',
+              background: '#E5E7EB',
+              borderRadius: '6px',
+              overflow: 'hidden',
+              border: '2px solid var(--color-text)'
+            }}>
+              <div style={{
+                width: `${(recordingTime.value / MAX_RECORDING_TIME) * 100}%`,
+                height: '100%',
+                background: showTimeWarning.value ? '#EF4444' : 'var(--accent-electric)',
+                transition: 'width 0.3s ease-out, background 0.5s ease'
+              }}></div>
+            </div>
+            {showTimeWarning.value && (
+              <div style={{
+                padding: '0.85rem',
+                background: '#FEE2E2',
+                border: '2px solid #DC2626',
+                borderRadius: '10px',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                color: '#991B1B',
+                textAlign: 'center'
+              }}>
+                Auto-stop in {formatTime(timeRemaining.value)} — wrap it up.
+              </div>
+            )}
+            <AudioVisualizer analyser={analyserRef.current} />
+          </div>
+        )}
+      </section>
 
-      {mode.value === 'text' && (
-        <div class="mapper-panel-body">
-          <textarea
-            class="mapper-textarea w-full resize-none"
-            rows={8}
-            placeholder="Paste your conversation here..."
-            value={textInput.value}
-            onInput={(e) => textInput.value = (e.target as HTMLTextAreaElement).value}
-            onKeyDown={(e) => {
-              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && textInput.value.trim()) {
-                e.preventDefault();
-                handleTextSubmit();
-              }
-            }}
-          />
+      <section class="mapper-capture-block">
+        <div class="mapper-block-header">
+          <span class="mapper-block-pill">Paste text</span>
+          <div class="mapper-block-meta">Cmd/Ctrl + Enter to analyze instantly</div>
+        </div>
+        <textarea
+          class="mapper-textarea w-full resize-none"
+          rows={8}
+          placeholder="Paste your conversation here..."
+          value={textInput.value}
+          onInput={(e) => textInput.value = (e.target as HTMLTextAreaElement).value}
+          onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && textInput.value.trim()) {
+              e.preventDefault();
+              handleTextSubmit();
+            }
+          }}
+        />
+        <div class="mapper-capture-actions">
           <button
             onClick={handleTextSubmit}
             disabled={isProcessing.value || !textInput.value.trim()}
             class="mapper-slab-button"
             style={{ opacity: isProcessing.value || !textInput.value.trim() ? 0.5 : 1 }}
           >
-            {isProcessing.value ? 'Processing...' : 'Paste'}
+            {isProcessing.value ? 'Processing…' : 'Analyze Text'}
           </button>
         </div>
-      )}
+      </section>
 
-      {mode.value === 'audio' && (
-        <div class="mapper-panel-body">
-          <input
-            type="file"
-            accept="audio/*"
-            ref={fileInputRef}
-            onChange={handleAudioUpload}
-            disabled={isProcessing.value}
-            style={{ display: 'none' }}
-          />
-          <div
-            role="button"
-            tabIndex={0}
-            class="mapper-upload-drop"
-            onClick={() => !isProcessing.value && fileInputRef.current?.click()}
-            onKeyDown={(e) => {
-              if ((e.key === 'Enter' || e.key === ' ') && !isProcessing.value) {
-                e.preventDefault();
-                fileInputRef.current?.click();
-              }
-            }}
-          >
-            <div style={{
-              fontSize: '1rem',
-              fontWeight: '700',
-              color: '#2C2C2C',
-              marginBottom: '0.5rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em'
-            }}>
-              Drop audio file here
-            </div>
-            <div style={{
-              fontSize: '0.9rem',
-              color: '#666'
-            }}>
-              We accept anything your browser can decode.
-            </div>
+      <section class="mapper-capture-block">
+        <div class="mapper-block-header">
+          <span class="mapper-block-pill">Upload audio</span>
+          <div class="mapper-block-meta">MP3 · WAV · M4A · everything stays private</div>
+        </div>
+        <input
+          type="file"
+          accept="audio/*"
+          ref={fileInputRef}
+          onChange={handleAudioUpload}
+          disabled={isProcessing.value}
+          style={{ display: 'none' }}
+        />
+        <div
+          role="button"
+          tabIndex={0}
+          class="mapper-upload-drop"
+          onClick={() => !isProcessing.value && fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if ((e.key === 'Enter' || e.key === ' ') && !isProcessing.value) {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+        >
+          <div style={{
+            fontSize: '1rem',
+            fontWeight: '700',
+            color: '#2C2C2C',
+            marginBottom: '0.5rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.06em'
+          }}>
+            Drop audio file here
           </div>
+          <div style={{ fontSize: '0.9rem', color: '#666' }}>
+            {lastUploadName.value ? `Last uploaded: ${lastUploadName.value}` : 'or click to browse'}
+          </div>
+        </div>
+        <div class="mapper-capture-actions">
           <button
             type="button"
             class="mapper-slab-button"
@@ -420,10 +401,10 @@ export default function UploadIsland() {
             style={{ opacity: isProcessing.value ? 0.5 : 1 }}
             onClick={() => fileInputRef.current?.click()}
           >
-            {isProcessing.value ? 'Processing...' : 'Upload'}
+            {isProcessing.value ? 'Processing…' : 'Choose File'}
           </button>
         </div>
-      )}
+      </section>
 
       {isProcessing.value && <LoadingModal />}
     </div>

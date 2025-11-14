@@ -13,8 +13,15 @@ import TopicVisualizationsCard from "../components/TopicVisualizationsCard.tsx";
 export default function DashboardIsland() {
   if (!conversationData.value) {
     return (
-      <div class="text-center py-12">
-        <p class="text-gray-500">No conversation data yet. Upload audio or text to begin.</p>
+      <div class="dashboard-skeleton-grid">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div class="skeleton dashboard-skeleton-card skeleton-pulse" key={index}>
+            <div class="skeleton-line skeleton-lg"></div>
+            <div class="skeleton-line" style="width: 70%"></div>
+            <div class="skeleton-line" style="width: 85%"></div>
+            <div class="skeleton-line" style="width: 55%"></div>
+          </div>
+        ))}
       </div>
     );
   }
