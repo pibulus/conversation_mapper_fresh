@@ -143,39 +143,9 @@ export default function HomeIsland() {
               </div>
             </div>
           ) : (
-            // Default header when no conversation loaded
-            <div class="flex items-center justify-between gap-4">
-              <div class="flex-1 text-center">
-                <div style={{
-                  fontSize: 'clamp(5rem, 12vw, 8rem)',
-                  marginBottom: '1rem',
-                  lineHeight: 1
-                }}>
-                  🧠
-                </div>
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4" style={{
-                  color: 'var(--color-text)',
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1.1
-                }}>
-                  Conversation Mapper
-                </h1>
-                <p class="text-xl md:text-2xl font-bold mb-2" style={{
-                  color: 'var(--color-accent)',
-                  lineHeight: 1.3
-                }}>
-                  Talk. Map. Track.
-                </p>
-                <p class="text-base md:text-lg max-w-lg mx-auto" style={{
-                  color: 'var(--color-text-secondary)',
-                  lineHeight: 1.5
-                }}>
-                  Messy conversations become clear action
-                </p>
-              </div>
-              <div class="absolute right-4 top-4">
-                <ThemeShuffler />
-              </div>
+            // Minimal header when no conversation loaded - just theme button
+            <div class="flex items-center justify-end">
+              <ThemeShuffler />
             </div>
           )}
         </div>
@@ -204,22 +174,73 @@ export default function HomeIsland() {
         {!conversationData.value && <MobileHistoryMenu />}
 
         {/* Right Content Area */}
-        <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8">
           <div class="max-w-7xl mx-auto grid gap-4 sm:gap-6">
-            {/* Upload Section - Only show when NO data */}
+            {/* Hero + Upload Section - Only show when NO data */}
             {!conversationData.value && (
-              <section class="glass-strong p-8 max-w-2xl mx-auto mt-8" style={{
-                borderRadius: 'var(--border-radius-xl)',
-                boxShadow: 'var(--shadow-xl)'
+              <div class="flex flex-col items-center justify-center text-center" style={{
+                minHeight: 'max(500px, 60vh)',
+                paddingTop: 'clamp(2rem, 8vh, 4rem)',
+                paddingBottom: 'clamp(3rem, 10vh, 6rem)'
               }}>
-                <UploadIsland />
-              </section>
+                {/* Simple abstract mark */}
+                <div style={{
+                  width: '80px',
+                  height: '80px',
+                  marginBottom: '2.5rem',
+                  borderRadius: '22px',
+                  background: 'var(--color-accent)',
+                  border: '4px solid var(--color-text)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '2.5rem',
+                  fontWeight: '900',
+                  color: 'white',
+                  boxShadow: '0 10px 20px rgba(0,0,0,0.12)',
+                  transform: 'rotate(-3deg)'
+                }}>
+                  →
+                </div>
+
+                {/* Main title - chonky and confident */}
+                <h1 style={{
+                  fontSize: 'clamp(2.75rem, 9vw, 5.5rem)',
+                  fontWeight: '900',
+                  color: 'var(--color-text)',
+                  letterSpacing: '-0.04em',
+                  lineHeight: '0.95',
+                  marginBottom: '1.5rem',
+                  maxWidth: '16ch'
+                }}>
+                  Conversation Mapper
+                </h1>
+
+                {/* Subtitle - simple and clear */}
+                <p style={{
+                  fontSize: 'clamp(1.125rem, 3vw, 1.625rem)',
+                  fontWeight: '500',
+                  color: 'var(--color-text-secondary)',
+                  lineHeight: '1.4',
+                  marginBottom: '4rem',
+                  maxWidth: '30ch'
+                }}>
+                  Turn your conversations into clarity
+                </p>
+
+                {/* Upload card - centered and prominent */}
+                <div class="w-full max-w-xl">
+                  <UploadIsland />
+                </div>
+              </div>
             )}
 
             {/* Dashboard - Always rendered, shows its own empty state */}
-            <section>
-              <DashboardIsland />
-            </section>
+            {conversationData.value && (
+              <section style={{ paddingTop: 'clamp(1rem, 3vh, 2rem)' }}>
+                <DashboardIsland />
+              </section>
+            )}
           </div>
         </main>
       </div>

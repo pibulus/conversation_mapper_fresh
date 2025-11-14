@@ -367,7 +367,20 @@ export class ThemeRandomizerService {
   }
 
   /**
-   * Generates and applies a complete random theme with mesh gradient.
+   * Generates a simple, tasteful 2-color linear gradient.
+   * Much cleaner than mesh gradients - warm, atmospheric, intentional.
+   */
+  static generateSimpleGradient(baseColor: string, accentColor: string): string {
+    // Prefer gentle diagonal angles (120-240°) for warmth
+    const angles = [135, 145, 155, 165, 180, 195, 205, 215, 225];
+    const angle = angles[Math.floor(Math.random() * angles.length)];
+
+    return `linear-gradient(${angle}deg, ${baseColor}, ${accentColor})`;
+  }
+
+  /**
+   * Generates and applies a complete random theme with clean gradient.
+   * Now using simple 2-color linear gradients instead of messy mesh.
    */
   static randomizeTheme(): Record<string, string> {
     const colorPalette = this.generateRandomColorPalette();
@@ -375,19 +388,18 @@ export class ThemeRandomizerService {
     // Apply colors immediately
     this.applyTheme(colorPalette);
 
-    // Generate mesh gradient (deferred for performance)
+    // Generate simple 2-color gradient (deferred for performance)
     requestAnimationFrame(() => {
-      const gradientColors = [
+      // Use base-100 (lightest) and primary for a clean, warm gradient
+      // This creates subtle, tasteful backgrounds - not chaos
+      const gradientBg = this.generateSimpleGradient(
         colorPalette['--color-base-100'],
-        colorPalette['--color-primary'],
-        colorPalette['--color-secondary'],
-        colorPalette['--color-accent']
-      ];
-      const meshGradient = this.generateMeshGradient(gradientColors);
+        colorPalette['--color-primary']
+      );
 
       // Update gradient
-      document.documentElement.style.setProperty('--gradient-bg', meshGradient);
-      colorPalette['--gradient-bg'] = meshGradient;
+      document.documentElement.style.setProperty('--gradient-bg', gradientBg);
+      colorPalette['--gradient-bg'] = gradientBg;
     });
 
     return colorPalette;
