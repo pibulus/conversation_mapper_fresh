@@ -43,6 +43,10 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
 
   // Refs for cleanup
   const dropdownTimeoutRef = useRef<number | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const dropdownSelectedIndex = useSignal(0);
+  const selectedItemIndex = useSignal<number>(-1);
+  const listContainerRef = useRef<HTMLDivElement>(null);
 
   // Common assignee names (can be customized)
   const commonAssignees = ['Me', 'Team Lead', 'Developer', 'Designer', 'QA', 'Product Manager', 'Client'];
@@ -92,6 +96,74 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [showAddModal.value]);
+
+  // Focus trap: Keep Tab within modal
+  useEffect(() => {
+    if (!showAddModal.value || !modalRef.current) return;
+
+    const modal = modalRef.current;
+    const focusableElements = modal.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    function handleTab(e: KeyboardEvent) {
+      if (e.key !== 'Tab') return;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement?.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement?.focus();
+        }
+      }
+    }
+
+    modal.addEventListener('keydown', handleTab);
+    firstElement?.focus();
+
+    return () => modal.removeEventListener('keydown', handleTab);
+  }, [showAddModal.value]);
+
+  // Arrow key navigation in action items list
+  useEffect(() => {
+    if (!listContainerRef.current || sortedActionItems.length === 0) return;
+
+    function handleArrowKeys(e: KeyboardEvent) {
+      // Only handle if we're not in an input/textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedItemIndex.value = Math.min(
+          selectedItemIndex.value + 1,
+          sortedActionItems.length - 1
+        );
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedItemIndex.value = Math.max(
+          selectedItemIndex.value - 1,
+          0
+        );
+      } else if (e.key === 'Enter' && selectedItemIndex.value >= 0) {
+        e.preventDefault();
+        const item = sortedActionItems[selectedItemIndex.value];
+        toggleActionItem(item.id);
+      }
+    }
+
+    const container = listContainerRef.current;
+    container.addEventListener('keydown', handleArrowKeys);
+
+    return () => container.removeEventListener('keydown', handleArrowKeys);
+  }, [sortedActionItems.length]);
 
   // Filter and sort action items (memoized for performance)
   const sortedActionItems = useComputed(() => {
@@ -346,7 +418,12 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
               </p>
             )}
           </div>
-          <div style={{ padding: '0.5rem var(--card-padding) var(--card-padding)' }} class="max-h-96 overflow-y-auto">
+          <div
+            ref={listContainerRef}
+            tabIndex={0}
+            style={{ padding: '0.5rem var(--card-padding) var(--card-padding)' }}
+            class="max-h-96 overflow-y-auto focus:outline-none"
+          >
             {sortedActionItems.length === 0 ? (
               <div class="empty-state">
                 <div class="empty-state-icon">✓</div>
@@ -354,10 +431,11 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
               </div>
             ) : (
               <div class="space-y-3">
-                {sortedActionItems.map((item) => {
+                {sortedActionItems.map((item, index) => {
                   const isDragging = draggedItemId.value === item.id;
                   const isDragOver = dragOverItemId.value === item.id;
                   const canDrag = item.status === 'pending' && sortMode.value === 'manual';
+                  const isSelected = selectedItemIndex.value === index;
 
                   return (
                     <div
@@ -368,12 +446,15 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                       onDragOver={(e) => canDrag && handleDragOver(e, item.id)}
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => canDrag && handleDrop(e, item.id)}
+                      onClick={() => selectedItemIndex.value = index}
                       class="relative p-4 rounded-lg bg-white hover:bg-gray-50 transition-all"
                       style={{
-                        border: `2px solid ${isDragOver ? 'var(--color-accent)' : 'var(--color-border)'}`,
+                        border: `2px solid ${isSelected ? 'var(--color-accent)' : isDragOver ? 'var(--color-accent)' : 'var(--color-border)'}`,
                         boxShadow: item.status === 'completed' ? 'none' : '2px 2px 0 rgba(0,0,0,0.1)',
                         opacity: isDragging ? '0.5' : '1',
-                        cursor: canDrag ? 'move' : 'default'
+                        cursor: canDrag ? 'move' : 'default',
+                        outline: isSelected ? `2px solid var(--color-accent)` : 'none',
+                        outlineOffset: '2px'
                       }}
                     >
                       {/* Grid layout with drag handle, checkbox and content */}
@@ -541,7 +622,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
       {/* Add New Item Modal */}
       {showAddModal.value && (
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="dashboard-card max-w-md w-full mx-4" style={{
+          <div ref={modalRef} class="dashboard-card max-w-md w-full mx-4" style={{
             padding: 'var(--card-padding)'
           }}>
             <h3 style={{
@@ -589,7 +670,10 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                     type="text"
                     value={newItemAssignee.value}
                     onInput={(e) => newItemAssignee.value = (e.target as HTMLInputElement).value}
-                    onFocus={() => showAssigneeDropdown.value = true}
+                    onFocus={() => {
+                      showAssigneeDropdown.value = true;
+                      dropdownSelectedIndex.value = 0;
+                    }}
                     onBlur={() => {
                       if (dropdownTimeoutRef.current !== null) {
                         clearTimeout(dropdownTimeoutRef.current);
@@ -598,6 +682,27 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                         showAssigneeDropdown.value = false;
                         dropdownTimeoutRef.current = null;
                       }, 200) as unknown as number;
+                    }}
+                    onKeyDown={(e) => {
+                      if (!showAssigneeDropdown.value) return;
+
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        dropdownSelectedIndex.value = Math.min(
+                          dropdownSelectedIndex.value + 1,
+                          commonAssignees.length - 1
+                        );
+                      } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        dropdownSelectedIndex.value = Math.max(
+                          dropdownSelectedIndex.value - 1,
+                          0
+                        );
+                      } else if (e.key === 'Enter' && showAssigneeDropdown.value) {
+                        e.preventDefault();
+                        newItemAssignee.value = commonAssignees[dropdownSelectedIndex.value];
+                        showAssigneeDropdown.value = false;
+                      }
                     }}
                     placeholder="Who's on it?"
                     class="w-full rounded px-3 py-2 pr-8"
@@ -616,7 +721,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                 </div>
                 {showAssigneeDropdown.value && (
                   <div class="absolute z-10 w-full mt-1 bg-white border-2 border-gray-300 rounded shadow-lg max-h-40 overflow-y-auto">
-                    {commonAssignees.map((assignee) => (
+                    {commonAssignees.map((assignee, index) => (
                       <button
                         type="button"
                         key={assignee}
@@ -625,6 +730,10 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                           showAssigneeDropdown.value = false;
                         }}
                         class="w-full text-left px-3 py-2 text-sm hover:bg-purple-100 border-b border-gray-100 last:border-none"
+                        style={{
+                          background: index === dropdownSelectedIndex.value ? 'var(--color-accent)' : 'transparent',
+                          color: index === dropdownSelectedIndex.value ? 'white' : 'var(--color-text)'
+                        }}
                       >
                         {assignee}
                       </button>
