@@ -313,33 +313,56 @@ export default function UploadIsland() {
             {isRecording.value ? 'Stop' : 'Record'}
           </button>
 
-          {/* Recording Timer & Visualizer */}
+          {/* Recording Timer & Progress Bar */}
           {isRecording.value && (
             <div class="space-y-3">
+              {/* Elapsed time display */}
               <div class="text-center">
                 <div style={{
                   fontSize: 'var(--small-size)',
                   color: 'var(--color-text-secondary)',
-                  marginBottom: '0.25rem'
+                  marginBottom: '0.5rem'
                 }}>Recording</div>
-                <div class={`font-mono font-bold ${showTimeWarning.value ? 'animate-pulse' : ''}`} style={{
-                  fontSize: '3rem',
-                  color: showTimeWarning.value ? 'var(--color-danger)' : 'var(--color-text)',
+                <div class="font-mono font-bold" style={{
+                  fontSize: '2rem',
+                  color: 'var(--color-text)',
                   lineHeight: '1'
                 }}>
-                  {formatTime(timeRemaining.value)}
+                  {formatTime(recordingTime.value)}
                 </div>
               </div>
 
-              {/* Warning */}
-              <div class="rounded-lg p-3" style={{
-                background: 'var(--color-danger-bg)',
-                border: `2px solid var(--color-danger-border)`,
-                fontSize: 'var(--text-size)',
-                color: 'var(--color-danger-text)'
+              {/* Progress bar */}
+              <div style={{
+                width: '100%',
+                height: '8px',
+                background: 'var(--color-secondary)',
+                borderRadius: '4px',
+                overflow: 'hidden',
+                border: '2px solid var(--color-border)'
               }}>
-                Don't leave while recording
+                <div style={{
+                  width: `${(recordingTime.value / MAX_RECORDING_TIME) * 100}%`,
+                  height: '100%',
+                  background: showTimeWarning.value
+                    ? 'linear-gradient(90deg, var(--color-accent) 0%, var(--color-danger) 100%)'
+                    : 'var(--color-accent)',
+                  transition: 'width 0.3s ease-out, background 0.5s ease',
+                  borderRadius: '2px'
+                }}></div>
               </div>
+
+              {/* Warning (only show when near limit) */}
+              {showTimeWarning.value && (
+                <div class="rounded-lg p-3" style={{
+                  background: 'var(--color-danger-bg)',
+                  border: `2px solid var(--color-danger-border)`,
+                  fontSize: 'var(--text-size)',
+                  color: 'var(--color-danger-text)'
+                }}>
+                  Don't leave while recording
+                </div>
+              )}
 
               {/* Real-time Audio Visualizer */}
               <AudioVisualizer analyser={analyserRef.current} />
