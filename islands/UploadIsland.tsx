@@ -262,49 +262,36 @@ export default function UploadIsland() {
 
   return (
     <div class="space-y-4">
+      {/* Invitation Hook */}
+      <p style={{
+        textAlign: 'center',
+        fontSize: 'clamp(1rem, 2vw, 1.125rem)',
+        fontWeight: '500',
+        color: 'var(--color-text-secondary)',
+        marginBottom: '0.5rem'
+      }}>
+        Got a conversation? Let's map it
+      </p>
+
       {/* Mode Tabs */}
       <div class="flex gap-2">
         <button
           onClick={() => mode.value = 'record'}
-          class="px-4 py-2 rounded-lg font-semibold"
-          style={{
-            border: `var(--border-width) solid var(--color-border)`,
-            background: mode.value === 'record' ? 'var(--color-accent)' : 'white',
-            color: mode.value === 'record' ? 'white' : 'var(--color-text)',
-            boxShadow: mode.value === 'record' ? 'var(--shadow-soft)' : 'none',
-            transition: 'var(--transition-medium)',
-            fontSize: 'var(--text-size)'
-          }}
+          class={`mode-tab ${mode.value === 'record' ? 'active' : ''}`}
         >
-          🎙️ Record
+          Record
         </button>
         <button
           onClick={() => mode.value = 'text'}
-          class="px-4 py-2 rounded-lg font-semibold"
-          style={{
-            border: `var(--border-width) solid var(--color-border)`,
-            background: mode.value === 'text' ? 'var(--color-accent)' : 'white',
-            color: mode.value === 'text' ? 'white' : 'var(--color-text)',
-            boxShadow: mode.value === 'text' ? 'var(--shadow-soft)' : 'none',
-            transition: 'var(--transition-medium)',
-            fontSize: 'var(--text-size)'
-          }}
+          class={`mode-tab ${mode.value === 'text' ? 'active' : ''}`}
         >
-          📝 Text
+          Text
         </button>
         <button
           onClick={() => mode.value = 'audio'}
-          class="px-4 py-2 rounded-lg font-semibold"
-          style={{
-            border: `var(--border-width) solid var(--color-border)`,
-            background: mode.value === 'audio' ? 'var(--color-accent)' : 'white',
-            color: mode.value === 'audio' ? 'white' : 'var(--color-text)',
-            boxShadow: mode.value === 'audio' ? 'var(--shadow-soft)' : 'none',
-            transition: 'var(--transition-medium)',
-            fontSize: 'var(--text-size)'
-          }}
+          class={`mode-tab ${mode.value === 'audio' ? 'active' : ''}`}
         >
-          🎤 Upload
+          Upload
         </button>
       </div>
 
@@ -324,7 +311,7 @@ export default function UploadIsland() {
               fontSize: 'var(--text-size)'
             }}
           >
-            {isRecording.value ? '⏹ Stop Recording' : '🎙️ Start Recording'}
+            {isRecording.value ? 'Stop' : 'Record'}
           </button>
 
           {/* Recording Timer & Visualizer */}

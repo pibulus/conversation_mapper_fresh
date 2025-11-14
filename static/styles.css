@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -38,6 +40,7 @@
   --border-radius-xl: 32px;
 
   /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --heading-size: 1.125rem;
   --heading-weight: 600;
   --text-size: 0.9375rem;
@@ -63,6 +66,12 @@
   --transition-fast: 150ms ease;
   --transition-medium: 200ms ease;
   --transition-slow: 300ms ease;
+
+  /* Status Colors */
+  --color-danger: #EF4444;
+  --color-danger-bg: #FEE2E2;
+  --color-danger-border: #FECACA;
+  --color-danger-text: #B91C1C;
 }
 
 /* ===================================================================
@@ -76,7 +85,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -153,4 +162,30 @@ body {
 .glass-dark,
 .glass-strong {
   transition: all var(--transition-medium);
+}
+
+/* ===================================================================
+   MODE TABS - Upload section
+   ================================================================ */
+
+.mode-tab {
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  font-size: var(--text-size);
+  border: var(--border-width) solid var(--color-border);
+  background: white;
+  color: var(--color-text);
+  transition: var(--transition-medium);
+  cursor: pointer;
+}
+
+.mode-tab:hover:not(.active) {
+  background: var(--color-secondary);
+}
+
+.mode-tab.active {
+  background: var(--color-accent);
+  color: white;
+  box-shadow: var(--shadow-soft);
 }

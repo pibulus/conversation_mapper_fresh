@@ -118,10 +118,10 @@ export default function HomeIsland() {
                     fontSize: 'clamp(0.875rem, 2vw, var(--text-size))',
                     boxShadow: 'var(--shadow-soft)'
                   }}
-                  title="Markdown Maker"
+                  title="Export"
                 >
                   <i class={drawerOpen.value ? "fa fa-times" : "fa fa-bars"}></i>
-                  <span class="hidden sm:inline">Markdown</span>
+                  <span class="hidden sm:inline">Export</span>
                 </button>
 
                 {/* Share button */}
