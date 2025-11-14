@@ -265,15 +265,15 @@ export default function UploadIsland() {
   }, []);
 
   return (
-    <div class="softstack-input-lab">
-      <div class="softstack-mode-tabs" role="tablist" aria-label="Capture mode">
+    <div class="mapper-input-lab">
+      <div class="mapper-mode-tabs" role="tablist" aria-label="Capture mode">
         {MODE_TABS.map(({ key, label }) => (
           <button
             key={key}
             type="button"
             role="tab"
             aria-selected={mode.value === key}
-            class={`softstack-mode-tab${mode.value === key ? ' is-active' : ''}`}
+            class={`mapper-mode-tab${mode.value === key ? ' is-active' : ''}`}
             onClick={() => mode.value = key}
           >
             {label}
@@ -282,16 +282,15 @@ export default function UploadIsland() {
       </div>
 
       {mode.value === 'record' && (
-        <div class="softstack-panel-body">
+        <div class="mapper-panel-body">
           <button
             onClick={isRecording.value ? stopRecording : startRecording}
             disabled={isProcessing.value && !isRecording.value}
-            class={`softstack-slab-button${isRecording.value ? ' is-accent' : ''}`}
+            class={`mapper-slab-button${isRecording.value ? ' is-accent' : ''}`}
           >
             {isRecording.value ? 'Stop' : 'Record'}
           </button>
-          <div class="softstack-panel-scroll">
-            <div class="softstack-info-note">Live capture</div>
+          <div class="mapper-panel-scroll">
             {isRecording.value ? (
               <div class="space-y-4 pt-2">
                 <div class="text-center">
@@ -343,36 +342,17 @@ export default function UploadIsland() {
                 <AudioVisualizer analyser={analyserRef.current} />
               </div>
             ) : (
-              <p style={{
-                fontSize: '0.9rem',
-                lineHeight: '1.5',
-                color: 'rgba(0, 0, 0, 0.65)'
-              }}>
-                Ten-minute limit. We warn you with 30 seconds left and keep
-                everything inside your browser.
-              </p>
+              <div style={{ minHeight: '220px' }}></div>
             )}
           </div>
         </div>
       )}
 
       {mode.value === 'text' && (
-        <div class="softstack-panel-body">
-          <div class="softstack-info-note">Paste transcript</div>
+        <div class="mapper-panel-body">
           <textarea
-            class="w-full resize-none focus:outline-none"
+            class="mapper-textarea w-full resize-none"
             rows={8}
-            style={{
-              padding: '18px',
-              fontSize: '15px',
-              lineHeight: '1.5',
-              border: '2px solid var(--softstack-ink)',
-              borderRadius: '14px',
-              background: 'rgba(0, 0, 0, 0.02)',
-              color: '#2C2C2C',
-              transition: 'all 0.2s ease',
-              boxShadow: 'inset 0 4px 0 rgba(0, 0, 0, 0.05)'
-            }}
             placeholder="Paste your conversation here..."
             value={textInput.value}
             onInput={(e) => textInput.value = (e.target as HTMLTextAreaElement).value}
@@ -382,19 +362,11 @@ export default function UploadIsland() {
                 handleTextSubmit();
               }
             }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-accent)';
-              e.currentTarget.style.background = 'white';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = 'var(--softstack-ink)';
-              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.02)';
-            }}
           />
           <button
             onClick={handleTextSubmit}
             disabled={isProcessing.value || !textInput.value.trim()}
-            class="softstack-slab-button is-accent"
+            class="mapper-slab-button"
             style={{ opacity: isProcessing.value || !textInput.value.trim() ? 0.5 : 1 }}
           >
             {isProcessing.value ? 'Processing...' : 'Paste'}
@@ -403,8 +375,7 @@ export default function UploadIsland() {
       )}
 
       {mode.value === 'audio' && (
-        <div class="softstack-panel-body">
-          <div class="softstack-info-note">Upload audio</div>
+        <div class="mapper-panel-body">
           <input
             type="file"
             accept="audio/*"
@@ -416,32 +387,13 @@ export default function UploadIsland() {
           <div
             role="button"
             tabIndex={0}
+            class="mapper-upload-drop"
             onClick={() => !isProcessing.value && fileInputRef.current?.click()}
             onKeyDown={(e) => {
               if ((e.key === 'Enter' || e.key === ' ') && !isProcessing.value) {
                 e.preventDefault();
                 fileInputRef.current?.click();
               }
-            }}
-            style={{
-              padding: '3rem 2rem',
-              textAlign: 'center',
-              border: '3px dashed var(--softstack-ink)',
-              borderRadius: '14px',
-              background: 'rgba(0, 0, 0, 0.03)',
-              cursor: isProcessing.value ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.4)'
-            }}
-            onMouseEnter={(e) => {
-              if (!isProcessing.value) {
-                e.currentTarget.style.borderColor = 'var(--color-accent)';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.85)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'var(--softstack-ink)';
-              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.03)';
             }}
           >
             <div style={{
@@ -463,7 +415,7 @@ export default function UploadIsland() {
           </div>
           <button
             type="button"
-            class="softstack-slab-button"
+            class="mapper-slab-button"
             disabled={isProcessing.value}
             style={{ opacity: isProcessing.value ? 0.5 : 1 }}
             onClick={() => fileInputRef.current?.click()}

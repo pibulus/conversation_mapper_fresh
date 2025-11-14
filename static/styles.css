@@ -21,7 +21,7 @@
   --color-text: #2C2C2C;
   --color-text-secondary: #6B6B6B;
   --color-border: rgba(61, 57, 53, 0.1);
-  --gradient-bg: linear-gradient(to bottom right, #FFE5D4, #FF9A76);
+  --gradient-bg: linear-gradient(120deg, #FEF8F1 0%, #F2F5FF 45%, #F0FBF2 100%);
 
   /* ===================================================================
      DESIGN TOKENS - Consistent styling across components
@@ -73,10 +73,10 @@
   --color-danger-border: #FECACA;
   --color-danger-text: #B91C1C;
 
-  /* SoftStack world tokens */
-  --softstack-ink: #161413;
-  --softstack-shell: rgba(255, 255, 255, 0.92);
-  --softstack-wash: rgba(255, 247, 239, 0.65);
+  /* Module tokens */
+  --module-ink: #15110f;
+  --module-shell: rgba(255, 255, 255, 0.94);
+  --module-wash: rgba(255, 245, 232, 0.6);
 }
 
 /* ===================================================================
@@ -204,324 +204,284 @@ body {
 }
 
 /* ===================================================================
-   SOFTSTACK BACKGROUND SYSTEM
+   CANVAS BACKGROUND + MODULE SYSTEM
    ================================================================ */
 
-.softstack-universe {
+.mapper-scene {
   min-height: 100vh;
   position: relative;
-  background-color: var(--color-base-solid, #FFF5EC);
-  background-image:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 55%),
-    var(--gradient-bg, linear-gradient(120deg, #FFE5D4 0%, #F5C7A9 100%));
+  background: var(--gradient-bg);
   overflow: hidden;
 }
 
-.softstack-universe::before {
+.mapper-scene::before {
   content: "";
   position: absolute;
-  inset: -25% -15% auto -15%;
-  height: 65%;
-  background: repeating-linear-gradient(12deg, rgba(10, 7, 5, 0.04) 0 22px, transparent 22px 44px);
-  opacity: 0.45;
+  inset: -30% -20% auto -20%;
+  height: 70%;
+  background: linear-gradient(105deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 65%);
+  opacity: 0.35;
   transform: rotate(1deg);
   pointer-events: none;
+  animation: sceneDrift 26s ease-in-out infinite alternate;
 }
 
-.softstack-universe::after {
+.mapper-scene::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 110 110' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
   mix-blend-mode: soft-light;
-  opacity: 0.5;
+  opacity: 0.8;
 }
 
-.softstack-background {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 0;
+@keyframes sceneDrift {
+  from { transform: rotate(0.5deg) translateY(0); }
+  to { transform: rotate(-0.75deg) translateY(14px); }
 }
 
-.softstack-background__band,
-.softstack-background__ghost {
-  position: absolute;
-  border-radius: 32px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.softstack-background__band {
-  width: 160%;
-  height: 220px;
-  left: -30%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0));
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  opacity: 0.4;
-  transform: translateY(15%) rotate(-1deg);
-}
-
-.softstack-background__band--vertical {
-  width: 320px;
-  height: 120%;
-  top: -10%;
-  right: 4%;
-  left: auto;
-  transform: translateX(15%) rotate(1deg);
-  opacity: 0.25;
-}
-
-.softstack-background__ghost {
-  border: 2px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.22);
-  box-shadow: 0 18px 40px rgba(12, 7, 3, 0.08);
-}
-
-.softstack-background__ghost--primary {
-  width: 320px;
-  height: 180px;
-  bottom: 8%;
-  left: 6%;
-}
-
-.softstack-background__ghost--secondary {
-  width: 180px;
-  height: 120px;
-  top: 18%;
-  right: 12%;
-}
-
-.softstack-stage {
+.mapper-stage {
   position: relative;
-  padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 6vw, 6rem) clamp(2rem, 5vw, 4rem);
-  min-height: max(640px, 70vh);
+  padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem);
+  min-height: max(600px, 70vh);
   display: flex;
   align-items: flex-end;
-  justify-content: flex-start;
-  z-index: 1;
 }
 
-.softstack-glyph {
-  position: absolute;
-  top: clamp(1.5rem, 4vw, 3rem);
-  left: clamp(1rem, 4vw, 4rem);
-  width: 110px;
-  height: 110px;
-  border-radius: 24px;
-  border: 3px solid var(--softstack-ink);
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.12);
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-  padding: 14px;
-  z-index: 2;
-}
-
-.softstack-glyph span {
-  border-radius: 10px;
-  border: 2px solid var(--softstack-ink);
-  background: rgba(255, 255, 255, 0.75);
-}
-
-.softstack-card {
+.mapper-card {
   position: relative;
-  width: min(100%, 1080px);
-  border: 5px solid var(--softstack-ink);
-  border-radius: 28px;
-  background: var(--softstack-shell);
+  width: min(100%, 1100px);
+  border: 4px solid var(--module-ink);
+  border-radius: 24px;
+  background: var(--module-shell);
   box-shadow:
-    12px 12px 0 rgba(0, 0, 0, 0.14),
-    0 35px 60px rgba(5, 5, 5, 0.15);
-  min-height: clamp(480px, 60vh, 540px);
+    10px 12px 0 rgba(16, 12, 9, 0.15),
+    0 28px 50px rgba(5, 5, 5, 0.14);
+  min-height: clamp(420px, 58vh, 520px);
   overflow: hidden;
-  z-index: 2;
+  transition: transform 280ms cubic-bezier(0.2, 0.75, 0.25, 1), box-shadow 280ms ease;
 }
 
-.softstack-card::before {
+.mapper-card::before {
   content: "";
   position: absolute;
-  inset: 12px;
-  border-radius: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.65);
+  inset: 14px;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.7);
   pointer-events: none;
 }
 
-.softstack-card__inner {
+.mapper-card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow:
+    14px 16px 0 rgba(14, 11, 8, 0.18),
+    0 40px 70px rgba(12, 8, 6, 0.18);
+}
+
+.mapper-card__inner {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(360px, 460px);
-  gap: clamp(1.75rem, 4vw, 3rem);
-  padding: clamp(2rem, 4vw, 3rem);
-  height: 100%;
+  grid-template-columns: minmax(320px, 1fr) minmax(360px, 440px);
+  gap: clamp(2rem, 5vw, 3.5rem);
+  padding: clamp(2.5rem, 4vw, 3.5rem);
+  align-items: stretch;
+  min-height: 460px;
 }
 
-.softstack-hero-copy {
+.mapper-hero-copy {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 1rem;
+  gap: 1.5rem;
+  justify-content: flex-start;
 }
 
-.softstack-eyebrow {
-  font-size: 0.75rem;
+.mapper-eyebrow {
+  font-size: 0.78rem;
   font-weight: 800;
-  letter-spacing: 0.35em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--color-text-secondary, #7A6F68);
+  color: var(--color-text-secondary, #857c75);
 }
 
-.softstack-hero-title {
-  font-size: clamp(2.35rem, 5vw, 3.6rem);
-  text-transform: uppercase;
-  line-height: 1.02;
-  letter-spacing: -0.04em;
+.mapper-hero-title {
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
   font-weight: 900;
-  color: var(--color-text, #141414);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: var(--color-text, #0f0f0f);
   margin: 0;
 }
 
-.softstack-hero-desc {
-  font-size: 1.125rem;
+.mapper-hero-title span {
+  display: block;
+}
+
+.mapper-hero-desc {
+  font-size: 1.1rem;
   font-weight: 600;
-  color: rgba(10, 10, 10, 0.85);
-  letter-spacing: -0.01em;
+  color: rgba(15, 15, 15, 0.82);
 }
 
-.softstack-hero-caption {
-  font-size: 0.95rem;
-  color: rgba(0, 0, 0, 0.7);
+.mapper-hero-caption {
+  font-size: 0.94rem;
+  color: rgba(0, 0, 0, 0.68);
 }
 
-.softstack-card__panel {
+.mapper-card__panel {
   position: relative;
   height: 100%;
 }
 
-.softstack-input-lab {
+.mapper-input-lab {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.2rem;
 }
 
-.softstack-mode-tabs {
+.mapper-mode-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
-.softstack-mode-tab {
-  border: 2px solid var(--softstack-ink);
+.mapper-mode-tab {
+  border: 2px solid var(--module-ink);
   border-radius: 999px;
-  padding: 0.65rem 1.5rem;
-  font-size: 0.82rem;
+  padding: 0.6rem 1.4rem;
+  font-size: 0.85rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--softstack-ink);
-  background: rgba(22, 20, 19, 0.04);
-  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.12);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+  color: var(--module-ink);
+  background: rgba(20, 16, 13, 0.05);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+  transition: transform 140ms ease, box-shadow 140ms ease, background 200ms ease;
 }
 
-.softstack-mode-tab.is-active {
-  background: var(--softstack-ink);
-  color: #fff;
+.mapper-mode-tab.is-active {
+  background: var(--module-ink);
+  color: white;
   box-shadow: 0 10px 0 rgba(0, 0, 0, 0.18);
   transform: translateY(-2px);
 }
 
-.softstack-mode-tab:focus-visible {
+.mapper-mode-tab:focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 3px;
 }
 
-.softstack-panel-body {
+.mapper-panel-body {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding-top: 0.5rem;
-  overflow: hidden;
+  min-height: 340px;
 }
 
-.softstack-panel-scroll {
+.mapper-panel-scroll {
   flex: 1;
   overflow-y: auto;
   padding-right: 4px;
 }
 
-.softstack-slab-button {
+.mapper-slab-button {
   width: 100%;
-  padding: 1.15rem 1.75rem;
+  padding: 1.1rem 1.6rem;
   border-radius: 14px;
-  border: 3px solid var(--softstack-ink);
-  background: var(--softstack-ink);
-  color: #fff;
-  font-size: 1rem;
+  border: 3px solid var(--module-ink);
+  background: var(--module-ink);
+  color: white;
+  font-size: 0.95rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  box-shadow: 0 12px 0 rgba(0, 0, 0, 0.16);
   transition: transform 120ms ease, box-shadow 120ms ease, background 200ms ease;
-  box-shadow: 0 12px 0 rgba(0, 0, 0, 0.18);
 }
 
-.softstack-slab-button.is-accent {
-  background: var(--color-accent, #EA8B9F);
-  border-color: var(--color-accent, #EA8B9F);
+.mapper-slab-button.is-accent {
+  background: var(--color-accent, #ef8ea7);
+  border-color: var(--color-accent, #ef8ea7);
 }
 
-.softstack-slab-button:disabled {
+.mapper-slab-button:disabled {
   opacity: 0.55;
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.1);
   cursor: not-allowed;
 }
 
-.softstack-slab-button:not(:disabled):hover {
+.mapper-slab-button:not(:disabled):hover {
   transform: translate(-2px, -2px);
-  box-shadow: 0 14px 0 rgba(0, 0, 0, 0.22);
+  box-shadow: 0 15px 0 rgba(0, 0, 0, 0.2);
 }
 
-.softstack-slab-button:not(:disabled):active {
-  transform: translate(1px, 2px);
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+.mapper-slab-button:not(:disabled):active {
+  transform: translate(1px, 1px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.18);
 }
 
-.softstack-info-note {
+.mapper-info-note {
   font-size: 0.82rem;
   color: rgba(0, 0, 0, 0.65);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
+.mapper-upload-drop {
+  display: block;
+  padding: 3rem 2rem;
+  text-align: center;
+  border: 3px dashed var(--module-ink);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.mapper-upload-drop:hover {
+  border-color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.mapper-textarea {
+  padding: 18px;
+  font-size: 15px;
+  line-height: 1.5;
+  border: 2px solid var(--module-ink);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.02);
+  color: #2c2c2c;
+  transition: border-color 160ms ease, background 160ms ease;
+  box-shadow: inset 0 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+.mapper-textarea:focus {
+  border-color: var(--color-accent);
+  background: white;
+  outline: none;
+}
+
 @media (max-width: 1024px) {
-  .softstack-card__inner {
+  .mapper-card__inner {
     grid-template-columns: 1fr;
-    min-height: 100%;
   }
 
-  .softstack-card {
+  .mapper-card {
     min-height: unset;
   }
 
-  .softstack-stage {
-    padding-top: 6rem;
+  .mapper-stage {
+    padding-top: 5.5rem;
   }
 }
 
 @media (max-width: 640px) {
-  .softstack-glyph {
-    width: 80px;
-    height: 80px;
-    padding: 10px;
-  }
-
-  .softstack-mode-tabs {
+  .mapper-mode-tabs {
     gap: 0.5rem;
   }
 }

@@ -359,12 +359,31 @@ export class ThemeRandomizerService {
     if (typeof document === 'undefined') return;
 
     requestAnimationFrame(() => {
+      const root = document.documentElement;
       for (const [key, value] of Object.entries(theme)) {
         if (key.startsWith('--color-') || key === '--gradient-bg') {
-          document.documentElement.style.setProperty(key, value);
+          root.style.setProperty(key, value);
         }
       }
+
+      const ink = this.pickSolid(theme['--color-text'], '#15110f');
+      const shell = this.pickSolid(theme['--color-base-solid'], '#FFF9F2');
+      const wash = this.pickSolid(theme['--color-secondary'], 'rgba(255,255,255,0.7)');
+
+      root.style.setProperty('--module-ink', ink);
+      root.style.setProperty('--module-shell', shell);
+      root.style.setProperty('--module-wash', wash);
     });
+  }
+
+  private static pickSolid(value: string | undefined, fallback: string): string {
+    if (!value) return fallback;
+    if (value.includes('gradient')) {
+      const hexMatch = value.match(/#[0-9A-Fa-f]{6}/);
+      if (hexMatch) return hexMatch[0];
+      return fallback;
+    }
+    return value;
   }
 
   /**

@@ -41,13 +41,7 @@ export default function HomeIsland() {
   const transcript = conversationData.value?.transcript?.text || '';
 
   return (
-    <div class="softstack-universe min-h-screen">
-      <div class="softstack-background" aria-hidden="true">
-        <div class="softstack-background__band"></div>
-        <div class="softstack-background__band softstack-background__band--vertical"></div>
-        <div class="softstack-background__ghost softstack-background__ghost--primary"></div>
-        <div class="softstack-background__ghost softstack-background__ghost--secondary"></div>
-      </div>
+    <div class="mapper-scene min-h-screen">
       {/* Top Bar - Brand presence */}
       <header style={{
         background: 'rgba(255, 250, 245, 0.92)',
@@ -188,31 +182,26 @@ export default function HomeIsland() {
           <div class="max-w-7xl mx-auto grid gap-4 sm:gap-6">
             {/* Hero Section - Only show when NO data */}
             {!conversationData.value && (
-              <section class="softstack-stage">
-                <div class="softstack-glyph" aria-hidden="true">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-                <div class="softstack-card">
-                  <div class="softstack-card__inner">
-                    <div class="softstack-hero-copy">
+              <section class="mapper-stage">
+                <div class="mapper-card" data-tilt>
+                  <div class="mapper-card__inner">
+                    <div class="mapper-hero-copy">
                       <div>
-                        <div class="softstack-eyebrow">Softstack field guide</div>
-                        <h1 class="softstack-hero-title">
-                          SEE WHAT&apos;S REALLY<br />GOING ON
+                        <div class="mapper-eyebrow">Welcome to Conversation Mapper</div>
+                        <h1 class="mapper-hero-title">
+                          <span>See what you&apos;re</span>
+                          <span>really saying</span>
                         </h1>
                       </div>
-                      <p class="softstack-hero-desc">
-                        Pin every call, interview, and brainstorm to a tidy slab
-                        that refuses to wobble when you change modes.
+                      <p class="mapper-hero-desc">
+                        Build a confident map for every conversation—stable layout, playful controls,
+                        no resizing jump scares when you switch modes.
                       </p>
-                      <p class="softstack-hero-caption">
-                        Record / Paste / Upload — same module, same rhythm, different inner world.
+                      <p class="mapper-hero-caption">
+                        Record / Paste / Upload — same module, same rhythm.
                       </p>
                     </div>
-                    <div class="softstack-card__panel">
+                    <div class="mapper-card__panel">
                       <UploadIsland />
                     </div>
                   </div>
