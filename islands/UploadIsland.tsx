@@ -342,7 +342,7 @@ export default function UploadIsland() {
                 ref={textAreaRef}
                 class="mapper-textarea w-full resize-none"
                 rows={6}
-                placeholder="Drop audio, paste conversation, or click to type"
+                placeholder="Type, paste, or drop audio…"
                 value={textInput.value}
                 onInput={(e) => {
                   textInput.value = (e.target as HTMLTextAreaElement).value;
@@ -360,7 +360,7 @@ export default function UploadIsland() {
               />
 
               <div class="mapper-input-hint" aria-hidden="true">
-                {selectedFile.value ? (
+                {selectedFile.value && (
                   <div class="mapper-file-chip">
                     <span>{selectedFile.value.name}</span>
                     <button
@@ -374,8 +374,6 @@ export default function UploadIsland() {
                       ×
                     </button>
                   </div>
-                ) : (
-                  <span class="mapper-drop-hint">Drop audio • paste text</span>
                 )}
               </div>
               <button
