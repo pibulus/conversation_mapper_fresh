@@ -9,6 +9,7 @@ import { signal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
 import { initializeTheme } from "../services/themeStore.ts";
+import { getActiveConversationId, loadConversation } from "../core/storage/localStorage.ts";
 import UploadIsland from "./UploadIsland.tsx";
 import DashboardIsland from "./DashboardIsland.tsx";
 import ConversationList from "./ConversationList.tsx";
@@ -21,9 +22,19 @@ import ThemeShuffler from "./ThemeShuffler.tsx";
 const drawerOpen = signal(false);
 
 export default function HomeIsland() {
-  // Initialize theme system on mount
+  // Initialize theme + restore last conversation on mount
   useEffect(() => {
     initializeTheme();
+
+    // Auto-restore last active conversation from localStorage
+    const activeId = getActiveConversationId();
+    if (activeId && !conversationData.value) {
+      const stored = loadConversation(activeId);
+      if (stored) {
+        conversationData.value = stored;
+        console.log('✅ Restored conversation from localStorage:', stored.conversation.title || activeId);
+      }
+    }
   }, []);
 
   // Get transcript for MarkdownMaker
