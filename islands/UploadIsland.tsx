@@ -259,41 +259,42 @@ export default function UploadIsland() {
 
   return (
     <div>
-      {/* Mode Selector - Compact pills */}
+      {/* Mode Selector - Small outlined tabs */}
       <div class="flex gap-2 mb-5" style={{
-        background: 'rgba(0, 0, 0, 0.03)',
-        padding: '4px',
-        borderRadius: '10px',
-        border: '1px solid rgba(0, 0, 0, 0.06)',
-        maxWidth: '360px',
-        margin: '0 auto 1.5rem'
+        maxWidth: '320px',
+        margin: '0 auto 1.5rem',
+        justifyContent: 'center'
       }}>
         {(['record', 'text', 'audio'] as const).map((tabMode) => (
           <button
             key={tabMode}
             onClick={() => mode.value = tabMode}
             style={{
-              flex: 1,
-              padding: '10px 16px',
-              fontSize: '14px',
-              fontWeight: '500',
-              border: 'none',
+              padding: '7px 18px',
+              fontSize: '13px',
+              fontWeight: '600',
+              border: mode.value === tabMode ? '1.5px solid #1A1A1A' : '1px solid rgba(0, 0, 0, 0.15)',
               borderRadius: '8px',
-              background: mode.value === tabMode ? '#1A1A1A' : 'transparent',
-              color: mode.value === tabMode ? 'white' : '#6B6B6B',
+              background: mode.value === tabMode ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
+              color: mode.value === tabMode ? '#0A0A0A' : '#666',
               cursor: 'pointer',
-              transition: 'all 0.15s ease'
+              transition: 'all 0.2s ease',
+              letterSpacing: '0.01em'
             }}
             onMouseEnter={(e) => {
               if (mode.value !== tabMode) {
-                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.05)';
+                e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.3)';
                 e.currentTarget.style.color = '#1A1A1A';
+              } else {
+                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.06)';
               }
             }}
             onMouseLeave={(e) => {
               if (mode.value !== tabMode) {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = '#6B6B6B';
+                e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+                e.currentTarget.style.color = '#666';
+              } else {
+                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.04)';
               }
             }}
           >
@@ -313,36 +314,37 @@ export default function UploadIsland() {
               padding: '18px 32px',
               fontSize: '17px',
               fontWeight: '700',
-              border: '2px solid rgba(0, 0, 0, 0.12)',
-              borderRadius: '14px',
-              background: isRecording.value ? '#EF4444' : '#2A2A2A',
+              border: '2px solid rgba(0, 0, 0, 0.2)',
+              borderRadius: '10px',
+              background: isRecording.value ? '#EF4444' : '#1A1A1A',
               color: 'white',
               cursor: isProcessing.value && !isRecording.value ? 'not-allowed' : 'pointer',
-              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
               opacity: isProcessing.value && !isRecording.value ? 0.5 : 1,
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-              position: 'relative'
+              boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.1)',
+              position: 'relative',
+              letterSpacing: '-0.01em'
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 28px rgba(0, 0, 0, 0.14), 0 0 0 2px var(--color-accent)';
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.15), 0 0 0 2px var(--color-accent)';
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = '4px 4px 0 0 rgba(0, 0, 0, 0.1)';
             }}
             onMouseDown={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.12)';
+                e.currentTarget.style.transform = 'translate(1px, 1px)';
+                e.currentTarget.style.boxShadow = '2px 2px 0 0 rgba(0, 0, 0, 0.12)';
               }
             }}
             onMouseUp={(e) => {
               if (!(isProcessing.value && !isRecording.value)) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--color-accent)';
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.15), 0 0 0 2px var(--color-accent)';
               }
             }}
           >
@@ -453,35 +455,36 @@ export default function UploadIsland() {
               padding: '18px 32px',
               fontSize: '17px',
               fontWeight: '700',
-              border: '2px solid rgba(0, 0, 0, 0.12)',
-              borderRadius: '14px',
-              background: '#2A2A2A',
+              border: '2px solid rgba(0, 0, 0, 0.2)',
+              borderRadius: '10px',
+              background: '#1A1A1A',
               color: 'white',
               cursor: isProcessing.value || !textInput.value.trim() ? 'not-allowed' : 'pointer',
-              transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
               opacity: isProcessing.value || !textInput.value.trim() ? 0.5 : 1,
-              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)'
+              boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.1)',
+              letterSpacing: '-0.01em'
             }}
             onMouseEnter={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 28px rgba(0, 0, 0, 0.14), 0 0 0 2px var(--color-accent)';
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.15), 0 0 0 2px var(--color-accent)';
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = '4px 4px 0 0 rgba(0, 0, 0, 0.1)';
             }}
             onMouseDown={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.12)';
+                e.currentTarget.style.transform = 'translate(1px, 1px)';
+                e.currentTarget.style.boxShadow = '2px 2px 0 0 rgba(0, 0, 0, 0.12)';
               }
             }}
             onMouseUp={(e) => {
               if (!(isProcessing.value || !textInput.value.trim())) {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.16), 0 0 0 1px var(--color-accent)';
+                e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.15), 0 0 0 2px var(--color-accent)';
               }
             }}
           >

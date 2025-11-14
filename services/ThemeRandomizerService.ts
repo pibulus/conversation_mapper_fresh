@@ -369,43 +369,47 @@ export class ThemeRandomizerService {
 
   /**
    * Generates flavorful but CONSTRAINED gradients
-   * Always resolves to warm cream tones - no mud
+   * WARM ONLY: Peach, Coral, Flamingo, Sunset, Sherbet vibes
+   * Always resolves to warm cream - NO greens, NO browns, NO mustard
    */
   static generateSimpleGradient(baseHue: number, secondaryHue: number): string {
-    // Warm spectrum: 330-40 (pink through peach to warm gold)
-    // Always ends in cream/beige territory
+    // WARM ONLY: Flamingo/Pink → Peach/Coral → Sunset/Sherbet → Cream
+    // Range: 330-60° (pink through peach to warm gold)
+    // NO COOL PALETTES - they create greens/teals
 
-    const isWarm = Math.random() > 0.2; // 80% warm
-
+    // Pick starting point in warm spectrum
+    const paletteStart = Math.random();
     let hue1, hue2, hue3;
 
-    if (isWarm) {
-      // WARM PALETTE: Peach → Coral → Cream
-      // Range: 330-40 (wrapping)
-      const warmBase = 345 + (Math.random() * 40); // 345-385 (wraps to 345-25)
-      hue1 = warmBase % 360;
-      hue2 = (warmBase + 18) % 360;
-      // Final stop always resolves toward cream (35-45° = warm beige)
-      hue3 = 38 + (Math.random() * 8); // 38-46° = cream territory
+    if (paletteStart < 0.4) {
+      // FLAMINGO → CORAL → CREAM (330-360-20)
+      const base = 335 + (Math.random() * 15); // 335-350° = flamingo/pink
+      hue1 = base % 360;
+      hue2 = (base + 20) % 360; // shift toward coral
+      hue3 = 38 + (Math.random() * 8); // 38-46° = cream
+    } else if (paletteStart < 0.7) {
+      // PEACH → CORAL → CREAM (350-20)
+      const base = 350 + (Math.random() * 25); // 350-375 wraps to 350-15° = peach/coral
+      hue1 = base % 360;
+      hue2 = (base + 15) % 360;
+      hue3 = 40 + (Math.random() * 6); // 40-46° = cream
     } else {
-      // COOL PALETTE: Mint → Seafoam → Cream
-      // Range: 150-180, resolves to warm
-      const coolBase = 155 + (Math.random() * 25);
-      hue1 = coolBase;
-      hue2 = coolBase + 12;
-      // Still resolve to cream
-      hue3 = 40 + (Math.random() * 8);
+      // SUNSET → SHERBET → CREAM (10-40)
+      const base = 10 + (Math.random() * 25); // 10-35° = sunset/sherbet
+      hue1 = base;
+      hue2 = base + 12;
+      hue3 = 42 + (Math.random() * 6); // 42-48° = cream
     }
 
-    // Diagonal warmth
-    const angle = 130 + (Math.random() * 100); // 130-230
+    // Varied angles for more interest
+    const angle = 120 + (Math.random() * 120); // 120-240 (mostly diagonal)
 
-    // HIGHER LUMINOSITY - always light and creamy
-    const baseLightness = 94;
-    const color1 = this.generateOKLCHColor(baseLightness, this.getRandomValue(0.09, 0.14), hue1);
-    const color2 = this.generateOKLCHColor(baseLightness + 1, this.getRandomValue(0.10, 0.15), hue2);
-    // Final stop is VERY light cream
-    const color3 = this.generateOKLCHColor(96, this.getRandomValue(0.04, 0.08), hue3);
+    // HIGHER LUMINOSITY + HIGHER CHROMA for candy vibes (not lotion)
+    const baseLightness = 93;
+    const color1 = this.generateOKLCHColor(baseLightness, this.getRandomValue(0.11, 0.16), hue1);
+    const color2 = this.generateOKLCHColor(baseLightness + 1, this.getRandomValue(0.12, 0.17), hue2);
+    // Final stop is VERY light cream with low chroma
+    const color3 = this.generateOKLCHColor(96, this.getRandomValue(0.05, 0.09), hue3);
 
     return `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 50%, ${color3} 100%)`;
   }

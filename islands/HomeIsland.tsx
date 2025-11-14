@@ -224,7 +224,7 @@ export default function HomeIsland() {
                       maxWidth: '480px',
                       letterSpacing: '-0.01em'
                     }}>
-                      Turn messy conversations into clear maps.
+                      Turn messy conversations into maps that make sense.
                     </p>
 
                     {/* Supporting Details */}
@@ -235,46 +235,57 @@ export default function HomeIsland() {
                       lineHeight: '1.65',
                       maxWidth: '440px'
                     }}>
-                      Record, paste, or upload any conversation. Get instant summaries, action items, and visual topic maps. No signup. Everything stays private in your browser.
+                      Record, paste, or upload—everything stays in your browser.
                     </p>
                   </div>
 
                   {/* RIGHT: Action Card */}
                   <div>
                     <div style={{
-                      background: 'rgba(255, 250, 245, 0.75)',
-                      backdropFilter: 'blur(20px)',
-                      WebkitBackdropFilter: 'blur(20px)',
-                      border: '2px solid rgba(255, 200, 170, 0.35)',
-                      borderRadius: '24px',
-                      boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.6) inset',
+                      background: 'rgba(255, 250, 245, 0.78)',
+                      backdropFilter: 'blur(24px)',
+                      WebkitBackdropFilter: 'blur(24px)',
+                      border: '1.5px solid rgba(0, 0, 0, 0.12)',
+                      borderRadius: '20px',
+                      boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.06), 0 12px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7)',
                       padding: 'clamp(2rem, 4vw, 3rem)',
                       position: 'relative',
                       overflow: 'hidden',
-                      transition: 'all 0.4s ease'
+                      transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = '0 28px 80px rgba(0, 0, 0, 0.1), 0 0 0 2px rgba(var(--color-accent), 0.25) inset, 0 0 32px rgba(var(--color-accent), 0.12)';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '8px 8px 0 0 rgba(0, 0, 0, 0.08), 0 16px 48px rgba(0, 0, 0, 0.12), inset 0 0 0 1.5px rgba(var(--color-accent), 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.9)';
+                      e.currentTarget.style.transform = 'translateY(-3px) translateX(-1px)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.6) inset';
-                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.06), 0 12px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7)';
+                      e.currentTarget.style.transform = 'translateY(0) translateX(0)';
                     }}
                     >
+                      {/* Subtle noise texture overlay for micro-texture */}
+                      <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.03\'/%3E%3C/svg%3E")',
+                        opacity: 0.5,
+                        pointerEvents: 'none',
+                        zIndex: 0,
+                        mixBlendMode: 'overlay'
+                      }}></div>
+
                       {/* Warm cream glow */}
                       <div style={{
                         position: 'absolute',
-                        top: '-20%',
-                        left: '-10%',
-                        right: '-10%',
-                        height: '70%',
-                        background: 'radial-gradient(ellipse 110% 70% at 50% 0%, rgba(255, 235, 215, 0.4) 0%, rgba(255, 245, 230, 0.2) 50%, transparent 75%)',
+                        top: '-15%',
+                        left: '-5%',
+                        right: '-5%',
+                        height: '60%',
+                        background: 'radial-gradient(ellipse 100% 65% at 50% 0%, rgba(255, 235, 215, 0.35) 0%, rgba(255, 245, 230, 0.15) 50%, transparent 75%)',
                         pointerEvents: 'none',
-                        zIndex: 0
+                        zIndex: 1
                       }}></div>
 
-                      <div style={{ position: 'relative', zIndex: 1 }}>
+                      <div style={{ position: 'relative', zIndex: 2 }}>
                         <UploadIsland />
                       </div>
                     </div>
