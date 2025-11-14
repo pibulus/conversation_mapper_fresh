@@ -295,99 +295,104 @@ export default function UploadIsland() {
 
   const clearSelectedFile = () => {
     selectedFile.value = null;
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   useEffect(() => () => cleanup(), []);
 
   return (
     <div class="mapper-input-lab">
-      <section class="mapper-capture-block mapper-capture-unified">
-        <div class="mapper-block-header">
-          <span class="mapper-block-pill">Input board</span>
-        </div>
+      <section class="mapper-capture-block mapper-capture-unified" aria-label="Conversation input">
 
         <div
-          class={`mapper-unified-input${isDragActive.value ? ' is-drop' : ''}${selectedFile.value ? ' has-file' : ''}`}
-          onDragOver={handleDragOver}
-          onDragEnter={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={() => textAreaRef.current?.focus()}
+          class={`mapper-unified-input${isDragActive.value ? ' is-drop' : ''}${selectedFile.value ? ' has-file' : ''}${isRecording.value ? ' is-recording' : ''}`}
+          onDragOver={isRecording.value ? undefined : handleDragOver}
+          onDragEnter={isRecording.value ? undefined : handleDragOver}
+          onDragLeave={isRecording.value ? undefined : handleDragLeave}
+          onDrop={isRecording.value ? undefined : handleDrop}
+          onClick={() => !isRecording.value && textAreaRef.current?.focus()}
         >
-          <textarea
-            ref={textAreaRef}
-            class="mapper-textarea w-full resize-none"
-            rows={6}
-            placeholder="Paste text, drop audio, or click to type"
-            value={textInput.value}
-            onInput={(e) => {
-              textInput.value = (e.target as HTMLTextAreaElement).value;
-              if (selectedFile.value) {
-                selectedFile.value = null;
-              }
-            }}
-            onKeyDown={(e) => {
-              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && hasText.value) {
-                e.preventDefault();
-                handleTextSubmit();
-              }
-            }}
-            onFocus={() => isDragActive.value = false}
-          />
+          {isRecording.value ? (
+            <div class="mapper-record-visual">
+              <div class="mapper-record-visual__top">
+                <div class="mapper-record-label">Recording</div>
+                <div class="mapper-record-time">{formatTime(recordingTime.value)}</div>
+              </div>
+              <div class="mapper-record-bar">
+                <div
+                  style={{
+                    width: `${(recordingTime.value / MAX_RECORDING_TIME) * 100}%`,
+                    background: showTimeWarning.value ? '#EF4444' : 'var(--accent-electric)'
+                  }}
+                ></div>
+              </div>
+              {showTimeWarning.value && (
+                <p class="mapper-record-warning">
+                  Auto-stop in {formatTime(timeRemaining.value)} — wrap it up.
+                </p>
+              )}
+              <div class="mapper-record-visualizer">
+                <AudioVisualizer analyser={analyserRef.current} />
+              </div>
+            </div>
+          ) : (
+            <>
+              <textarea
+                ref={textAreaRef}
+                class="mapper-textarea w-full resize-none"
+                rows={6}
+                placeholder="Paste text, drop audio, or click to type"
+                value={textInput.value}
+                onInput={(e) => {
+                  textInput.value = (e.target as HTMLTextAreaElement).value;
+                  if (selectedFile.value) {
+                    selectedFile.value = null;
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && hasText.value) {
+                    e.preventDefault();
+                    handleTextSubmit();
+                  }
+                }}
+                onFocus={() => isDragActive.value = false}
+              />
 
-          <div class="mapper-input-hint">
-            {selectedFile.value ? (
-              <div class="mapper-file-chip">
-                <span>{selectedFile.value.name}</span>
+              <div class="mapper-input-hint" aria-hidden="true">
+                {selectedFile.value ? (
+                  <div class="mapper-file-chip">
+                    <span>{selectedFile.value.name}</span>
+                    <button
+                      type="button"
+                      aria-label="Remove file"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        clearSelectedFile();
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <span class="mapper-input-ghost"></span>
+                )}
                 <button
                   type="button"
-                  aria-label="Remove file"
+                  class="mapper-link-btn"
+                  aria-label="Browse file"
                   onClick={(event) => {
                     event.stopPropagation();
-                    clearSelectedFile();
+                    fileInputRef.current?.click();
                   }}
                 >
-                  ×
+                  +
                 </button>
               </div>
-            ) : (
-              <span>Drop audio • paste text</span>
-            )}
-            <button
-              type="button"
-              class="mapper-link-btn"
-              onClick={(event) => {
-                event.stopPropagation();
-                fileInputRef.current?.click();
-              }}
-            >
-              Browse
-            </button>
-          </div>
+            </>
+          )}
         </div>
-
-        {isRecording.value && (
-          <div class="mapper-record-readout">
-            <div>
-              <div class="mapper-record-label">Recording</div>
-              <div class="mapper-record-time">{formatTime(recordingTime.value)}</div>
-            </div>
-            <div class="mapper-record-bar">
-              <div
-                style={{
-                  width: `${(recordingTime.value / MAX_RECORDING_TIME) * 100}%`,
-                  background: showTimeWarning.value ? '#EF4444' : 'var(--accent-electric)'
-                }}
-              ></div>
-            </div>
-            {showTimeWarning.value && (
-              <p class="mapper-record-warning">
-                Auto-stop in {formatTime(timeRemaining.value)} — wrap it up.
-              </p>
-            )}
-            <AudioVisualizer analyser={analyserRef.current} />
-          </div>
-        )}
 
         <div class="mapper-capture-actions">
           <button
