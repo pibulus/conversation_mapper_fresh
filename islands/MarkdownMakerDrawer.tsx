@@ -378,20 +378,13 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
         }}
       >
         {/* Header */}
-        <div class="flex justify-between items-center" style={{
-          background: 'var(--color-accent)',
-          padding: 'var(--card-padding)',
-          borderBottom: `var(--border-width) solid var(--color-border)`
-        }}>
-          <h3 style={{
-            fontSize: 'var(--heading-size)',
-            fontWeight: 'var(--heading-weight)',
-            color: 'white'
-          }}>📝 Markdown Maker</h3>
+        <div class="dashboard-card-header">
+          <h3>Export</h3>
           <button
             onClick={onClose}
             class="text-white hover:text-gray-200 cursor-pointer transition-colors"
-            title="Close drawer"
+            title="Close"
+            aria-label="Close export"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

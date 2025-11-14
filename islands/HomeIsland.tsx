@@ -135,6 +135,13 @@ export default function HomeIsland() {
             // Default header when no conversation loaded
             <div class="flex items-center justify-between gap-4">
               <div class="flex-1 text-center">
+                <div style={{
+                  fontSize: 'clamp(5rem, 12vw, 8rem)',
+                  marginBottom: '1rem',
+                  lineHeight: 1
+                }}>
+                  🧠
+                </div>
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-2 sm:mb-3" style={{
                   color: 'var(--color-text)',
                   letterSpacing: '-0.02em',
@@ -142,11 +149,11 @@ export default function HomeIsland() {
                 }}>
                   Conversation Mapper
                 </h1>
-                <p class="text-lg md:text-xl opacity-80 max-w-2xl mx-auto" style={{
-                  color: 'var(--color-text-secondary)',
-                  lineHeight: 1.5
+                <p class="text-2xl md:text-3xl font-bold opacity-90 max-w-2xl mx-auto" style={{
+                  color: 'var(--color-accent)',
+                  lineHeight: 1.2
                 }}>
-                  Meeting transcripts that make sense
+                  Clarity
                 </p>
               </div>
               <div class="absolute right-4 top-4">

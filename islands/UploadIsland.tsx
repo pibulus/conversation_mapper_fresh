@@ -301,14 +301,13 @@ export default function UploadIsland() {
           <button
             onClick={isRecording.value ? stopRecording : startRecording}
             disabled={isProcessing.value && !isRecording.value}
-            class="w-full py-4 font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full py-6 font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed text-lg"
             style={{
               border: `var(--border-width) solid var(--color-border)`,
-              background: isRecording.value ? '#EF4444' : 'var(--color-accent)',
+              background: isRecording.value ? 'var(--color-danger)' : 'var(--color-accent)',
               color: 'white',
               boxShadow: 'var(--shadow-soft)',
-              transition: 'var(--transition-medium)',
-              fontSize: 'var(--text-size)'
+              transition: 'var(--transition-medium)'
             }}
           >
             {isRecording.value ? 'Stop' : 'Record'}
@@ -317,27 +316,29 @@ export default function UploadIsland() {
           {/* Recording Timer & Visualizer */}
           {isRecording.value && (
             <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <span style={{
-                  fontSize: 'var(--text-size)',
-                  color: 'var(--color-text-secondary)'
-                }}>Recording time limit: 10 minutes</span>
-                <span class={`font-mono font-bold ${showTimeWarning.value ? 'animate-pulse' : ''}`} style={{
-                  fontSize: 'calc(var(--text-size) * 1.2)',
-                  color: showTimeWarning.value ? '#EF4444' : 'var(--color-text)'
+              <div class="text-center">
+                <div style={{
+                  fontSize: 'var(--small-size)',
+                  color: 'var(--color-text-secondary)',
+                  marginBottom: '0.25rem'
+                }}>Recording</div>
+                <div class={`font-mono font-bold ${showTimeWarning.value ? 'animate-pulse' : ''}`} style={{
+                  fontSize: '3rem',
+                  color: showTimeWarning.value ? 'var(--color-danger)' : 'var(--color-text)',
+                  lineHeight: '1'
                 }}>
                   {formatTime(timeRemaining.value)}
-                </span>
+                </div>
               </div>
 
               {/* Warning */}
               <div class="rounded-lg p-3" style={{
-                background: '#FEE2E2',
-                border: `2px solid #FECACA`,
+                background: 'var(--color-danger-bg)',
+                border: `2px solid var(--color-danger-border)`,
                 fontSize: 'var(--text-size)',
-                color: '#B91C1C'
+                color: 'var(--color-danger-text)'
               }}>
-                <strong>⚠️ Recording in progress:</strong> You must stop recording before leaving this page
+                Don't leave while recording
               </div>
 
               {/* Real-time Audio Visualizer */}
@@ -360,7 +361,7 @@ export default function UploadIsland() {
               fontSize: 'var(--text-size)',
               transition: 'var(--transition-fast)'
             }}
-            placeholder="Paste your conversation text here..."
+            placeholder="Paste text"
             value={textInput.value}
             onInput={(e) => textInput.value = (e.target as HTMLTextAreaElement).value}
           />
@@ -385,27 +386,37 @@ export default function UploadIsland() {
       {/* Audio Upload Mode */}
       {mode.value === 'audio' && (
         <div class="space-y-3">
-          <div class="rounded-lg p-8 text-center" style={{
-            border: `var(--border-width) dashed var(--color-border)`,
-            transition: 'var(--transition-medium)'
+          <label class="block rounded-lg p-8 text-center cursor-pointer transition-all hover:bg-white/30" style={{
+            border: `2px dashed var(--color-border)`
           }}>
             <input
               type="file"
               accept="audio/*"
               onChange={handleAudioUpload}
               disabled={isProcessing.value}
-              class="w-full cursor-pointer"
-              style={{
-                fontSize: 'var(--text-size)'
-              }}
+              class="hidden"
             />
-            <p class="mt-2" style={{
+            <i class="fa fa-cloud-upload" style={{
+              fontSize: '3rem',
+              color: 'var(--color-accent)',
+              display: 'block',
+              marginBottom: '0.75rem'
+            }}></i>
+            <p style={{
+              fontSize: 'var(--text-size)',
+              color: 'var(--color-text)',
+              fontWeight: '500',
+              marginBottom: '0.25rem'
+            }}>
+              Drop audio file to upload
+            </p>
+            <p style={{
               fontSize: 'var(--small-size)',
               color: 'var(--color-text-secondary)'
             }}>
-              Upload audio file (MP3, WAV, M4A, etc.)
+              Or click to choose a file
             </p>
-          </div>
+          </label>
         </div>
       )}
 

@@ -371,47 +371,25 @@ export default function DashboardIsland() {
 
         {/* Card 1: Transcript */}
         <div class="w-full">
-          <div class="glass" style={{
-            borderRadius: 'var(--border-radius-lg)',
-            boxShadow: 'var(--shadow-lifted)',
-            height: '100%'
-          }}>
-            <div style={{
-              background: 'var(--color-accent)',
-              padding: 'var(--card-padding)',
-              borderBottom: `var(--border-width) solid var(--color-border)`,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <h3 style={{
-                fontSize: 'var(--heading-size)',
-                fontWeight: 'var(--heading-weight)',
-                color: 'white'
-              }}>📝 Transcript</h3>
+          <div class="dashboard-card">
+            <div class="dashboard-card-header">
+              <h3>Transcript</h3>
               <button
                 onClick={() => transcript?.text && copyToClipboard(transcript.text)}
                 class="text-white hover:text-gray-200 cursor-pointer"
                 style={{ transition: 'var(--transition-fast)' }}
                 title="Copy transcript"
+                aria-label="Copy transcript"
                 disabled={!transcript?.text}
               >
                 <i class="fa fa-copy text-sm"></i>
               </button>
             </div>
-            <div style={{ padding: 'var(--card-padding)' }} class="max-h-96 overflow-y-auto">
+            <div class="dashboard-card-body">
               {!transcript?.text || transcript.text.trim() === '' ? (
-                <div class="flex flex-col items-center justify-center py-8 text-center">
-                  <i class="fa fa-file-text-o text-4xl text-gray-300 mb-3"></i>
-                  <p style={{
-                    fontSize: 'var(--text-size)',
-                    fontWeight: '500',
-                    color: 'var(--color-text-secondary)'
-                  }}>No transcript available</p>
-                  <p style={{
-                    fontSize: 'var(--small-size)',
-                    color: 'var(--color-text-secondary)'
-                  }} class="mt-1">Upload a conversation to see the transcript</p>
+                <div class="empty-state">
+                  <div class="empty-state-icon">📄</div>
+                  <div class="empty-state-text">Quiet here</div>
                 </div>
               ) : (
                 <div class="relative p-4 rounded-lg bg-white" style={{ border: '2px solid var(--color-border)' }}>
@@ -459,54 +437,27 @@ export default function DashboardIsland() {
 
         {/* Card 2: Summary */}
         <div class="w-full">
-          <div class="glass" style={{
-            borderRadius: 'var(--border-radius-lg)',
-            boxShadow: 'var(--shadow-lifted)',
-            height: '100%'
-          }}>
-            <div style={{
-              background: 'var(--color-accent)',
-              padding: 'var(--card-padding)',
-              borderBottom: `var(--border-width) solid var(--color-border)`,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <h3 style={{
-                fontSize: 'var(--heading-size)',
-                fontWeight: 'var(--heading-weight)',
-                color: 'white'
-              }}>📊 Summary</h3>
+          <div class="dashboard-card">
+            <div class="dashboard-card-header">
+              <h3>Summary</h3>
               <div class="flex items-center gap-2">
                 <button
                   onClick={() => summary && copyToClipboard(summary)}
                   class="text-white hover:text-gray-200 cursor-pointer"
                   style={{ transition: 'var(--transition-fast)' }}
                   title="Copy summary"
+                  aria-label="Copy summary"
                   disabled={!summary}
                 >
                   <i class="fa fa-copy text-sm"></i>
                 </button>
-                <span style={{
-                  fontSize: 'var(--tiny-size)',
-                  color: 'white',
-                  opacity: 0.75
-                }}>{conversation.title}</span>
               </div>
             </div>
-            <div style={{ padding: 'var(--card-padding)' }} class="max-h-96 overflow-y-auto">
+            <div class="dashboard-card-body">
               {!summary || summary === "No summary generated" ? (
-                <div class="flex flex-col items-center justify-center py-8 text-center">
-                  <i class="fa fa-info-circle text-4xl text-gray-300 mb-3"></i>
-                  <p style={{
-                    fontSize: 'var(--text-size)',
-                    fontWeight: '500',
-                    color: 'var(--color-text-secondary)'
-                  }}>No summary available yet</p>
-                  <p style={{
-                    fontSize: 'var(--small-size)',
-                    color: 'var(--color-text-secondary)'
-                  }} class="mt-1">Upload a conversation to generate a summary</p>
+                <div class="empty-state">
+                  <div class="empty-state-icon">📋</div>
+                  <div class="empty-state-text">Nothing yet</div>
                 </div>
               ) : (
                 <div>
@@ -571,24 +522,9 @@ export default function DashboardIsland() {
 
         {/* Card 3: Action Items */}
         <div class="w-full">
-          <div class="glass" style={{
-            borderRadius: 'var(--border-radius-lg)',
-            boxShadow: 'var(--shadow-lifted)',
-            height: '100%'
-          }}>
-            <div style={{
-              background: 'var(--color-accent)',
-              padding: 'var(--card-padding)',
-              borderBottom: `var(--border-width) solid var(--color-border)`,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <h3 style={{
-                fontSize: 'var(--heading-size)',
-                fontWeight: 'var(--heading-weight)',
-                color: 'white'
-              }}>✅ Action Items</h3>
+          <div class="dashboard-card">
+            <div class="dashboard-card-header">
+              <h3>Action Items</h3>
               <div class="flex gap-2">
                 <button
                   onClick={cycleSortMode}
@@ -620,7 +556,7 @@ export default function DashboardIsland() {
                 type="text"
                 value={searchQuery.value}
                 onInput={(e) => searchQuery.value = (e.target as HTMLInputElement).value}
-                placeholder="🔍 Search items..."
+                placeholder="Search"
                 class="w-full rounded px-2 py-1 focus:outline-none"
                 style={{
                   fontSize: 'var(--tiny-size)',
@@ -630,23 +566,15 @@ export default function DashboardIsland() {
               />
               {sortMode.value === 'manual' && (
                 <p class="text-xs text-gray-500 mt-1 italic">
-                  💡 Drag pending items to reorder them
+                  Drag to reorder
                 </p>
               )}
             </div>
             <div style={{ padding: '0.5rem var(--card-padding) var(--card-padding)' }} class="max-h-96 overflow-y-auto">
               {sortedActionItems.length === 0 ? (
-                <div class="flex flex-col items-center justify-center py-8 text-center">
-                  <i class="fa fa-clipboard-check text-4xl text-gray-300 mb-3"></i>
-                  <p style={{
-                    fontSize: 'var(--text-size)',
-                    fontWeight: '500',
-                    color: 'var(--color-text-secondary)'
-                  }}>No action items found</p>
-                  <p style={{
-                    fontSize: 'var(--small-size)',
-                    color: 'var(--color-text-secondary)'
-                  }} class="mt-1">Add one manually using the + button</p>
+                <div class="empty-state">
+                  <div class="empty-state-icon">✓</div>
+                  <div class="empty-state-text">All clear</div>
                 </div>
               ) : (
                 <div class="space-y-3">
@@ -716,14 +644,14 @@ export default function DashboardIsland() {
                                   class="px-3 py-1 rounded text-xs font-bold text-white"
                                   style={{ background: 'var(--color-accent)' }}
                                 >
-                                  ✓ Save
+                                  Save
                                 </button>
                                 <button
                                   onClick={cancelEdit}
                                   class="px-3 py-1 rounded text-xs font-bold"
                                   style={{ border: '2px solid var(--color-border)' }}
                                 >
-                                  ✕ Cancel
+                                  Cancel
                                 </button>
                               </div>
                             </div>
@@ -749,7 +677,7 @@ export default function DashboardIsland() {
                               >
                                 <i class="fa fa-user text-xs"></i>
                                 <span style={{ color: item.assignee ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
-                                  {item.assignee || 'Unassigned'}
+                                  {item.assignee || 'None'}
                                 </span>
                               </button>
                               {activeAssigneeDropdown.value === item.id && (
@@ -809,7 +737,7 @@ export default function DashboardIsland() {
                               >
                                 <i class="fa fa-calendar text-xs"></i>
                                 <span style={{ color: item.due_date ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
-                                  {item.due_date ? formatFriendlyDate(item.due_date) : 'No due date'}
+                                  {item.due_date ? formatFriendlyDate(item.due_date) : 'None'}
                                 </span>
                               </button>
                             </div>
@@ -836,21 +764,9 @@ export default function DashboardIsland() {
 
         {/* Card 4: Topic Visualizations - FULL WIDTH (spans all columns) */}
         <div class="w-full lg:col-span-3">
-          <div class="glass" style={{
-            borderRadius: 'var(--border-radius-lg)',
-            boxShadow: 'var(--shadow-lifted)',
-            height: '100%'
-          }}>
-            <div style={{
-              background: 'var(--color-accent)',
-              padding: 'var(--card-padding)',
-              borderBottom: `var(--border-width) solid var(--color-border)`
-            }}>
-              <h3 style={{
-                fontSize: 'var(--heading-size)',
-                fontWeight: 'var(--heading-weight)',
-                color: 'white'
-              }}>📊 Topic Visualizations</h3>
+          <div class="dashboard-card">
+            <div class="dashboard-card-header">
+              <h3>Topic Visualizations</h3>
             </div>
             <div style={{ padding: 'var(--card-padding)', minHeight: '500px' }}>
               <VisualizationSelector />
@@ -863,11 +779,7 @@ export default function DashboardIsland() {
       {/* Add New Item Modal */}
       {showAddModal.value && (
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="max-w-md w-full mx-4" style={{
-            background: 'var(--color-secondary)',
-            borderRadius: 'var(--border-radius)',
-            border: `var(--border-width) solid var(--color-border)`,
-            boxShadow: 'var(--shadow-lifted)',
+          <div class="dashboard-card max-w-md w-full mx-4" style={{
             padding: 'var(--card-padding)'
           }}>
             <h3 style={{
@@ -875,7 +787,7 @@ export default function DashboardIsland() {
               fontWeight: 'var(--heading-weight)',
               color: 'var(--color-text)',
               marginBottom: '1rem'
-            }}>➕ Add New Action Item</h3>
+            }}>Add Item</h3>
 
             <div class="space-y-3">
               <div>
@@ -888,7 +800,7 @@ export default function DashboardIsland() {
                   type="text"
                   value={newItemDescription.value}
                   onInput={(e) => newItemDescription.value = (e.target as HTMLInputElement).value}
-                  placeholder="What needs to be done?"
+                  placeholder="What to do"
                   class="w-full rounded px-3 py-2"
                   style={{
                     fontSize: 'var(--text-size)',
@@ -921,7 +833,7 @@ export default function DashboardIsland() {
                         dropdownTimeoutRef.current = null;
                       }, 200) as unknown as number;
                     }}
-                    placeholder="Who's responsible?"
+                    placeholder="Who"
                     class="w-full rounded px-3 py-2 pr-8"
                     style={{
                       fontSize: 'var(--text-size)',

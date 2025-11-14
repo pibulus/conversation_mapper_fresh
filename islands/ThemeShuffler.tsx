@@ -59,12 +59,6 @@ export default function ThemeShuffler() {
       aria-label="Randomize theme colors"
     >
       <span style={{ fontSize: '1.5rem' }}>🎨</span>
-      <span class="hidden sm:inline sr-only">Theme</span>
-      {themeSignal.value.harmony && (
-        <span class="hidden md:inline text-xs opacity-70">
-          ({themeSignal.value.harmony})
-        </span>
-      )}
     </button>
   );
 }
