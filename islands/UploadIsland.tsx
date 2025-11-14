@@ -305,7 +305,6 @@ export default function UploadIsland() {
   return (
     <div class="mapper-input-lab">
       <section class="mapper-capture-block mapper-capture-unified" aria-label="Conversation input">
-
         <div
           class={`mapper-unified-input${isDragActive.value ? ' is-drop' : ''}${selectedFile.value ? ' has-file' : ''}${isRecording.value ? ' is-recording' : ''}`}
           onDragOver={isRecording.value ? undefined : handleDragOver}
@@ -343,7 +342,7 @@ export default function UploadIsland() {
                 ref={textAreaRef}
                 class="mapper-textarea w-full resize-none"
                 rows={6}
-                placeholder="Paste text, drop audio, or click to type"
+                placeholder="Drop audio, paste conversation, or click to type"
                 value={textInput.value}
                 onInput={(e) => {
                   textInput.value = (e.target as HTMLTextAreaElement).value;
@@ -376,20 +375,20 @@ export default function UploadIsland() {
                     </button>
                   </div>
                 ) : (
-                  <span class="mapper-input-ghost"></span>
+                  <span class="mapper-drop-hint">Drop audio • paste text</span>
                 )}
-                <button
-                  type="button"
-                  class="mapper-link-btn"
-                  aria-label="Browse file"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    fileInputRef.current?.click();
-                  }}
-                >
-                  +
-                </button>
               </div>
+              <button
+                type="button"
+                class="mapper-link-btn"
+                aria-label="Browse file"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+              >
+                +
+              </button>
             </>
           )}
         </div>
