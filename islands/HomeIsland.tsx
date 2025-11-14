@@ -190,10 +190,10 @@ export default function HomeIsland() {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                {/* Unified Hero Card - Message + Action together */}
+                {/* Unified Hero Card - Two columns inside */}
                 <div style={{
                   width: '100%',
-                  maxWidth: '680px',
+                  maxWidth: '1100px',
                   margin: '0 auto'
                 }}>
                   <div style={{
@@ -241,45 +241,65 @@ export default function HomeIsland() {
                     }}></div>
 
                     <div style={{ position: 'relative', zIndex: 2 }}>
-                      {/* Headline + Copy */}
+                      {/* Eyebrow heading */}
                       <div style={{
-                        textAlign: 'center',
-                        marginBottom: 'clamp(2rem, 4vw, 3rem)'
+                        fontSize: '11px',
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        color: 'var(--color-accent)',
+                        marginBottom: '2rem',
+                        opacity: 0.9
                       }}>
-                        <h1 style={{
-                          fontSize: 'clamp(2.5rem, 5.5vw, 3.75rem)',
-                          fontWeight: '900',
-                          color: '#0A0A0A',
-                          letterSpacing: '-0.04em',
-                          lineHeight: '1',
-                          marginBottom: '1.25rem'
-                        }}>
-                          See what you're<br />really saying
-                        </h1>
-
-                        <p style={{
-                          fontSize: 'clamp(17px, 2vw, 20px)',
-                          color: '#3A3A3A',
-                          fontWeight: '500',
-                          lineHeight: '1.5',
-                          marginBottom: '0.75rem',
-                          letterSpacing: '-0.01em'
-                        }}>
-                          Turn messy conversations into maps that make sense.
-                        </p>
-
-                        <p style={{
-                          fontSize: '15px',
-                          color: '#666',
-                          fontWeight: '400',
-                          lineHeight: '1.5'
-                        }}>
-                          Record, paste, or upload—everything stays in your browser.
-                        </p>
+                        Welcome to Conversation Mapper
                       </div>
 
-                      {/* Action Section */}
-                      <UploadIsland />
+                      {/* Two-column layout */}
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                        gap: 'clamp(2rem, 5vw, 4rem)',
+                        alignItems: 'center'
+                      }}>
+                        {/* LEFT: Text */}
+                        <div>
+                          <h1 style={{
+                            fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
+                            fontWeight: '900',
+                            color: '#0A0A0A',
+                            letterSpacing: '-0.04em',
+                            lineHeight: '1.05',
+                            marginBottom: '1.25rem'
+                          }}>
+                            See what you're<br />really saying
+                          </h1>
+
+                          <p style={{
+                            fontSize: 'clamp(17px, 2vw, 20px)',
+                            color: '#3A3A3A',
+                            fontWeight: '500',
+                            lineHeight: '1.5',
+                            marginBottom: '0.75rem',
+                            letterSpacing: '-0.01em'
+                          }}>
+                            Turn messy conversations into maps that make sense.
+                          </p>
+
+                          <p style={{
+                            fontSize: '15px',
+                            color: '#666',
+                            fontWeight: '400',
+                            lineHeight: '1.5'
+                          }}>
+                            Record, paste, or upload—everything stays in your browser.
+                          </p>
+                        </div>
+
+                        {/* RIGHT: Action */}
+                        <div>
+                          <UploadIsland />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

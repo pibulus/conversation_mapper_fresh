@@ -368,60 +368,66 @@ export class ThemeRandomizerService {
   }
 
   /**
-   * Generates PASTEL PUNK gradients
-   * Fresh, elegant, soft but bold - wider color range, subtle execution
-   * Curated palettes: Flamingo, Lavender, Sky, Peach, Mint
+   * Generates SOFT CREAM gradients with subtle color hints
+   * HEAPS close to cream, elegant and warm, barely-there color
+   * Like cream with the faintest blush of color
    */
   static generateSimpleGradient(baseHue: number, secondaryHue: number): string {
-    // PASTEL PUNK: Variety of fresh tones, high lightness, moderate chroma
-    // Each palette flows through related hues with elegant transitions
+    // SOFT CREAM: Mostly cream with subtle color whispers
+    // High lightness (96-98), very low chroma (0.02-0.06)
+    // 4-stop gradient for elegant blending
 
     const paletteChoice = Math.random();
-    let hue1, hue2, hue3;
+    let hue1, hue2, hue3, hue4;
 
-    if (paletteChoice < 0.2) {
-      // FLAMINGO → ROSE → CREAM (325-350)
-      const base = 325 + (Math.random() * 20);
+    if (paletteChoice < 0.25) {
+      // Flamingo whisper → warm cream
+      const base = 330 + (Math.random() * 15);
+      hue1 = base;
+      hue2 = base + 10;
+      hue3 = 40 + (Math.random() * 5); // warm cream
+      hue4 = 42 + (Math.random() * 6); // warm cream
+    } else if (paletteChoice < 0.45) {
+      // Lavender whisper → soft cream
+      const base = 285 + (Math.random() * 25);
       hue1 = base;
       hue2 = base + 15;
-      hue3 = 38 + (Math.random() * 8); // cream
-    } else if (paletteChoice < 0.4) {
-      // LAVENDER → LILAC → SOFT PINK (280-320)
-      const base = 280 + (Math.random() * 30);
-      hue1 = base;
-      hue2 = base + 25;
-      hue3 = 340 + (Math.random() * 15); // soft pink ending
-    } else if (paletteChoice < 0.55) {
-      // SKY → PERIWINKLE → LAVENDER (210-270)
-      const base = 210 + (Math.random() * 35);
-      hue1 = base;
-      hue2 = base + 30;
-      hue3 = base + 50; // stay in cool pastels
-    } else if (paletteChoice < 0.75) {
-      // PEACH → CORAL → WARM CREAM (350-30)
-      const base = 350 + (Math.random() * 30);
-      hue1 = base % 360;
-      hue2 = (base + 20) % 360;
-      hue3 = 40 + (Math.random() * 8); // warm cream
-    } else {
-      // MINT → SEAFOAM → SKY (160-200)
-      const base = 160 + (Math.random() * 25);
+      hue3 = 340 + (Math.random() * 10); // soft pink cream
+      hue4 = 38 + (Math.random() * 8); // cream
+    } else if (paletteChoice < 0.65) {
+      // Sky whisper → cool cream
+      const base = 220 + (Math.random() * 25);
       hue1 = base;
       hue2 = base + 20;
-      hue3 = base + 35; // stay in cool pastels
+      hue3 = 45 + (Math.random() * 8); // neutral cream
+      hue4 = 40 + (Math.random() * 6); // warm cream
+    } else if (paletteChoice < 0.85) {
+      // Peach whisper → warm cream
+      const base = 355 + (Math.random() * 20);
+      hue1 = base % 360;
+      hue2 = (base + 12) % 360;
+      hue3 = 38 + (Math.random() * 6); // warm cream
+      hue4 = 42 + (Math.random() * 6); // warm cream
+    } else {
+      // Mint whisper → neutral cream
+      const base = 165 + (Math.random() * 20);
+      hue1 = base;
+      hue2 = base + 15;
+      hue3 = 50 + (Math.random() * 8); // neutral cream
+      hue4 = 43 + (Math.random() * 7); // warm cream
     }
 
-    // Subtle diagonal angles
-    const angle = 130 + (Math.random() * 100); // 130-230
+    // Gentle angles
+    const angle = 135 + (Math.random() * 90); // 135-225
 
-    // PASTEL RANGE: High lightness (92-96), moderate chroma (0.08-0.14)
-    // Subtle but present - not washed out, not too saturated
-    const baseLightness = 92;
-    const color1 = this.generateOKLCHColor(baseLightness, this.getRandomValue(0.09, 0.13), hue1);
-    const color2 = this.generateOKLCHColor(baseLightness + 2, this.getRandomValue(0.10, 0.14), hue2);
-    const color3 = this.generateOKLCHColor(95, this.getRandomValue(0.06, 0.10), hue3);
+    // ULTRA SOFT: Very high lightness (96-98), very low chroma (0.02-0.06)
+    // Barely-there color, mostly cream
+    const color1 = this.generateOKLCHColor(96, this.getRandomValue(0.04, 0.06), hue1);
+    const color2 = this.generateOKLCHColor(97, this.getRandomValue(0.03, 0.05), hue2);
+    const color3 = this.generateOKLCHColor(97.5, this.getRandomValue(0.02, 0.04), hue3);
+    const color4 = this.generateOKLCHColor(98, this.getRandomValue(0.02, 0.03), hue4);
 
-    return `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 50%, ${color3} 100%)`;
+    return `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 35%, ${color3} 70%, ${color4} 100%)`;
   }
 
   /**

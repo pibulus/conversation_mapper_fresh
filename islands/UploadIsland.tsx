@@ -316,7 +316,7 @@ export default function UploadIsland() {
               fontWeight: '700',
               border: '2px solid rgba(0, 0, 0, 0.2)',
               borderRadius: '10px',
-              background: isRecording.value ? '#EF4444' : '#1A1A1A',
+              background: isRecording.value ? '#C97B6B' : '#1A1A1A',
               color: 'white',
               cursor: isProcessing.value && !isRecording.value ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
