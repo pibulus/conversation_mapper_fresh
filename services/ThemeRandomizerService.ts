@@ -368,48 +368,58 @@ export class ThemeRandomizerService {
   }
 
   /**
-   * Generates flavorful but CONSTRAINED gradients
-   * WARM ONLY: Peach, Coral, Flamingo, Sunset, Sherbet vibes
-   * Always resolves to warm cream - NO greens, NO browns, NO mustard
+   * Generates PASTEL PUNK gradients
+   * Fresh, elegant, soft but bold - wider color range, subtle execution
+   * Curated palettes: Flamingo, Lavender, Sky, Peach, Mint
    */
   static generateSimpleGradient(baseHue: number, secondaryHue: number): string {
-    // WARM ONLY: Flamingo/Pink → Peach/Coral → Sunset/Sherbet → Cream
-    // Range: 330-60° (pink through peach to warm gold)
-    // NO COOL PALETTES - they create greens/teals
+    // PASTEL PUNK: Variety of fresh tones, high lightness, moderate chroma
+    // Each palette flows through related hues with elegant transitions
 
-    // Pick starting point in warm spectrum
-    const paletteStart = Math.random();
+    const paletteChoice = Math.random();
     let hue1, hue2, hue3;
 
-    if (paletteStart < 0.4) {
-      // FLAMINGO → CORAL → CREAM (330-360-20)
-      const base = 335 + (Math.random() * 15); // 335-350° = flamingo/pink
-      hue1 = base % 360;
-      hue2 = (base + 20) % 360; // shift toward coral
-      hue3 = 38 + (Math.random() * 8); // 38-46° = cream
-    } else if (paletteStart < 0.7) {
-      // PEACH → CORAL → CREAM (350-20)
-      const base = 350 + (Math.random() * 25); // 350-375 wraps to 350-15° = peach/coral
-      hue1 = base % 360;
-      hue2 = (base + 15) % 360;
-      hue3 = 40 + (Math.random() * 6); // 40-46° = cream
-    } else {
-      // SUNSET → SHERBET → CREAM (10-40)
-      const base = 10 + (Math.random() * 25); // 10-35° = sunset/sherbet
+    if (paletteChoice < 0.2) {
+      // FLAMINGO → ROSE → CREAM (325-350)
+      const base = 325 + (Math.random() * 20);
       hue1 = base;
-      hue2 = base + 12;
-      hue3 = 42 + (Math.random() * 6); // 42-48° = cream
+      hue2 = base + 15;
+      hue3 = 38 + (Math.random() * 8); // cream
+    } else if (paletteChoice < 0.4) {
+      // LAVENDER → LILAC → SOFT PINK (280-320)
+      const base = 280 + (Math.random() * 30);
+      hue1 = base;
+      hue2 = base + 25;
+      hue3 = 340 + (Math.random() * 15); // soft pink ending
+    } else if (paletteChoice < 0.55) {
+      // SKY → PERIWINKLE → LAVENDER (210-270)
+      const base = 210 + (Math.random() * 35);
+      hue1 = base;
+      hue2 = base + 30;
+      hue3 = base + 50; // stay in cool pastels
+    } else if (paletteChoice < 0.75) {
+      // PEACH → CORAL → WARM CREAM (350-30)
+      const base = 350 + (Math.random() * 30);
+      hue1 = base % 360;
+      hue2 = (base + 20) % 360;
+      hue3 = 40 + (Math.random() * 8); // warm cream
+    } else {
+      // MINT → SEAFOAM → SKY (160-200)
+      const base = 160 + (Math.random() * 25);
+      hue1 = base;
+      hue2 = base + 20;
+      hue3 = base + 35; // stay in cool pastels
     }
 
-    // Varied angles for more interest
-    const angle = 120 + (Math.random() * 120); // 120-240 (mostly diagonal)
+    // Subtle diagonal angles
+    const angle = 130 + (Math.random() * 100); // 130-230
 
-    // HIGHER LUMINOSITY + HIGHER CHROMA for candy vibes (not lotion)
-    const baseLightness = 93;
-    const color1 = this.generateOKLCHColor(baseLightness, this.getRandomValue(0.11, 0.16), hue1);
-    const color2 = this.generateOKLCHColor(baseLightness + 1, this.getRandomValue(0.12, 0.17), hue2);
-    // Final stop is VERY light cream with low chroma
-    const color3 = this.generateOKLCHColor(96, this.getRandomValue(0.05, 0.09), hue3);
+    // PASTEL RANGE: High lightness (92-96), moderate chroma (0.08-0.14)
+    // Subtle but present - not washed out, not too saturated
+    const baseLightness = 92;
+    const color1 = this.generateOKLCHColor(baseLightness, this.getRandomValue(0.09, 0.13), hue1);
+    const color2 = this.generateOKLCHColor(baseLightness + 2, this.getRandomValue(0.10, 0.14), hue2);
+    const color3 = this.generateOKLCHColor(95, this.getRandomValue(0.06, 0.10), hue3);
 
     return `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 50%, ${color3} 100%)`;
   }

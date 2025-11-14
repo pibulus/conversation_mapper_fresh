@@ -43,7 +43,7 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
     dataArrayRef.current = new Uint8Array(analyser.frequencyBinCount);
     console.log(`🎵 Audio visualizer initialized (${analyser.frequencyBinCount} frequency bins)`);
 
-    // Animation draw function
+    // Animation draw function - ELEGANT BARS
     function draw() {
       if (!analyser || !canvasCtx || !canvas || !dataArrayRef.current) return;
 
@@ -55,23 +55,36 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
       // Get frequency data from analyser
       analyser.getByteFrequencyData(dataArrayRef.current);
 
-      // Clear canvas
-      canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+      // Clear canvas with subtle bg
+      canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.02)';
+      canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
-      // Calculate bar dimensions
-      const barWidth = (WIDTH / dataArrayRef.current.length) * 2.5;
-      let barHeight: number;
-      let x = 0;
+      // Sample fewer bars for cleaner look (every 4th bar)
+      const barCount = 48;
+      const barWidth = Math.floor(WIDTH / barCount) - 4;
+      const sampleStep = Math.floor(dataArrayRef.current.length / barCount);
 
-      // Draw frequency bars with theme color
-      for (let i = 0; i < dataArrayRef.current.length; i++) {
-        barHeight = dataArrayRef.current[i] / 2;
+      for (let i = 0; i < barCount; i++) {
+        const dataIndex = i * sampleStep;
+        const value = dataArrayRef.current[dataIndex];
+        const barHeight = (value / 255) * HEIGHT * 0.8; // 80% max height
 
-        // Use theme accent color
-        canvasCtx.fillStyle = accentColorRef.current;
-        canvasCtx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+        const x = i * (barWidth + 4) + 2;
+        const y = HEIGHT - barHeight;
 
-        x += barWidth + 1;
+        // Gradient from accent to lighter
+        const gradient = canvasCtx.createLinearGradient(x, y, x, HEIGHT);
+        gradient.addColorStop(0, accentColorRef.current);
+        gradient.addColorStop(0.6, accentColorRef.current);
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.1)');
+
+        canvasCtx.fillStyle = gradient;
+
+        // Rounded bars
+        canvasCtx.beginPath();
+        const radius = Math.min(barWidth / 2, 3);
+        canvasCtx.roundRect(x, y, barWidth, barHeight, [radius, radius, 0, 0]);
+        canvasCtx.fill();
       }
     }
 
@@ -90,21 +103,24 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
 
   return (
     <div
-      class="w-full rounded-lg p-3"
+      class="w-full"
       style={{
-        background: 'var(--color-secondary)',
-        border: 'var(--border-width) solid var(--color-border)',
-        boxShadow: 'var(--shadow-soft)'
+        background: 'rgba(0, 0, 0, 0.03)',
+        border: '1.5px solid rgba(0, 0, 0, 0.1)',
+        borderRadius: '12px',
+        padding: '16px',
+        boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.06)'
       }}
     >
       <canvas
         ref={canvasRef}
-        class="w-full rounded"
+        class="w-full"
         width="1024"
-        height="200"
+        height="120"
         style={{
           display: 'block',
-          maxHeight: '100px'
+          height: '60px',
+          borderRadius: '6px'
         }}
       />
     </div>

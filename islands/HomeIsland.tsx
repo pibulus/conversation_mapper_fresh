@@ -190,104 +190,96 @@ export default function HomeIsland() {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                {/* Split Hero - Left message / Right action */}
+                {/* Unified Hero Card - Message + Action together */}
                 <div style={{
                   width: '100%',
-                  maxWidth: '1100px',
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                  gap: 'clamp(2rem, 5vw, 4rem)',
-                  alignItems: 'center'
+                  maxWidth: '680px',
+                  margin: '0 auto'
                 }}>
-                  {/* LEFT: Billboard Message */}
-                  <div style={{ padding: '0 1rem' }}>
-                    {/* Big Bold Headline */}
-                    <h1 style={{
-                      fontSize: 'clamp(2.75rem, 6.5vw, 4.5rem)',
-                      fontWeight: '900',
-                      color: '#0A0A0A',
-                      letterSpacing: '-0.05em',
-                      lineHeight: '0.95',
-                      marginBottom: '1.5rem',
-                      maxWidth: '520px'
-                    }}>
-                      See what you're really saying
-                    </h1>
-
-                    {/* Value Prop */}
-                    <p style={{
-                      fontSize: 'clamp(18px, 2.2vw, 22px)',
-                      color: '#3A3A3A',
-                      fontWeight: '500',
-                      lineHeight: '1.5',
-                      marginBottom: '1.25rem',
-                      maxWidth: '480px',
-                      letterSpacing: '-0.01em'
-                    }}>
-                      Turn messy conversations into maps that make sense.
-                    </p>
-
-                    {/* Supporting Details */}
-                    <p style={{
-                      fontSize: '16px',
-                      color: '#666',
-                      fontWeight: '400',
-                      lineHeight: '1.65',
-                      maxWidth: '440px'
-                    }}>
-                      Record, paste, or upload—everything stays in your browser.
-                    </p>
-                  </div>
-
-                  {/* RIGHT: Action Card */}
-                  <div>
+                  <div style={{
+                    background: 'rgba(255, 250, 245, 0.85)',
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)',
+                    border: '2px solid rgba(0, 0, 0, 0.12)',
+                    borderRadius: '24px',
+                    boxShadow: '8px 8px 0 0 rgba(0, 0, 0, 0.06), 0 16px 48px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+                    padding: 'clamp(2.5rem, 5vw, 3.5rem)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '10px 10px 0 0 rgba(0, 0, 0, 0.08), 0 20px 56px rgba(0, 0, 0, 0.12), inset 0 0 0 2px rgba(var(--color-accent), 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.9)';
+                    e.currentTarget.style.transform = 'translateY(-4px) translateX(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '8px 8px 0 0 rgba(0, 0, 0, 0.06), 0 16px 48px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
+                    e.currentTarget.style.transform = 'translateY(0) translateX(0)';
+                  }}
+                  >
+                    {/* Subtle noise texture */}
                     <div style={{
-                      background: 'rgba(255, 250, 245, 0.78)',
-                      backdropFilter: 'blur(24px)',
-                      WebkitBackdropFilter: 'blur(24px)',
-                      border: '1.5px solid rgba(0, 0, 0, 0.12)',
-                      borderRadius: '20px',
-                      boxShadow: '6px 6px 0 0 rgba(0, 0, 0, 0.06), 0 12px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7)',
-                      padding: 'clamp(2rem, 4vw, 3rem)',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = '8px 8px 0 0 rgba(0, 0, 0, 0.08), 0 16px 48px rgba(0, 0, 0, 0.12), inset 0 0 0 1.5px rgba(var(--color-accent), 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.9)';
-                      e.currentTarget.style.transform = 'translateY(-3px) translateX(-1px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = '6px 6px 0 0 rgba(0, 0, 0, 0.06), 0 12px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7)';
-                      e.currentTarget.style.transform = 'translateY(0) translateX(0)';
-                    }}
-                    >
-                      {/* Subtle noise texture overlay for micro-texture */}
-                      <div style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.03\'/%3E%3C/svg%3E")',
-                        opacity: 0.5,
-                        pointerEvents: 'none',
-                        zIndex: 0,
-                        mixBlendMode: 'overlay'
-                      }}></div>
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.03\'/%3E%3C/svg%3E")',
+                      opacity: 0.4,
+                      pointerEvents: 'none',
+                      zIndex: 0,
+                      mixBlendMode: 'overlay'
+                    }}></div>
 
-                      {/* Warm cream glow */}
-                      <div style={{
-                        position: 'absolute',
-                        top: '-15%',
-                        left: '-5%',
-                        right: '-5%',
-                        height: '60%',
-                        background: 'radial-gradient(ellipse 100% 65% at 50% 0%, rgba(255, 235, 215, 0.35) 0%, rgba(255, 245, 230, 0.15) 50%, transparent 75%)',
-                        pointerEvents: 'none',
-                        zIndex: 1
-                      }}></div>
+                    {/* Warm glow */}
+                    <div style={{
+                      position: 'absolute',
+                      top: '-10%',
+                      left: '-5%',
+                      right: '-5%',
+                      height: '50%',
+                      background: 'radial-gradient(ellipse 100% 60% at 50% 0%, rgba(255, 235, 215, 0.3) 0%, rgba(255, 245, 230, 0.12) 50%, transparent 75%)',
+                      pointerEvents: 'none',
+                      zIndex: 1
+                    }}></div>
 
-                      <div style={{ position: 'relative', zIndex: 2 }}>
-                        <UploadIsland />
+                    <div style={{ position: 'relative', zIndex: 2 }}>
+                      {/* Headline + Copy */}
+                      <div style={{
+                        textAlign: 'center',
+                        marginBottom: 'clamp(2rem, 4vw, 3rem)'
+                      }}>
+                        <h1 style={{
+                          fontSize: 'clamp(2.5rem, 5.5vw, 3.75rem)',
+                          fontWeight: '900',
+                          color: '#0A0A0A',
+                          letterSpacing: '-0.04em',
+                          lineHeight: '1',
+                          marginBottom: '1.25rem'
+                        }}>
+                          See what you're<br />really saying
+                        </h1>
+
+                        <p style={{
+                          fontSize: 'clamp(17px, 2vw, 20px)',
+                          color: '#3A3A3A',
+                          fontWeight: '500',
+                          lineHeight: '1.5',
+                          marginBottom: '0.75rem',
+                          letterSpacing: '-0.01em'
+                        }}>
+                          Turn messy conversations into maps that make sense.
+                        </p>
+
+                        <p style={{
+                          fontSize: '15px',
+                          color: '#666',
+                          fontWeight: '400',
+                          lineHeight: '1.5'
+                        }}>
+                          Record, paste, or upload—everything stays in your browser.
+                        </p>
                       </div>
+
+                      {/* Action Section */}
+                      <UploadIsland />
                     </div>
                   </div>
                 </div>
