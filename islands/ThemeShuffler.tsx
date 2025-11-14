@@ -44,34 +44,22 @@ export default function ThemeShuffler() {
       onClick={handleShuffle}
       className={`glass glass-hover`}
       style={{
-        padding: '0.625rem',
+        padding: '0.55rem',
         borderRadius: '10px',
         cursor: 'pointer',
-        transition: 'all var(--transition-medium)',
+        transition: 'transform var(--transition-medium)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: '1.25rem',
-        opacity: 0.85,
-        position: 'relative',
-        border: '1px solid rgba(255, 92, 141, 0.35)',
-        boxShadow: '0 8px 20px rgba(255, 92, 141, 0.2)'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.opacity = '1';
-        e.currentTarget.style.transform = 'scale(1.05)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.opacity = '0.7';
-        e.currentTarget.style.transform = 'scale(1)';
+        fontSize: '1.25rem'
       }}
       title="Shuffle theme colors"
       aria-label="Randomize theme colors"
     >
       {/* Palette icon that spins on click */}
       <svg
-        width="20"
-        height="20"
+        width="18"
+        height="18"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"

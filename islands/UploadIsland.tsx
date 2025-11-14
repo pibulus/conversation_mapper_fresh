@@ -385,9 +385,7 @@ export default function UploadIsland() {
                   fileInputRef.current?.click();
                 }}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 12.5V7a5 5 0 0 0-5-5 5 5 0 0 0-5 5v10a3 3 0 0 1-6 0V8" />
-                </svg>
+                <i class="fa fa-paperclip" aria-hidden="true"></i>
               </button>
             </>
           )}
