@@ -368,10 +368,12 @@ export class ThemeRandomizerService {
 
       const shell = this.pickSolid(theme['--color-base-solid'], '#FFF9F2');
       const wash = this.pickSolid(theme['--color-secondary'], 'rgba(255,255,255,0.7)');
+      const accent = this.pickSolid(theme['--color-accent'], '#ff5c8d');
 
       root.style.setProperty('--module-ink', '#1a130f');
       root.style.setProperty('--module-shell', shell);
       root.style.setProperty('--module-wash', wash);
+      root.style.setProperty('--accent-electric', accent);
     });
   }
 

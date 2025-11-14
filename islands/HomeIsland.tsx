@@ -40,6 +40,8 @@ export default function HomeIsland() {
   // Get transcript for MarkdownMaker
   const transcript = conversationData.value?.transcript?.text || '';
 
+  const heroLines = ["See what you're", 'really saying'];
+
   return (
     <div class="mapper-scene min-h-screen">
       {/* Top Bar - Brand presence */}
@@ -189,8 +191,15 @@ export default function HomeIsland() {
                       <div>
                         <div class="mapper-eyebrow">Welcome to Conversation Mapper</div>
                         <h1 class="mapper-hero-title">
-                          <span>See what you&apos;re</span>
-                          <span>really saying</span>
+                          {heroLines.map((line, lineIndex) => (
+                            <span
+                              class="mapper-hero-line"
+                              key={line}
+                              style={{ animationDelay: `${lineIndex * 140}ms` }}
+                            >
+                              {line}
+                            </span>
+                          ))}
                         </h1>
                       </div>
                       <p class="mapper-hero-desc">

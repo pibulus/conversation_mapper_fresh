@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@property --gradient-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 120deg;
+}
+
 @property --mapper-scale {
   syntax: '<number>';
   inherits: false;
@@ -83,6 +89,7 @@
   --module-ink: #1a130f;
   --module-shell: rgba(255, 255, 255, 0.96);
   --module-wash: rgba(250, 244, 233, 0.6);
+  --accent-electric: #ff5c8d;
 }
 
 /* ===================================================================
@@ -216,8 +223,9 @@ body {
 .mapper-scene {
   min-height: 100vh;
   position: relative;
-  background: var(--gradient-bg);
+  background: var(--gradient-bg, linear-gradient(120deg, #fef8f1 0%, #f0f5ff 45%, #f1fff6 100%));
   overflow: hidden;
+  animation: mapperGradient 18s ease-in-out infinite alternate;
 }
 
 .mapper-scene::before {
@@ -225,7 +233,7 @@ body {
   position: absolute;
   inset: -30% -20% auto -20%;
   height: 70%;
-  background: linear-gradient(105deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 65%);
+  background: linear-gradient(var(--gradient-angle), rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 65%);
   opacity: 0.35;
   transform: rotate(1deg);
   pointer-events: none;
@@ -247,6 +255,11 @@ body {
   to { transform: rotate(-0.75deg) translateY(14px); }
 }
 
+@keyframes mapperGradient {
+  from { --gradient-angle: 108deg; }
+  to { --gradient-angle: 152deg; }
+}
+
 .mapper-stage {
   position: relative;
   padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem);
@@ -261,6 +274,8 @@ body {
   border: 4px solid var(--module-ink);
   border-radius: 24px;
   background: var(--module-shell);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   box-shadow:
     10px 12px 0 rgba(16, 12, 9, 0.15),
     0 28px 50px rgba(5, 5, 5, 0.14);
@@ -325,6 +340,25 @@ body {
   display: block;
 }
 
+.mapper-hero-line {
+  display: block;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: mapperLineIn 0.6s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+@keyframes mapperLineIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .mapper-hero-desc {
   font-size: 1.1rem;
   font-weight: 600;
@@ -376,15 +410,22 @@ body {
 }
 
 .mapper-mode-tab.is-active {
-  background: var(--module-ink);
+  background: var(--accent-electric);
   color: white;
-  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.18);
+  border-color: var(--accent-electric);
+  box-shadow: 0 14px 25px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
 }
 
 .mapper-mode-tab:focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 3px;
+}
+
+.mapper-mode-tab:hover:not(.is-active) {
+  border-color: var(--accent-electric);
+  color: var(--module-ink);
+  background: rgba(255, 92, 141, 0.12);
 }
 
 .mapper-panel-body {
@@ -461,6 +502,17 @@ body {
     1.022 99.5%, 1.021 99.8%, 1.02 100%
   ) forwards;
   box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18);
+}
+
+.mapper-slab-button--record {
+  background: linear-gradient(135deg, var(--accent-electric), #ffb347);
+  border-color: transparent;
+  color: #1a1310;
+  box-shadow: 0 18px 30px rgba(255, 92, 141, 0.35);
+}
+
+.mapper-slab-button--record:not(:disabled):hover {
+  box-shadow: 0 22px 35px rgba(255, 92, 141, 0.45);
 }
 
 .mapper-info-note {

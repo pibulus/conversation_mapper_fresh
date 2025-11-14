@@ -286,7 +286,7 @@ export default function UploadIsland() {
           <button
             onClick={isRecording.value ? stopRecording : startRecording}
             disabled={isProcessing.value && !isRecording.value}
-            class={`mapper-slab-button${isRecording.value ? ' is-accent' : ''}`}
+            class="mapper-slab-button mapper-slab-button--record"
           >
             {isRecording.value ? 'Stop' : 'Record'}
           </button>
@@ -342,18 +342,7 @@ export default function UploadIsland() {
                 <AudioVisualizer analyser={analyserRef.current} />
               </div>
             ) : (
-              <div style={{
-                minHeight: '220px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '0.95rem',
-                color: 'rgba(0, 0, 0, 0.6)',
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase'
-              }}>
-                Ready when you are
-              </div>
+              <div style={{ minHeight: '220px' }}></div>
             )}
           </div>
         </div>
