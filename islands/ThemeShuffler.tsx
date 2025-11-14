@@ -44,27 +44,22 @@ export default function ThemeShuffler() {
       onClick={handleShuffle}
       className={`glass glass-hover ${isSpinning.value ? 'animate-spin' : ''}`}
       style={{
-        padding: '0.75rem',
-        borderRadius: 'var(--border-radius)',
+        padding: '0.625rem',
+        borderRadius: '10px',
         cursor: 'pointer',
         transition: 'all var(--transition-medium)',
         display: 'flex',
         alignItems: 'center',
-        gap: '0.5rem',
-        fontSize: 'var(--text-size)',
-        fontWeight: '500',
-        color: 'var(--color-text)'
+        justifyContent: 'center',
+        fontSize: '1.25rem',
+        opacity: 0.5
       }}
-      title="Randomize Theme"
+      onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+      onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}
+      title="Shuffle colors"
       aria-label="Randomize theme colors"
     >
-      <span style={{ fontSize: '1.5rem' }}>🎨</span>
-      <span class="hidden sm:inline sr-only">Theme</span>
-      {themeSignal.value.harmony && (
-        <span class="hidden md:inline text-xs opacity-70">
-          ({themeSignal.value.harmony})
-        </span>
-      )}
+      ✨
     </button>
   );
 }

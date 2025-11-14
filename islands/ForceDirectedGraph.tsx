@@ -91,10 +91,12 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
 
     // Create modal container
     const modalContainer = document.createElement('div');
-    modalContainer.className = 'bg-white rounded-lg shadow-brutal border-4 border-purple-400';
+    modalContainer.className = 'bg-white rounded-lg';
     modalContainer.style.width = '90%';
     modalContainer.style.height = '85%';
     modalContainer.style.padding = '1.5rem';
+    modalContainer.style.border = '4px solid var(--color-accent)';
+    modalContainer.style.boxShadow = 'var(--shadow-xl)';
 
     // Create header
     const header = document.createElement('div');
@@ -163,7 +165,7 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
 
     const rect = container.getBoundingClientRect();
     const width = rect.width;
-    const height = isFullscreen.value ? rect.height : 800;
+    const height = rect.height || Math.min(800, window.innerHeight * 0.6);
 
     // Map edges to correct format
     const edges = relationships.value.map(rel => ({
@@ -320,8 +322,9 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
 
   if (topics.value.length === 0) {
     return (
-      <div class="flex h-full items-center justify-center text-gray-500">
-        <p>No topic data available</p>
+      <div class="empty-state" style="min-height: 400px;">
+        <div class="empty-state-icon">🕸️</div>
+        <div class="empty-state-text">No topics yet</div>
       </div>
     );
   }
@@ -350,7 +353,7 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
       <div
         ref={svgContainerRef}
         class="mx-auto w-full flex-1 overflow-hidden rounded-lg border border-gray-300 bg-gray-100"
-        style="height: 800px;"
+        style="min-height: 400px; height: 100%;"
       />
 
       {/* Control buttons */}

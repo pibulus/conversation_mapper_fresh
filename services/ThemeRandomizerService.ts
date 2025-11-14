@@ -204,9 +204,9 @@ export class ThemeRandomizerService {
     const harmony = this.getColorHarmony();
     const hues = this.generateHues(baseHue, harmony);
 
-    // Reduced chroma ranges for softer, less garish colors
-    const chromaBase = this.getRandomValue(0.05, 0.15);
-    const chromaAccent = chromaBase + this.getRandomValue(0.05, 0.12);
+    // Very calm chroma ranges - pastel punk but grown-up
+    const chromaBase = this.getRandomValue(0.04, 0.10);
+    const chromaAccent = chromaBase + this.getRandomValue(0.06, 0.14);
 
     // Base Colors with subtle hue variations
     const baseColors = {
@@ -233,18 +233,18 @@ export class ThemeRandomizerService {
     };
 
     const primaryColors = {
-      '--color-primary': this.generateOKLCHColor(65, chromaAccent * 0.8, hues.primary),
-      '--color-primary-content': this.generateOKLCHColor(95, chromaBase * 0.3, hues.primary)
+      '--color-primary': this.generateOKLCHColor(72, chromaAccent * 0.7, hues.primary),
+      '--color-primary-content': this.generateOKLCHColor(96, chromaBase * 0.3, hues.primary)
     };
 
     const secondaryColors = {
-      '--color-secondary': this.generateOKLCHColor(70, chromaAccent * 0.7, hues.secondary),
-      '--color-secondary-content': this.generateOKLCHColor(95, chromaBase * 0.3, hues.secondary)
+      '--color-secondary': this.generateOKLCHColor(75, chromaAccent * 0.6, hues.secondary),
+      '--color-secondary-content': this.generateOKLCHColor(96, chromaBase * 0.3, hues.secondary)
     };
 
     const accentColors = {
-      '--color-accent': this.generateOKLCHColor(60, chromaAccent * 0.85, hues.accent),
-      '--color-accent-content': this.generateOKLCHColor(95, chromaBase * 0.3, hues.accent)
+      '--color-accent': this.generateOKLCHColor(68, chromaAccent * 0.75, hues.accent),
+      '--color-accent-content': this.generateOKLCHColor(96, chromaBase * 0.3, hues.accent)
     };
 
     const neutralColors = {
@@ -367,27 +367,44 @@ export class ThemeRandomizerService {
   }
 
   /**
-   * Generates and applies a complete random theme with mesh gradient.
+   * Generates a simple, tasteful 2-color linear gradient.
+   * Very light, pastel backgrounds - calm and readable.
+   */
+  static generateSimpleGradient(baseHue: number, secondaryHue: number): string {
+    // Prefer gentle diagonal angles for warmth
+    const angles = [135, 145, 155, 165, 180, 195, 205, 215, 225];
+    const angle = angles[Math.floor(Math.random() * angles.length)];
+
+    // Very light, low-chroma colors for calm backgrounds
+    const color1 = this.generateOKLCHColor(96, this.getRandomValue(0.02, 0.06), baseHue);
+    const color2 = this.generateOKLCHColor(94, this.getRandomValue(0.03, 0.08), secondaryHue);
+
+    return `linear-gradient(${angle}deg, ${color1}, ${color2})`;
+  }
+
+  /**
+   * Generates and applies a complete random theme with clean gradient.
+   * Now using simple 2-color linear gradients instead of messy mesh.
    */
   static randomizeTheme(): Record<string, string> {
+    // Generate base hue first
+    const baseHue = Math.random() * 360;
+    const harmony = this.getColorHarmony();
+    const hues = this.generateHues(baseHue, harmony);
+
     const colorPalette = this.generateRandomColorPalette();
 
     // Apply colors immediately
     this.applyTheme(colorPalette);
 
-    // Generate mesh gradient (deferred for performance)
+    // Generate simple 2-color gradient (deferred for performance)
     requestAnimationFrame(() => {
-      const gradientColors = [
-        colorPalette['--color-base-100'],
-        colorPalette['--color-primary'],
-        colorPalette['--color-secondary'],
-        colorPalette['--color-accent']
-      ];
-      const meshGradient = this.generateMeshGradient(gradientColors);
+      // Use base and secondary hues for a very light, calm gradient
+      const gradientBg = this.generateSimpleGradient(hues.base, hues.secondary);
 
       // Update gradient
-      document.documentElement.style.setProperty('--gradient-bg', meshGradient);
-      colorPalette['--gradient-bg'] = meshGradient;
+      document.documentElement.style.setProperty('--gradient-bg', gradientBg);
+      colorPalette['--gradient-bg'] = gradientBg;
     });
 
     return colorPalette;

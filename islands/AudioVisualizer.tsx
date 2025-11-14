@@ -15,6 +15,7 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameIdRef = useRef<number | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
+  const accentColorRef = useRef<string>('rgba(232, 131, 156, 0.8)');
 
   useEffect(() => {
     if (!analyser || !canvasRef.current) {
@@ -29,6 +30,13 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
     if (!canvasCtx) {
       console.error('Failed to get canvas context');
       return;
+    }
+
+    // Read accent color from CSS variables
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
+    if (accentColor) {
+      accentColorRef.current = accentColor;
+      console.log('🎨 Using theme accent color:', accentColor);
     }
 
     // Initialize data array for frequency data
@@ -55,21 +63,12 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
       let barHeight: number;
       let x = 0;
 
-      // Draw frequency bars
+      // Draw frequency bars with theme color
       for (let i = 0; i < dataArrayRef.current.length; i++) {
         barHeight = dataArrayRef.current[i] / 2;
 
-        // Create gradient for each bar (purple to blue)
-        const gradient = canvasCtx.createLinearGradient(
-          x,
-          HEIGHT - barHeight,
-          x,
-          HEIGHT
-        );
-        gradient.addColorStop(0, 'rgba(136, 57, 239, 0.8)'); // Primary purple
-        gradient.addColorStop(1, 'rgba(29, 78, 216, 0.6)');  // Secondary blue
-
-        canvasCtx.fillStyle = gradient;
+        // Use theme accent color
+        canvasCtx.fillStyle = accentColorRef.current;
         canvasCtx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
 
         x += barWidth + 1;
@@ -91,10 +90,11 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
 
   return (
     <div
-      class="w-full rounded-lg p-2"
+      class="w-full rounded-lg p-3"
       style={{
-        background: 'var(--color-base-solid)',
-        border: '2px solid var(--color-border)'
+        background: 'var(--color-secondary)',
+        border: 'var(--border-width) solid var(--color-border)',
+        boxShadow: 'var(--shadow-soft)'
       }}
     >
       <canvas
@@ -104,7 +104,7 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
         height="200"
         style={{
           display: 'block',
-          maxHeight: '80px'
+          maxHeight: '100px'
         }}
       />
     </div>

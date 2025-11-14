@@ -102,69 +102,39 @@ export default function UploadIsland() {
       }, 1000) as unknown as number;
 
     } catch (error) {
-      console.error("❌ Error starting recording:", error);
-      alert("Failed to start recording. Please check microphone permissions.");
-      cleanup();
+      console.error('Error starting recording:', error);
+      alert('Could not access microphone. Please grant permission and try again.');
     }
   }
 
-  async function stopRecording() {
-    if (!mediaRecorderRef.current || !isRecording.value) return;
-
-    isProcessing.value = true;
-    isRecording.value = false;
-
-    // Stop timer
-    if (recordingTimerRef.current) {
-      clearInterval(recordingTimerRef.current);
-      recordingTimerRef.current = null;
-    }
+  function stopRecording() {
+    if (!mediaRecorderRef.current) return;
 
     return new Promise<void>((resolve) => {
-      const mediaRecorder = mediaRecorderRef.current;
-      if (!mediaRecorder) {
-        resolve();
-        return;
-      }
+      const mediaRecorder = mediaRecorderRef.current!;
 
       mediaRecorder.onstop = async () => {
-        const mimeType = mediaRecorder.mimeType || 'audio/webm';
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType || 'audio/webm' });
+        console.log('🎤 Recording stopped. Blob size:', audioBlob.size);
 
+        // Process the audio
         await processAudio(audioBlob);
-        cleanup();
+
         resolve();
       };
 
       mediaRecorder.stop();
-    });
-  }
+      streamRef.current?.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+      isRecording.value = false;
 
-  async function processAudio(audioBlob: Blob) {
-    try {
-      const formData = new FormData();
-      formData.append("audio", audioBlob);
-
-      const response = await fetch("/api/process", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to process");
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+        recordingTimerRef.current = null;
       }
 
-      const result = await response.json();
-      console.log('✅ Processing complete:', result);
-      conversationData.value = result;
-      alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
-    } catch (error) {
-      console.error("❌ Error processing audio:", error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      isProcessing.value = false;
-    }
+      cleanup();
+    });
   }
 
   function cleanup() {
@@ -172,21 +142,48 @@ export default function UploadIsland() {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-
-    // Clean up Web Audio API resources
-    if (audioContextRef.current) {
-      audioContextRef.current.close().catch(console.warn);
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+      recordingTimerRef.current = null;
+    }
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close();
       audioContextRef.current = null;
     }
     analyserRef.current = null;
-
-    mediaRecorderRef.current = null;
-    audioChunksRef.current = [];
-    recordingTime.value = 0;
-    showTimeWarning.value = false;
   }
 
-  const handleTextSubmit = async () => {
+  async function processAudio(audioBlob: Blob) {
+    isProcessing.value = true;
+
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+
+      const response = await fetch('/api/process', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Processing failed');
+      }
+
+      const result = await response.json();
+      console.log('✅ Processing complete:', result);
+
+      conversationData.value = result;
+      alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
+    } catch (error) {
+      console.error('❌ Error processing audio:', error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      isProcessing.value = false;
+    }
+  }
+
+  async function handleTextSubmit() {
     if (!textInput.value.trim()) return;
 
     isProcessing.value = true;
@@ -207,15 +204,15 @@ export default function UploadIsland() {
       console.log('✅ Processing complete:', result);
 
       conversationData.value = result;
-      alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
       textInput.value = '';
+      alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
     } catch (error) {
       console.error('❌ Error processing text:', error);
       alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       isProcessing.value = false;
     }
-  };
+  }
 
   const handleAudioUpload = async (e: Event) => {
     const input = e.target as HTMLInputElement;
@@ -261,156 +258,259 @@ export default function UploadIsland() {
   }, []);
 
   return (
-    <div class="space-y-4">
-      {/* Invitation Hook */}
-      <p style={{
-        textAlign: 'center',
-        fontSize: 'clamp(1rem, 2vw, 1.125rem)',
-        fontWeight: '500',
-        color: 'var(--color-text-secondary)',
-        marginBottom: '0.5rem'
+    <div>
+      {/* Mode Selector - Clean pills */}
+      <div class="flex gap-2 mb-6" style={{
+        background: 'rgba(0, 0, 0, 0.03)',
+        padding: '4px',
+        borderRadius: '10px',
+        border: '1px solid rgba(0, 0, 0, 0.06)'
       }}>
-        Got a conversation? Let's map it
-      </p>
-
-      {/* Mode Tabs */}
-      <div class="flex gap-2">
-        <button
-          onClick={() => mode.value = 'record'}
-          class={`mode-tab ${mode.value === 'record' ? 'active' : ''}`}
-        >
-          Record
-        </button>
-        <button
-          onClick={() => mode.value = 'text'}
-          class={`mode-tab ${mode.value === 'text' ? 'active' : ''}`}
-        >
-          Text
-        </button>
-        <button
-          onClick={() => mode.value = 'audio'}
-          class={`mode-tab ${mode.value === 'audio' ? 'active' : ''}`}
-        >
-          Upload
-        </button>
+        {(['record', 'text', 'audio'] as const).map((tabMode) => (
+          <button
+            key={tabMode}
+            onClick={() => mode.value = tabMode}
+            style={{
+              flex: 1,
+              padding: '10px 16px',
+              fontSize: '14px',
+              fontWeight: '500',
+              border: 'none',
+              borderRadius: '8px',
+              background: mode.value === tabMode ? '#111' : 'transparent',
+              color: mode.value === tabMode ? 'white' : '#666',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={(e) => {
+              if (mode.value !== tabMode) {
+                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.05)';
+                e.currentTarget.style.color = '#111';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (mode.value !== tabMode) {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#666';
+              }
+            }}
+          >
+            {tabMode === 'record' ? 'Record' : tabMode === 'text' ? 'Text' : 'Upload'}
+          </button>
+        ))}
       </div>
 
       {/* Record Mode */}
       {mode.value === 'record' && (
-        <div class="space-y-3">
+        <div class="space-y-4">
           <button
             onClick={isRecording.value ? stopRecording : startRecording}
             disabled={isProcessing.value && !isRecording.value}
-            class="w-full py-4 font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              border: `var(--border-width) solid var(--color-border)`,
-              background: isRecording.value ? '#EF4444' : 'var(--color-accent)',
+              width: '100%',
+              padding: '16px 24px',
+              fontSize: '16px',
+              fontWeight: '600',
+              border: 'none',
+              borderRadius: '10px',
+              background: isRecording.value ? '#EF4444' : '#111',
               color: 'white',
-              boxShadow: 'var(--shadow-soft)',
-              transition: 'var(--transition-medium)',
-              fontSize: 'var(--text-size)'
+              cursor: isProcessing.value && !isRecording.value ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              opacity: isProcessing.value && !isRecording.value ? 0.5 : 1
+            }}
+            onMouseEnter={(e) => {
+              if (!(isProcessing.value && !isRecording.value)) {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
             }}
           >
-            {isRecording.value ? 'Stop' : 'Record'}
+            {isRecording.value ? 'Stop Recording' : 'Start Recording'}
           </button>
 
-          {/* Recording Timer & Visualizer */}
+          {/* Recording Timer & Progress Bar */}
           {isRecording.value && (
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <span style={{
-                  fontSize: 'var(--text-size)',
-                  color: 'var(--color-text-secondary)'
-                }}>Recording time limit: 10 minutes</span>
-                <span class={`font-mono font-bold ${showTimeWarning.value ? 'animate-pulse' : ''}`} style={{
-                  fontSize: 'calc(var(--text-size) * 1.2)',
-                  color: showTimeWarning.value ? '#EF4444' : 'var(--color-text)'
+            <div class="space-y-4 pt-2">
+              {/* Elapsed time display */}
+              <div class="text-center">
+                <div style={{
+                  fontSize: '0.875rem',
+                  color: 'var(--color-text-secondary)',
+                  marginBottom: '0.5rem',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>Recording</div>
+                <div class="font-mono font-bold" style={{
+                  fontSize: 'clamp(2rem, 6vw, 2.5rem)',
+                  color: 'var(--color-text)',
+                  lineHeight: '1'
                 }}>
-                  {formatTime(timeRemaining.value)}
-                </span>
+                  {formatTime(recordingTime.value)}
+                </div>
               </div>
 
-              {/* Warning */}
-              <div class="rounded-lg p-3" style={{
-                background: '#FEE2E2',
-                border: `2px solid #FECACA`,
-                fontSize: 'var(--text-size)',
-                color: '#B91C1C'
+              {/* Progress bar */}
+              <div style={{
+                width: '100%',
+                height: '12px',
+                background: '#E5E7EB',
+                borderRadius: '6px',
+                overflow: 'hidden',
+                border: '2px solid var(--color-text)'
               }}>
-                <strong>⚠️ Recording in progress:</strong> You must stop recording before leaving this page
+                <div style={{
+                  width: `${(recordingTime.value / MAX_RECORDING_TIME) * 100}%`,
+                  height: '100%',
+                  background: showTimeWarning.value ? '#EF4444' : 'var(--color-accent)',
+                  transition: 'width 0.3s ease-out, background 0.5s ease'
+                }}></div>
               </div>
+
+              {/* Warning (only show when near limit) */}
+              {showTimeWarning.value && (
+                <div style={{
+                  padding: '1rem',
+                  background: '#FEE2E2',
+                  border: '2px solid #DC2626',
+                  borderRadius: '8px',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  color: '#991B1B',
+                  textAlign: 'center'
+                }}>
+                  Don't leave while recording
+                </div>
+              )}
 
               {/* Real-time Audio Visualizer */}
               <AudioVisualizer analyser={analyserRef.current} />
             </div>
           )}
-
         </div>
       )}
 
       {/* Text Input Mode */}
       {mode.value === 'text' && (
-        <div class="space-y-3">
+        <div class="space-y-4">
           <textarea
-            class="w-full h-48 p-4 rounded-lg focus:outline-none resize-none"
+            class="w-full resize-none focus:outline-none"
+            rows={8}
             style={{
-              border: `var(--border-width) solid var(--color-border)`,
-              background: 'var(--color-secondary)',
-              color: 'var(--color-text)',
-              fontSize: 'var(--text-size)',
-              transition: 'var(--transition-fast)'
+              padding: '16px',
+              fontSize: '15px',
+              lineHeight: '1.5',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              borderRadius: '10px',
+              background: 'rgba(0, 0, 0, 0.02)',
+              color: '#111',
+              transition: 'all 0.2s ease'
             }}
-            placeholder="Paste your conversation text here..."
+            placeholder="Paste your conversation here..."
             value={textInput.value}
             onInput={(e) => textInput.value = (e.target as HTMLTextAreaElement).value}
+            onKeyDown={(e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && textInput.value.trim()) {
+                e.preventDefault();
+                handleTextSubmit();
+              }
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.2)';
+              e.currentTarget.style.background = 'white';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.02)';
+            }}
           />
           <button
             onClick={handleTextSubmit}
             disabled={isProcessing.value || !textInput.value.trim()}
-            class="px-6 py-3 font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              background: 'var(--color-accent)',
+              width: '100%',
+              padding: '16px 24px',
+              fontSize: '16px',
+              fontWeight: '600',
+              border: 'none',
+              borderRadius: '10px',
+              background: '#111',
               color: 'white',
-              border: `var(--border-width) solid var(--color-border)`,
-              boxShadow: 'var(--shadow-soft)',
-              fontSize: 'var(--text-size)',
-              transition: 'var(--transition-medium)'
+              cursor: isProcessing.value || !textInput.value.trim() ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              opacity: isProcessing.value || !textInput.value.trim() ? 0.5 : 1
+            }}
+            onMouseEnter={(e) => {
+              if (!(isProcessing.value || !textInput.value.trim())) {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
             }}
           >
-            {isProcessing.value ? '⚡ Processing...' : '🚀 Analyze Text'}
+            {isProcessing.value ? 'Processing...' : 'Analyze Text'}
           </button>
         </div>
       )}
 
       {/* Audio Upload Mode */}
       {mode.value === 'audio' && (
-        <div class="space-y-3">
-          <div class="rounded-lg p-8 text-center" style={{
-            border: `var(--border-width) dashed var(--color-border)`,
-            transition: 'var(--transition-medium)'
-          }}>
+        <div class="space-y-4">
+          <label
+            style={{
+              display: 'block',
+              padding: '3rem 2rem',
+              textAlign: 'center',
+              border: '2px dashed rgba(0, 0, 0, 0.15)',
+              borderRadius: '10px',
+              background: 'rgba(0, 0, 0, 0.02)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.3)';
+              e.currentTarget.style.background = 'white';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.02)';
+            }}
+          >
             <input
               type="file"
               accept="audio/*"
               onChange={handleAudioUpload}
               disabled={isProcessing.value}
-              class="w-full cursor-pointer"
-              style={{
-                fontSize: 'var(--text-size)'
-              }}
+              style={{ display: 'none' }}
             />
-            <p class="mt-2" style={{
-              fontSize: 'var(--small-size)',
-              color: 'var(--color-text-secondary)'
+            <div style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#111',
+              marginBottom: '0.5rem'
             }}>
-              Upload audio file (MP3, WAV, M4A, etc.)
-            </p>
-          </div>
+              Drop audio file here
+            </div>
+            <div style={{
+              fontSize: '14px',
+              color: '#666'
+            }}>
+              or click to browse
+            </div>
+          </label>
         </div>
       )}
 
-      {/* Beautiful Loading Modal */}
-      <LoadingModal isOpen={isProcessing.value} />
+      {/* Loading Modal */}
+      {isProcessing.value && <LoadingModal />}
     </div>
   );
 }
