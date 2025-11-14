@@ -143,8 +143,17 @@ export default function HomeIsland() {
               </div>
             </div>
           ) : (
-            // Minimal header when no conversation loaded - just theme button
-            <div class="flex items-center justify-end">
+            // Default header with app title
+            <div class="flex items-center justify-between gap-4">
+              <h1 style={{
+                fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
+                fontWeight: '900',
+                color: 'var(--color-text)',
+                letterSpacing: '-0.03em',
+                lineHeight: '1'
+              }}>
+                Conversation Mapper
+              </h1>
               <ThemeShuffler />
             </div>
           )}
@@ -176,33 +185,20 @@ export default function HomeIsland() {
         {/* Right Content Area */}
         <main class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8">
           <div class="max-w-7xl mx-auto grid gap-4 sm:gap-6">
-            {/* Hero + Upload Section - Only show when NO data */}
+            {/* Upload Section - Only show when NO data */}
             {!conversationData.value && (
               <div class="flex flex-col items-center justify-center" style={{
-                minHeight: 'max(550px, 65vh)',
-                paddingTop: 'clamp(3rem, 10vh, 6rem)',
+                minHeight: 'max(500px, 60vh)',
+                paddingTop: 'clamp(2rem, 6vh, 4rem)',
                 paddingBottom: 'clamp(3rem, 10vh, 6rem)'
               }}>
-                {/* Main title - heavy and confident */}
-                <h1 style={{
-                  fontSize: 'clamp(3rem, 10vw, 6rem)',
-                  fontWeight: '900',
-                  color: 'var(--color-text)',
-                  letterSpacing: '-0.04em',
-                  lineHeight: '0.9',
-                  marginBottom: '1rem',
-                  textAlign: 'center'
-                }}>
-                  Conversation Mapper
-                </h1>
-
                 {/* Subtitle - clear and simple */}
                 <p style={{
-                  fontSize: 'clamp(1rem, 2.5vw, 1.375rem)',
+                  fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
                   fontWeight: '500',
                   color: 'var(--color-text-secondary)',
-                  lineHeight: '1.5',
-                  marginBottom: '3rem',
+                  lineHeight: '1.4',
+                  marginBottom: '2.5rem',
                   textAlign: 'center',
                   maxWidth: '32ch'
                 }}>
