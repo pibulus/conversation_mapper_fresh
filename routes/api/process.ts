@@ -25,7 +25,7 @@ export const handler: Handlers = {
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
       const aiService = createGeminiService(model);
 
       const conversationId = crypto.randomUUID();
