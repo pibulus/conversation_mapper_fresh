@@ -151,12 +151,14 @@ export default function UploadIsland() {
   }
 
   async function processRecordedAudio(audioBlob: Blob) {
+    console.log('🎤 Starting audio processing...', { size: audioBlob.size, type: audioBlob.type });
     isProcessing.value = true;
 
     try {
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
 
+      console.log('📤 Sending audio to API...');
       const response = await fetch('/api/process', {
         method: 'POST',
         body: formData
@@ -164,16 +166,20 @@ export default function UploadIsland() {
 
       if (!response.ok) {
         const error = await response.json();
+        console.error('❌ API error:', error);
         throw new Error(error.error || 'Processing failed');
       }
 
+      console.log('📥 Received response from API');
       const result = await response.json();
+      console.log('✅ Processing complete:', { actionItems: result.actionItems.length, topics: result.nodes.length });
       conversationData.value = result;
       alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
     } catch (error) {
       console.error('❌ Error processing audio:', error);
       alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
+      console.log('🏁 Processing complete, hiding modal');
       isProcessing.value = false;
     }
   }
@@ -181,9 +187,11 @@ export default function UploadIsland() {
   async function handleTextSubmit() {
     if (!hasText.value) return;
 
+    console.log('📝 Starting text processing...', { length: textInput.value.length });
     isProcessing.value = true;
 
     try {
+      console.log('📤 Sending text to API...');
       const response = await fetch('/api/process', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -192,10 +200,13 @@ export default function UploadIsland() {
 
       if (!response.ok) {
         const error = await response.json();
+        console.error('❌ API error:', error);
         throw new Error(error.error || 'Processing failed');
       }
 
+      console.log('📥 Received response from API');
       const result = await response.json();
+      console.log('✅ Processing complete:', { actionItems: result.actionItems.length, topics: result.nodes.length });
       conversationData.value = result;
       textInput.value = '';
       alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
@@ -203,6 +214,7 @@ export default function UploadIsland() {
       console.error('❌ Error processing text:', error);
       alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
+      console.log('🏁 Processing complete, hiding modal');
       isProcessing.value = false;
     }
   }

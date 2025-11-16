@@ -2,7 +2,23 @@
   "permissions": {
     "allow": [
       "Bash(rg:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git -C /Users/pabloalvarado/Projects/active/apps/conversation_mapper_fresh log --all --full-history --format=\"%H %s\" -- .env .env.local .env.example)",
+      "Bash(git -C /Users/pabloalvarado/Projects/active/apps/ziplist log --all --full-history --format=\"%H %s\" -- .env .env.local .env.example)",
+      "Bash(git -C /Users/pabloalvarado/Projects/active/apps/riffrap log --all --full-history --format=\"%H %s\" -- .env .env.local .env.example)",
+      "Bash(git -C /Users/pabloalvarado/Projects/active/apps/button_studio log --all --full-history --format=\"%H %s\" -- .env .env.local .env.example)",
+      "Bash(git -C /Users/pabloalvarado/Projects/active/apps/ziplist show:*)",
+      "Bash(cat:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(if [ -f ~/Documents/reference/INDEX.md ])",
+      "Bash(then head -80 ~/Documents/reference/INDEX.md)",
+      "Bash(else echo \"INDEX.md not found\")",
+      "Bash(fi)",
+      "Bash(if [ -f ~/Documents/reference/BRAND-design-reference.md ])",
+      "Bash(then head -100 ~/Documents/reference/BRAND-design-reference.md)",
+      "Bash(else echo \"Not found\")",
+      "mcp__sequential-thinking__sequentialthinking_tools",
+      "Bash(git show-ref:*)"
     ],
     "deny": [],
     "ask": []

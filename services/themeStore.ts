@@ -67,11 +67,17 @@ export function initializeTheme(): void {
   if (isInitialized) return;
   isInitialized = true;
 
+  console.log('🎨 Initializing theme system...');
+
   // Try to load from localStorage
   const stored = loadThemeFromStorage();
   if (stored) {
+    console.log('🎨 Loaded theme from localStorage:', stored);
     themeSignal.value = stored;
     ThemeRandomizerService.applyTheme(stored);
+  } else {
+    console.log('🎨 No stored theme, using Golden Master default');
+    ThemeRandomizerService.applyTheme(defaultTheme);
   }
 
   // Set up effect to save theme when it changes
@@ -79,14 +85,20 @@ export function initializeTheme(): void {
     const currentTheme = themeSignal.value;
     saveThemeToStorage(currentTheme);
   });
+
+  console.log('✅ Theme system initialized');
 }
 
 /**
  * Randomize theme and apply it
  */
 export function randomizeTheme(): void {
+  console.log('🎨 Randomizing theme...');
   const newTheme = ThemeRandomizerService.randomizeTheme();
+  console.log('🎨 Generated new theme:', newTheme);
   themeSignal.value = newTheme;
+  ThemeRandomizerService.applyTheme(newTheme);
+  console.log('✅ Theme applied to DOM');
 }
 
 /**
