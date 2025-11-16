@@ -234,7 +234,25 @@ body {
 .mapper-scene {
   min-height: 100vh;
   position: relative;
-  background: var(--gradient-bg, linear-gradient(125deg, #fff8f1 0%, #f6f2ff 45%, #f1fbf4 100%));
+  /* Risograph-style fluro pastel splashes - strong color moments */
+  background:
+    /* Fluro pink splash - top left */
+    radial-gradient(circle at 15% 10%,
+      rgba(255, 179, 217, 0.35),
+      transparent 40%),
+    /* Fluro peach splash - bottom right */
+    radial-gradient(circle at 85% 90%,
+      rgba(255, 203, 164, 0.32),
+      transparent 45%),
+    /* Fluro lavender accent - mid left */
+    radial-gradient(circle at 5% 50%,
+      rgba(245, 200, 255, 0.22),
+      transparent 35%),
+    /* Warm cream base with subtle gradient */
+    linear-gradient(135deg,
+      #fff8f1 0%,
+      #ffe9ef 50%,
+      #fff5e8 100%);
   overflow: hidden;
   animation: mapperGradient 18s ease-in-out infinite alternate;
 }
@@ -290,10 +308,11 @@ body {
   border: 3px solid var(--soft-black); /* use shared soft black for clean neutrals */
   border-radius: 26px;
   background: var(--module-shell, #fff7ef); /* single, warm card surface */
-  /* Confident slab shadow: less blur, more distance, darker for presence */
+  /* Confident slab shadow with pink glow layer for zest */
   box-shadow:
-    0 18px 45px rgba(30, 23, 20, 0.22),
-    0 6px 12px rgba(30, 23, 20, 0.12);
+    0 18px 45px rgba(30, 23, 20, 0.28),
+    0 6px 12px rgba(30, 23, 20, 0.12),
+    0 0 60px rgba(255, 92, 141, 0.12);
   min-height: clamp(430px, 60vh, 540px);
   overflow: visible; /* prevents text/controls from clipping */
   isolation: isolate; /* keeps the glow underneath the slab */
@@ -335,18 +354,19 @@ body {
 .mapper-hero-copy {
   display: flex;
   flex-direction: column;
-  gap: 1.4rem; /* tighter gap for better rhythm */
+  gap: 2.2rem; /* increased for visual breathing room */
   justify-content: flex-start;
   padding-bottom: 0.6rem;
 }
 
 .mapper-eyebrow {
-  font-size: 0.76rem;
+  font-size: 0.85rem; /* increased from 0.76rem for stronger presence */
   font-weight: 800;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.28em; /* slightly wider tracking */
   text-transform: uppercase;
   color: var(--soft-brown); /* use soft-brown for secondary text */
-  opacity: 0.75;
+  opacity: 0.85; /* increased from 0.75 for better readability */
+  margin-bottom: 1.2rem; /* explicit gap control for descenders */
 }
 
 .mapper-hero-title {
@@ -657,8 +677,10 @@ body {
   font-weight: 800;
   letter-spacing: 0.1em; /* slightly more tracking for readability */
   text-transform: uppercase;
-  /* LIGHTEST shadow in hierarchy - button is just a tool, not the star */
-  box-shadow: 0 3px 8px rgba(30, 23, 20, 0.14);
+  /* 3D toy-style offset shadow for playful neo-brutalism */
+  box-shadow:
+    4px 4px 0 0 rgba(30, 23, 20, 0.25),  /* Offset shadow for 3D effect */
+    0 3px 8px rgba(30, 23, 20, 0.14);     /* Soft underlay */
   transition: transform 120ms ease, box-shadow 120ms ease, background 200ms ease;
   will-change: transform;
   --mapper-scale: 1;
@@ -679,12 +701,17 @@ body {
 }
 
 .mapper-slab-button:not(:disabled):hover {
-  --mapper-translate-x: -1px;
-  --mapper-translate-y: -1px;
-  box-shadow: 0 6px 16px rgba(30, 23, 20, 0.2);
+  --mapper-translate-x: -2px;
+  --mapper-translate-y: -2px;
+  /* Expanded 3D shadow on hover */
+  box-shadow:
+    6px 6px 0 0 rgba(30, 23, 20, 0.25),
+    0 6px 16px rgba(30, 23, 20, 0.2);
 }
 
 .mapper-slab-button:not(:disabled):active {
+  --mapper-translate-x: 2px;
+  --mapper-translate-y: 2px;
   animation: mapperSpring 0.6s linear(
     0, 0.006, 0.025 0.9%, 0.101 1.8%, 0.539 6.5%, 0.826 10%,
     0.967 11.8%, 1.037 13.1%, 1.078 14.2%, 1.103 15.3%,
@@ -704,7 +731,10 @@ body {
     1.032 95.9%, 1.029 97.5%, 1.026 98.5%, 1.024 99.1%,
     1.022 99.5%, 1.021 99.8%, 1.02 100%
   ) forwards;
-  box-shadow: 0 5px 12px rgba(30, 23, 20, 0.18);
+  /* Compressed 3D shadow on press */
+  box-shadow:
+    2px 2px 0 0 rgba(30, 23, 20, 0.25),
+    0 2px 4px rgba(30, 23, 20, 0.14);
 }
 
 .mapper-slab-button--record {
@@ -760,6 +790,30 @@ body {
 .mapper-textarea:focus {
   background: transparent; /* stay transparent on cream */
   outline: none;
+}
+
+/* ===================================================================
+   HISTORY DRAWER ITEMS (Performance-optimized)
+   ================================================================ */
+
+.history-item {
+  padding: 1rem;
+  border-radius: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.history-item:hover:not(.active) {
+  border-color: rgba(232, 131, 156, 0.3);
+  background: rgba(232, 131, 156, 0.04);
+  transform: translateX(-2px);
+}
+
+.history-item.active {
+  border: 3px solid rgba(232, 131, 156, 0.5);
+  background: rgba(232, 131, 156, 0.08);
 }
 
 @keyframes mapperSpring {

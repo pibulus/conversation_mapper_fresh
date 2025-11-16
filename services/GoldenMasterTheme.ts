@@ -35,6 +35,13 @@ export const GOLDEN_MASTER_COLORS = {
   '--pink-light': '#FFD1E3',
   '--peach-light': '#FFE5D1',
   '--rose-glow': '#FFC4D4',
+
+  // Fluro pastel accents - high energy zest moments (stay in SoftStack hue range)
+  // These are brighter, more saturated pastels for risograph-style color splashes
+  '--fluro-pink': '#FFB3D9',      // Electric bubblegum (oklch 80% 0.20 340)
+  '--fluro-peach': '#FFCBA4',     // Safety orange tint (oklch 83% 0.18 35)
+  '--fluro-lime': '#FFE8A8',      // Laser highlighter cream (oklch 92% 0.12 70) - stays warm!
+  '--fluro-lavender': '#F5C8FF',  // Neon lilac edge (oklch 83% 0.18 320)
 } as const;
 
 // ===================================================================

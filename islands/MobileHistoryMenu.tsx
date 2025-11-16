@@ -4,8 +4,8 @@
  * Mobile-optimized conversation history with touch-friendly controls
  */
 
-import { useSignal } from "@preact/signals";
-import { useEffect } from "preact/hooks";
+import { useSignal, useComputed } from "@preact/signals";
+import { useEffect, useMemo } from "preact/hooks";
 import {
   getConversationList,
   loadConversation,
@@ -14,25 +14,42 @@ import {
 } from "../core/storage/localStorage.ts";
 import { conversationData } from "../signals/conversationStore.ts";
 
+// Cache date formatter outside component to avoid recreating
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit'
+});
+
 export default function MobileHistoryMenu() {
-  const conversations = useSignal<StoredConversation[]>([]);
+  const refreshTrigger = useSignal(0);
   const isOpen = useSignal(false);
   const showConfirmDelete = useSignal<string | null>(null);
 
+  // Memoize conversations list - only recalculates when refreshTrigger changes
+  const conversations = useComputed<StoredConversation[]>(() => {
+    refreshTrigger.value; // Depend on this to trigger refresh
+    return getConversationList();
+  });
+
   // Load conversations on mount
   useEffect(() => {
-    refreshList();
+    refreshTrigger.value++;
   }, []);
 
-  // Refresh list when conversationData changes
+  // Refresh list when conversationData changes (debounced)
   useEffect(() => {
     if (conversationData.value) {
-      refreshList();
+      const timeout = setTimeout(() => {
+        refreshTrigger.value++;
+      }, 150);
+      return () => clearTimeout(timeout);
     }
   }, [conversationData.value]);
 
   function refreshList() {
-    conversations.value = getConversationList();
+    refreshTrigger.value++;
   }
 
   function handleLoad(id: string) {
@@ -254,39 +271,13 @@ export default function MobileHistoryMenu() {
             conversations.value.map((conv) => {
               const isActive = activeId === conv.id;
               const truncatedTitle = conv.conversation.title?.substring(0, 35) || "Untitled";
-              const date = new Date(conv.updatedAt);
-              const dateStr = date.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              });
+              // Use cached date formatter for better performance
+              const dateStr = dateFormatter.format(new Date(conv.updatedAt));
 
               return (
                 <div
                   key={conv.id}
-                  style={{
-                    padding: '1rem',
-                    borderRadius: '12px',
-                    border: isActive ? '3px solid rgba(232, 131, 156, 0.5)' : '2px solid rgba(0, 0, 0, 0.08)',
-                    background: isActive ? 'rgba(232, 131, 156, 0.08)' : 'rgba(255, 255, 255, 0.6)',
-                    transition: 'all 0.2s ease',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.borderColor = 'rgba(232, 131, 156, 0.3)';
-                      e.currentTarget.style.background = 'rgba(232, 131, 156, 0.04)';
-                      e.currentTarget.style.transform = 'translateX(-2px)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.08)';
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.6)';
-                      e.currentTarget.style.transform = 'translateX(0)';
-                    }
-                  }}
+                  class={`history-item${isActive ? ' active' : ''}`}
                 >
                   <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', gap: '0.75rem' }}>
                     <button
