@@ -42,16 +42,32 @@ export default function ThemeShuffler() {
   return (
     <button
       onClick={handleShuffle}
-      className={`glass glass-hover`}
       style={{
-        padding: '0.55rem',
+        padding: '0.65rem 0.75rem',
         borderRadius: '10px',
         cursor: 'pointer',
-        transition: 'transform var(--transition-medium)',
+        transition: 'all 0.2s ease',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: '1.25rem'
+        /* Refined pill style - matches design system, not debug toggle */
+        background: 'rgba(255, 255, 255, 0.65)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1.5px solid rgba(30, 23, 20, 0.12)', /* use soft-black tint */
+        boxShadow: '0 2px 6px rgba(30, 23, 20, 0.06)'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.85)';
+        e.currentTarget.style.borderColor = 'rgba(30, 23, 20, 0.18)';
+        e.currentTarget.style.transform = 'scale(1.04)';
+        e.currentTarget.style.boxShadow = '0 4px 10px rgba(30, 23, 20, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = 'rgba(255, 255, 255, 0.65)';
+        e.currentTarget.style.borderColor = 'rgba(30, 23, 20, 0.12)';
+        e.currentTarget.style.transform = 'scale(1)';
+        e.currentTarget.style.boxShadow = '0 2px 6px rgba(30, 23, 20, 0.06)';
       }}
       title="Shuffle theme colors"
       aria-label="Randomize theme colors"
@@ -69,7 +85,8 @@ export default function ThemeShuffler() {
         style={{
           transition: 'transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
           transform: isSpinning.value ? 'rotate(360deg)' : 'rotate(0deg)',
-          color: '#2C2C2C'
+          color: 'var(--soft-black)', /* use unified color token */
+          opacity: 0.85
         }}
       >
         <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>

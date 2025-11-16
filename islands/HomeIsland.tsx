@@ -85,7 +85,7 @@ export default function HomeIsland() {
                   style={{
                     fontSize: '22px',
                     fontWeight: '800',
-                    color: '#0A0A0A',
+                    color: 'var(--soft-black)', /* use unified soft-black */
                     letterSpacing: '-0.03em'
                   }}
                 >
@@ -137,7 +137,7 @@ export default function HomeIsland() {
                 style={{
                   fontSize: '22px',
                   fontWeight: '800',
-                  color: '#0A0A0A',
+                  color: 'var(--soft-black)', /* use unified soft-black */
                   letterSpacing: '-0.03em',
                   flex: 1,
                   textDecoration: 'none',

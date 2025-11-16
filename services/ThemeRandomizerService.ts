@@ -1,21 +1,27 @@
 // ===================================================================
-// THEME RANDOMIZER SERVICE
-// OKLCH color system with harmony algorithms and mesh gradients
-// Ported from SvelteKit version, adapted for Fresh/Deno
+// THEME RANDOMIZER SERVICE (Golden Master Constrained)
+// OKLCH color system locked to SoftStack pink-peach-cream universe
+// All themes must orbit around the Golden Master - no drift allowed
 // ===================================================================
 
-// Constants for theme generation
-const MIN_HUE_DISTANCE = 90;
-const MAX_RETRIES = 10;
-const LIGHTNESS_VALUES = { l100: 98, l200: 95, l300: 92, content: 15 };
+import {
+  GOLDEN_MASTER_THEME,
+  GOLDEN_MASTER_GRADIENT,
+  RANDOMIZER_CONSTRAINTS,
+  constrainHueToSoftStack,
+  isHueInSoftStackRange,
+} from './GoldenMasterTheme.ts';
 
-// Simplified harmony weights - only the best 4 algorithms
-const HARMONY_WEIGHTS = {
-  golden: 4,              // Golden ratio (most pleasing)
-  wildcard: 3,            // Maximum hue distance (high contrast)
-  'split-complementary': 3, // Balanced modern look
-  analogous: 2            // Safe harmonious option
-};
+/**
+ * SOFTSTACK THEME RANDOMIZER
+ *
+ * This randomizer generates themes that MUST stay within the SoftStack universe:
+ * - Pink-peach-cream hues ONLY (320-40°)
+ * - ±10% sat/bright variance from Golden Master
+ * - No blues, greens, teals, purples
+ * - No pure whites, no cold greys
+ * - Shadow/glow geometry NEVER changes
+ */
 
 export class ThemeRandomizerService {
   // Cache for color generation to improve performance
@@ -30,24 +36,25 @@ export class ThemeRandomizerService {
   }
 
   /**
-   * Generates a hue (0-360) that is at least MIN_HUE_DISTANCE away from any hue in the avoid array.
+   * Generate a hue within SoftStack range (pink-peach-cream: 320-40°)
    */
-  static getDistantHue(avoid: number[], maxRetries = MAX_RETRIES): number {
-    let attempts = 0;
-    let hue = 0;
-    while (attempts < maxRetries) {
-      hue = Math.random() * 360;
-      const isTooClose = avoid.some((h) => {
-        const distance = Math.min(Math.abs(hue - h), 360 - Math.abs(hue - h));
-        return distance < MIN_HUE_DISTANCE;
-      });
-      if (!isTooClose) return hue;
-      attempts++;
+  static generateSoftStackHue(): number {
+    // Randomly choose pink side (320-360) or cream side (0-40)
+    if (Math.random() > 0.5) {
+      // Pink side: 320-360
+      return this.getRandomValue(320, 360);
+    } else {
+      // Cream/peach side: 0-40
+      return this.getRandomValue(0, 40);
     }
-    console.warn(
-      `getDistantHue: Reached maxRetries (${maxRetries}). Returning hue ${hue} even though it may be too close.`
-    );
-    return hue;
+  }
+
+  /**
+   * Generate a nearby hue (for harmony) within SoftStack range
+   */
+  static generateNearbyHue(baseHue: number, offsetDegrees: number): number {
+    const newHue = (baseHue + offsetDegrees) % 360;
+    return constrainHueToSoftStack(newHue);
   }
 
   /**
@@ -125,255 +132,105 @@ export class ThemeRandomizerService {
   }
 
   /**
-   * Generates harmonious hues using golden ratio (phi ≈ 1.618) around the color wheel.
+   * Generate SoftStack triad harmony (pink-peach-cream)
+   * All hues stay within 320-40° range
    */
-  static goldenRatioHarmony(baseHue: number, count = 4): number[] {
-    const hues = [baseHue];
-    const goldenAngle = 360 * 0.618033988749895; // Golden ratio conjugate (phi - 1)
+  static generateSoftStackTriad(): { pink: number; peach: number; cream: number } {
+    // Base hue in pink range (330-350)
+    const pink = this.getRandomValue(330, 350);
 
-    for (let i = 1; i < count; i++) {
-      const newHue = (baseHue + goldenAngle * i) % 360;
-      hues.push(newHue);
-    }
+    // Peach: slightly warmer (offset +20-35°, wraps to 0-40 range)
+    const peach = (pink + this.getRandomValue(20, 35)) % 360;
 
-    return hues;
-  }
-
-  /**
-   * Randomly selects a color harmony scheme based on defined weights.
-   */
-  static getColorHarmony(): string {
-    const harmonies = Object.entries(HARMONY_WEIGHTS).map(([name, weight]) => ({ name, weight }));
-    const totalWeight = harmonies.reduce((sum, harmony) => sum + harmony.weight, 0);
-    let random = Math.random() * totalWeight;
-
-    for (const harmony of harmonies) {
-      if (random < harmony.weight) {
-        return harmony.name;
-      }
-      random -= harmony.weight;
-    }
-    return 'golden'; // Fallback to golden ratio
-  }
-
-  /**
-   * Generates hues for different theme elements based on the chosen harmony.
-   */
-  static generateHues(baseHue: number, harmony: string): { base: number; primary: number; secondary: number; accent: number } {
-    switch (harmony) {
-      case 'analogous':
-        return {
-          base: baseHue,
-          primary: (baseHue + 30) % 360,
-          secondary: (baseHue + 60) % 360,
-          accent: (baseHue + 90) % 360
-        };
-      case 'split-complementary':
-        return {
-          base: baseHue,
-          primary: (baseHue + 150) % 360,
-          secondary: (baseHue + 210) % 360,
-          accent: (baseHue + this.getRandomValue(0, 360)) % 360
-        };
-      case 'golden': {
-        const goldenHues = this.goldenRatioHarmony(baseHue, 4);
-        return {
-          base: goldenHues[0],
-          primary: goldenHues[1],
-          secondary: goldenHues[2],
-          accent: goldenHues[3]
-        };
-      }
-      case 'wildcard': {
-        const hue1 = Math.random() * 360;
-        const hue2 = this.getDistantHue([hue1]);
-        const hue3 = this.getDistantHue([hue1, hue2]);
-        const hue4 = this.getDistantHue([hue1, hue2, hue3]);
-        return { base: hue1, primary: hue2, secondary: hue3, accent: hue4 };
-      }
-      default:
-        return { base: baseHue, primary: baseHue, secondary: baseHue, accent: baseHue };
-    }
-  }
-
-  /**
-   * Generates a random color palette based on a random hue and harmony.
-   */
-  static generateRandomColorPalette() {
-    const baseHue = Math.random() * 360;
-    const harmony = this.getColorHarmony();
-    const hues = this.generateHues(baseHue, harmony);
-
-    // JUICY chroma ranges - pastel punk with FLAVOR
-    // Peach fuzz, sunset sherbet, milk tea gold vibes
-    const chromaBase = this.getRandomValue(0.08, 0.14);
-    const chromaAccent = chromaBase + this.getRandomValue(0.10, 0.18);
-
-    // Base Colors with subtle hue variations
-    const baseColors = {
-      '--color-base-100': this.generateOKLCHColor(
-        LIGHTNESS_VALUES.l100,
-        chromaBase * 0.5,
-        hues.base
-      ),
-      '--color-base-200': this.generateOKLCHColor(
-        LIGHTNESS_VALUES.l200,
-        chromaBase * 0.6,
-        (hues.base + 5) % 360
-      ),
-      '--color-base-300': this.generateOKLCHColor(
-        LIGHTNESS_VALUES.l300,
-        chromaBase * 0.7,
-        (hues.base + 10) % 360
-      ),
-      '--color-base-content': this.generateOKLCHColor(
-        LIGHTNESS_VALUES.content,
-        chromaBase * 0.3,
-        hues.base
-      )
-    };
-
-    const primaryColors = {
-      '--color-primary': this.generateOKLCHColor(72, chromaAccent * 0.7, hues.primary),
-      '--color-primary-content': this.generateOKLCHColor(96, chromaBase * 0.3, hues.primary)
-    };
-
-    const secondaryColors = {
-      '--color-secondary': this.generateOKLCHColor(75, chromaAccent * 0.6, hues.secondary),
-      '--color-secondary-content': this.generateOKLCHColor(96, chromaBase * 0.3, hues.secondary)
-    };
-
-    const accentColors = {
-      '--color-accent': this.generateOKLCHColor(72, chromaAccent * 0.85, hues.accent),
-      '--color-accent-content': this.generateOKLCHColor(96, chromaBase * 0.3, hues.accent)
-    };
-
-    const neutralColors = {
-      '--color-neutral': this.generateOKLCHColor(70, chromaBase * 0.6, (hues.base + 15) % 360),
-      '--color-neutral-content': this.generateOKLCHColor(
-        15,
-        chromaBase * 0.3,
-        (hues.base + 15) % 360
-      )
-    };
-
-    const semanticColors = {
-      '--color-info': this.generateOKLCHColor(85, chromaAccent * 0.9, (hues.base + 210) % 360),
-      '--color-info-content': this.generateOKLCHColor(
-        95,
-        chromaBase * 0.3,
-        (hues.base + 210) % 360
-      ),
-      '--color-success': this.generateOKLCHColor(80, chromaAccent, (hues.base + 120) % 360),
-      '--color-success-content': this.generateOKLCHColor(
-        95,
-        chromaBase * 0.3,
-        (hues.base + 120) % 360
-      ),
-      '--color-warning': this.generateOKLCHColor(90, chromaAccent * 1.1, (hues.base + 40) % 360),
-      '--color-warning-content': this.generateOKLCHColor(
-        95,
-        chromaBase * 0.3,
-        (hues.base + 40) % 360
-      ),
-      '--color-error': this.generateOKLCHColor(75, chromaAccent * 1.2, (hues.base + 0) % 360),
-      '--color-error-content': this.generateOKLCHColor(95, chromaBase * 0.3, (hues.base + 0) % 360)
-    };
+    // Cream: warmest (offset +30-50°, wraps to 0-40 range)
+    const cream = (pink + this.getRandomValue(30, 50)) % 360;
 
     return {
-      harmony, // Include the harmony name for debugging
-      ...baseColors,
-      ...neutralColors,
-      ...primaryColors,
-      ...secondaryColors,
-      ...accentColors,
-      ...semanticColors
+      pink: constrainHueToSoftStack(pink),
+      peach: constrainHueToSoftStack(peach),
+      cream: constrainHueToSoftStack(cream),
     };
   }
 
   /**
-   * Parse OKLCH color string into components.
+   * Generate chroma (saturation) within ±10% of Golden Master
    */
-  static parseOklchColor(oklchColor: string): { lightness: number; chroma: number; hue: number } | null {
-    if (!oklchColor) return null;
-
-    const match = oklchColor.match(/oklch\((\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)\)/);
-    if (!match) return null;
-
-    return {
-      lightness: parseFloat(match[1]) / 100, // Convert percentage to 0-1
-      chroma: parseFloat(match[2]),
-      hue: parseFloat(match[3])
-    };
+  static generateConstrainedChroma(baseChroma: number): number {
+    const variance = baseChroma * RANDOMIZER_CONSTRAINTS.chromaVariance;
+    return this.getRandomValue(
+      Math.max(0.05, baseChroma - variance), // min: 0.05 to avoid grey
+      baseChroma + variance
+    );
   }
 
   /**
-   * Generates a mesh gradient from an array of colors.
-   * Enhanced for more interesting gradients.
+   * Generate lightness within ±10% of Golden Master
    */
-  static generateMeshGradient(colors: string[]): string {
-    // Add some extra colors for more interesting gradients
-    const extendedColors = [...colors];
+  static generateConstrainedLightness(baseLightness: number): number {
+    const variance = baseLightness * RANDOMIZER_CONSTRAINTS.lightnessVariance;
+    return this.getRandomValue(
+      Math.max(90, baseLightness - variance), // min: 90% to stay light
+      Math.min(99, baseLightness + variance)  // max: 99% to avoid pure white
+    );
+  }
 
-    // Maybe add an extra color based on the primary color
-    if (Math.random() > 0.5 && colors[1]) {
-      const parsedColor = this.parseOklchColor(colors[1]);
-      if (parsedColor) {
-        const newHue = (parsedColor.hue + this.getRandomValue(15, 45)) % 360;
-        const newColor = this.generateOKLCHColor(
-          Math.min(parsedColor.lightness * 100 + 5, 95),
-          parsedColor.chroma * 0.8,
-          newHue
-        );
-        extendedColors.push(newColor);
-      }
-    }
+  /**
+   * Generate SoftStack gradient (pink-peach-cream three-stop, warm only)
+   * NO blues, greens, or cool tones allowed
+   */
+  static generateSoftStackGradient(): string {
+    const triad = this.generateSoftStackTriad();
 
-    return extendedColors
-      .map((color, index) => {
-        const positionX = this.getRandomValue(10, 90);
-        const positionY = this.getRandomValue(10, 90);
+    // Very high lightness (96-98), very low chroma (0.03-0.07)
+    // This creates the warm cream with subtle blush effect
+    const lightness1 = this.getRandomValue(96, 97);
+    const lightness2 = this.getRandomValue(96.5, 97.5);
+    const lightness3 = this.getRandomValue(97, 98);
 
-        // First color (background) gets larger gradients for better blending
-        const stop = index === 0
-          ? this.getRandomValue(60, 85)
-          : this.getRandomValue(50, 75);
+    const chroma1 = this.getRandomValue(0.04, 0.07);
+    const chroma2 = this.getRandomValue(0.03, 0.06);
+    const chroma3 = this.getRandomValue(0.03, 0.05);
 
-        // Occasionally use elliptical gradients for more interesting shapes
-        const isElliptical = Math.random() > 0.7;
-        if (isElliptical) {
-          const xRadius = this.getRandomValue(70, 130);
-          const yRadius = this.getRandomValue(70, 130);
-          return `radial-gradient(ellipse ${xRadius}% ${yRadius}% at ${positionX}% ${positionY}%, ${color}, transparent ${stop}%)`;
-        }
+    // Generate three-stop gradient using triad
+    const color1 = this.generateOKLCHColor(lightness1, chroma1, triad.pink);
+    const color2 = this.generateOKLCHColor(lightness2, chroma2, triad.peach);
+    const color3 = this.generateOKLCHColor(lightness3, chroma3, triad.cream);
 
-        return `radial-gradient(circle at ${positionX}% ${positionY}%, ${color}, transparent ${stop}%)`;
-      })
-      .join(', ');
+    // Gentle angle (135 ± 30°)
+    const angle = 135 + this.getRandomValue(-30, 30);
+
+    return `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 50%, ${color3} 100%)`;
   }
 
   /**
    * Applies theme colors to CSS custom properties.
+   * NEVER modifies shadow/glow geometry - those are Golden Master constants.
    */
   static applyTheme(theme: Record<string, string>): void {
     if (typeof document === 'undefined') return;
 
     requestAnimationFrame(() => {
       const root = document.documentElement;
+
+      // Apply color variables only (not shadows/glows)
       for (const [key, value] of Object.entries(theme)) {
-        if (key.startsWith('--color-') || key === '--gradient-bg') {
+        if (key.startsWith('--color-') || key === '--gradient-bg' || key.startsWith('--soft-') || key.startsWith('--pink-') || key.startsWith('--peach-') || key.startsWith('--rose-')) {
           root.style.setProperty(key, value);
         }
       }
 
-      const shell = this.pickSolid(theme['--color-base-solid'], '#FFF9F2');
-      const wash = this.pickSolid(theme['--color-secondary'], 'rgba(255,255,255,0.7)');
+      // Update module tokens (derived from theme)
+      const shell = this.pickSolid(theme['--soft-cream'], '#FFF7EF');
+      const wash = this.pickSolid(theme['--soft-cream-dark'], '#FAF3E9');
       const accent = this.pickSolid(theme['--color-accent'], '#ff5c8d');
 
-      root.style.setProperty('--module-ink', '#1a130f');
+      root.style.setProperty('--module-ink', '#1E1714'); // Never randomize
       root.style.setProperty('--module-shell', shell);
       root.style.setProperty('--module-wash', wash);
       root.style.setProperty('--accent-electric', accent);
+
+      // Shadow and glow geometry are LOCKED to Golden Master (handled in CSS)
+      // We do NOT override them here
     });
   }
 
@@ -388,91 +245,91 @@ export class ThemeRandomizerService {
   }
 
   /**
-   * Generates SOFT CREAM gradients with subtle color hints
-   * HEAPS close to cream, elegant and warm, barely-there color
-   * Like cream with the faintest blush of color
-   */
-  static generateSimpleGradient(baseHue: number, secondaryHue: number): string {
-    // SOFT CREAM: Mostly cream with subtle color whispers
-    // High lightness (96-98), very low chroma (0.02-0.06)
-    // 4-stop gradient for elegant blending
-
-    const paletteChoice = Math.random();
-    let hue1, hue2, hue3, hue4;
-
-    if (paletteChoice < 0.25) {
-      // Flamingo whisper → warm cream
-      const base = 330 + (Math.random() * 15);
-      hue1 = base;
-      hue2 = base + 10;
-      hue3 = 40 + (Math.random() * 5); // warm cream
-      hue4 = 42 + (Math.random() * 6); // warm cream
-    } else if (paletteChoice < 0.45) {
-      // Lavender whisper → soft cream
-      const base = 285 + (Math.random() * 25);
-      hue1 = base;
-      hue2 = base + 15;
-      hue3 = 340 + (Math.random() * 10); // soft pink cream
-      hue4 = 38 + (Math.random() * 8); // cream
-    } else if (paletteChoice < 0.65) {
-      // Sky whisper → cool cream
-      const base = 220 + (Math.random() * 25);
-      hue1 = base;
-      hue2 = base + 20;
-      hue3 = 45 + (Math.random() * 8); // neutral cream
-      hue4 = 40 + (Math.random() * 6); // warm cream
-    } else if (paletteChoice < 0.85) {
-      // Peach whisper → warm cream
-      const base = 355 + (Math.random() * 20);
-      hue1 = base % 360;
-      hue2 = (base + 12) % 360;
-      hue3 = 38 + (Math.random() * 6); // warm cream
-      hue4 = 42 + (Math.random() * 6); // warm cream
-    } else {
-      // Mint whisper → neutral cream
-      const base = 165 + (Math.random() * 20);
-      hue1 = base;
-      hue2 = base + 15;
-      hue3 = 50 + (Math.random() * 8); // neutral cream
-      hue4 = 43 + (Math.random() * 7); // warm cream
-    }
-
-    // Gentle angles
-    const angle = 135 + (Math.random() * 90); // 135-225
-
-    // ULTRA SOFT: Very high lightness (96-98), very low chroma (0.02-0.06)
-    // Barely-there color, mostly cream
-    const color1 = this.generateOKLCHColor(96, this.getRandomValue(0.04, 0.06), hue1);
-    const color2 = this.generateOKLCHColor(97, this.getRandomValue(0.03, 0.05), hue2);
-    const color3 = this.generateOKLCHColor(97.5, this.getRandomValue(0.02, 0.04), hue3);
-    const color4 = this.generateOKLCHColor(98, this.getRandomValue(0.02, 0.03), hue4);
-
-    return `linear-gradient(${angle}deg, ${color1} 0%, ${color2} 35%, ${color3} 70%, ${color4} 100%)`;
-  }
-
-  /**
-   * Generates and applies a complete random theme with clean gradient.
-   * Now using simple 2-color linear gradients instead of messy mesh.
+   * Generate random SoftStack theme (constrained to Golden Master neighborhood)
    */
   static randomizeTheme(): Record<string, string> {
-    // Generate base hue first
-    const baseHue = Math.random() * 360;
-    const harmony = this.getColorHarmony();
-    const hues = this.generateHues(baseHue, harmony);
+    // Generate SoftStack triad (all hues stay in 320-40° range)
+    const triad = this.generateSoftStackTriad();
 
-    const colorPalette = this.generateRandomColorPalette();
+    // Generate constrained chroma values (±10% of Golden Master)
+    const baseChroma = this.generateConstrainedChroma(RANDOMIZER_CONSTRAINTS.baseChroma);
+    const accentChroma = this.generateConstrainedChroma(RANDOMIZER_CONSTRAINTS.accentChroma);
+
+    // Generate constrained lightness values (±10% of Golden Master)
+    const baseLightness = this.generateConstrainedLightness(RANDOMIZER_CONSTRAINTS.baseLightness);
+    const accentLightness = this.generateConstrainedLightness(RANDOMIZER_CONSTRAINTS.accentLightness);
+
+    // Create color palette using SoftStack triad
+    const colorPalette = {
+      // Core SoftStack colors (never randomize structural neutrals)
+      '--soft-black': '#1E1714',
+      '--soft-brown': '#3A2A22',
+
+      // Cream backgrounds (slight variation allowed)
+      '--soft-cream': this.generateOKLCHColor(
+        this.getRandomValue(96.5, 98),
+        this.getRandomValue(0.02, 0.04),
+        triad.cream
+      ),
+      '--soft-cream-dark': this.generateOKLCHColor(
+        this.getRandomValue(95, 97),
+        this.getRandomValue(0.03, 0.05),
+        triad.cream
+      ),
+
+      // Pastel accents (pink-peach-cream variations)
+      '--pink-light': this.generateOKLCHColor(
+        this.getRandomValue(92, 95),
+        accentChroma * 0.6,
+        triad.pink
+      ),
+      '--peach-light': this.generateOKLCHColor(
+        this.getRandomValue(92, 95),
+        accentChroma * 0.55,
+        triad.peach
+      ),
+      '--rose-glow': this.generateOKLCHColor(
+        this.getRandomValue(85, 90),
+        accentChroma * 0.7,
+        triad.pink
+      ),
+
+      // Legacy theme variables (for compatibility)
+      '--color-accent': this.generateOKLCHColor(
+        accentLightness,
+        accentChroma * 0.8,
+        triad.pink
+      ),
+      '--color-secondary': this.generateOKLCHColor(
+        accentLightness + 5,
+        accentChroma * 0.6,
+        triad.peach
+      ),
+      '--color-text': '#1E1714', // Always soft-black
+      '--color-text-secondary': '#3A2A22', // Always soft-brown
+      '--color-border': 'rgba(30, 23, 20, 0.1)', // Warm neutral
+
+      // Base color (used in some legacy places)
+      '--color-base-solid': this.generateOKLCHColor(
+        baseLightness,
+        baseChroma,
+        triad.cream
+      ),
+    };
 
     // Apply colors immediately
     this.applyTheme(colorPalette);
 
-    // Generate simple 2-color gradient (deferred for performance)
+    // Generate SoftStack gradient (deferred for performance)
     requestAnimationFrame(() => {
-      // Use base and secondary hues for a very light, calm gradient
-      const gradientBg = this.generateSimpleGradient(hues.base, hues.secondary);
+      const gradientBg = this.generateSoftStackGradient();
 
       // Update gradient
       document.documentElement.style.setProperty('--gradient-bg', gradientBg);
       colorPalette['--gradient-bg'] = gradientBg;
+
+      // Add grain texture overlay (1-2% opacity)
+      // This is done via CSS ::after pseudo-element in the .mapper-scene class
     });
 
     return colorPalette;

@@ -342,7 +342,7 @@ export default function UploadIsland() {
                 ref={textAreaRef}
                 class="mapper-textarea w-full resize-none"
                 rows={6}
-                placeholder="Type, paste, or drop audio…"
+                placeholder="Talk it out, paste a rant, or drop a recording here."
                 value={textInput.value}
                 onInput={(e) => {
                   textInput.value = (e.target as HTMLTextAreaElement).value;
@@ -413,7 +413,7 @@ export default function UploadIsland() {
         style={{ display: 'none' }}
       />
 
-      {isProcessing.value && <LoadingModal />}
+      {isProcessing.value && <LoadingModal isOpen={isProcessing.value} />}
     </div>
   );
 }

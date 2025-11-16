@@ -93,6 +93,14 @@
   --module-shell: rgba(255, 255, 255, 0.96);
   --module-wash: rgba(250, 244, 233, 0.6);
   --accent-electric: #ff5c8d;
+
+  /* ===================================================================
+     SOFTSTACK COLOR SYSTEM - Golden Master (no pure white, no cold greys)
+     ================================================================ */
+  --soft-black: #1E1714;           /* Main dark neutral - use for headlines, borders, button backgrounds */
+  --soft-brown: #3A2A22;           /* Secondary warm dark - use for accents/secondary text */
+  --soft-cream: #FFF7EF;           /* Warm cream for input backgrounds - NOT pure white */
+  --soft-cream-dark: #FAF3E9;      /* Slightly darker cream for subtle inset areas */
 }
 
 /* ===================================================================
@@ -226,7 +234,22 @@ body {
 .mapper-scene {
   min-height: 100vh;
   position: relative;
-  background: var(--gradient-bg, linear-gradient(125deg, #fff8f1 0%, #f6f2ff 45%, #f1fbf4 100%));
+  /* Risograph-style fluro pastel splashes OVER dynamic theme gradient */
+  background:
+    /* Fluro pink splash - top left */
+    radial-gradient(circle at 15% 10%,
+      rgba(255, 179, 217, 0.28),
+      transparent 40%),
+    /* Fluro peach splash - bottom right */
+    radial-gradient(circle at 85% 90%,
+      rgba(255, 203, 164, 0.25),
+      transparent 45%),
+    /* Fluro lavender accent - mid left */
+    radial-gradient(circle at 5% 50%,
+      rgba(245, 200, 255, 0.18),
+      transparent 35%),
+    /* Dynamic gradient from theme randomizer */
+    var(--gradient-bg, linear-gradient(135deg, #fff8f1 0%, #ffe9ef 50%, #fff5e8 100%));
   overflow: hidden;
   animation: mapperGradient 18s ease-in-out infinite alternate;
 }
@@ -248,13 +271,14 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  /* Golden Master grain texture: 1-2% opacity warm noise */
   background-image:
     radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.35), transparent 60%),
-    radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.03), transparent 3px),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-  background-size: 100% 100%, 120px 120px, auto;
-  mix-blend-mode: soft-light;
-  opacity: 0.85;
+    radial-gradient(circle at 1px 1px, rgba(30, 23, 20, 0.02), transparent 3px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='4' seed='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)' opacity='0.015'/%3E%3C/svg%3E");
+  background-size: 100% 100%, 140px 140px, auto;
+  mix-blend-mode: overlay;
+  opacity: 1;
 }
 
 @keyframes sceneDrift {
@@ -278,12 +302,14 @@ body {
 .mapper-card {
   position: relative;
   width: min(100%, 1100px);
-  border: 3px solid color-mix(in srgb, var(--module-ink) 90%, #ffffff);
+  border: 3px solid var(--soft-black); /* use shared soft black for clean neutrals */
   border-radius: 26px;
   background: var(--module-shell, #fff7ef); /* single, warm card surface */
+  /* Confident slab shadow with pink glow layer for zest */
   box-shadow:
-    0 25px 60px rgba(12, 8, 5, 0.18),
-    0 10px 0 rgba(12, 8, 5, 0.12);
+    0 18px 45px rgba(30, 23, 20, 0.28),
+    0 6px 12px rgba(30, 23, 20, 0.12),
+    0 0 60px rgba(255, 92, 141, 0.12);
   min-height: clamp(430px, 60vh, 540px);
   overflow: visible; /* prevents text/controls from clipping */
   isolation: isolate; /* keeps the glow underneath the slab */
@@ -293,21 +319,22 @@ body {
 .mapper-card::after {
   content: "";
   position: absolute;
-  inset: -12px;
+  inset: -16px; /* wider glow spread */
   border-radius: 32px;
-  background: radial-gradient(circle at 30% 0%, rgba(255, 160, 196, 0.28), transparent 55%),
-              radial-gradient(circle at 80% 80%, rgba(255, 209, 148, 0.25), transparent 60%);
-  filter: blur(45px);
-  opacity: 0.8; /* hero underglow replaces button glow per critique */
+  /* Hero underglow - entire card, not button - this is the emotional "zone of magic" */
+  background: radial-gradient(circle at 35% 0%, rgba(255, 160, 196, 0.32), transparent 55%),
+              radial-gradient(circle at 80% 85%, rgba(255, 209, 148, 0.28), transparent 60%);
+  filter: blur(50px);
+  opacity: 0.85;
   pointer-events: none;
   z-index: -1;
 }
 
 .mapper-card:hover {
-  transform: translate(-1px, -1px);
+  transform: translate(-1px, -2px);
   box-shadow:
-    0 28px 70px rgba(12, 8, 5, 0.22),
-    0 12px 0 rgba(12, 8, 5, 0.14);
+    0 22px 55px rgba(30, 23, 20, 0.26),
+    0 8px 16px rgba(30, 23, 20, 0.15);
 }
 
 .mapper-card__inner {
@@ -324,26 +351,29 @@ body {
 .mapper-hero-copy {
   display: flex;
   flex-direction: column;
-  gap: 1.6rem;
+  gap: 2.2rem; /* increased for visual breathing room */
   justify-content: flex-start;
-  padding-bottom: 0.8rem;
+  padding-bottom: 0.6rem;
 }
 
 .mapper-eyebrow {
-  font-size: 0.78rem;
+  font-size: 0.85rem; /* increased from 0.76rem for stronger presence */
   font-weight: 800;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.28em; /* slightly wider tracking */
   text-transform: uppercase;
-  color: var(--color-text-secondary, #857c75);
+  color: var(--soft-brown); /* use soft-brown for secondary text */
+  opacity: 0.85; /* increased from 0.75 for better readability */
+  margin-bottom: 1.2rem; /* explicit gap control for descenders */
 }
 
 .mapper-hero-title {
   font-size: clamp(2.3rem, 4.5vw, 3.6rem);
   font-weight: 900;
-  line-height: 1.08;
+  line-height: 1.1; /* slightly more space for descenders */
   letter-spacing: -0.03em;
-  color: var(--color-text, #0f0f0f);
-  margin: 0 0 0.9rem 0;
+  color: var(--soft-black); /* use shared soft black, not random dark */
+  margin: 0 0 0.75rem 0; /* tighter bottom margin */
+  padding-bottom: 0.4rem; /* extra padding so descenders never clip */
 }
 
 .mapper-hero-title span {
@@ -370,14 +400,18 @@ body {
 }
 
 .mapper-hero-desc {
-  font-size: 1.1rem;
+  font-size: 1.08rem;
   font-weight: 600;
-  color: rgba(15, 15, 15, 0.82);
+  line-height: 1.5;
+  color: var(--soft-black);
+  opacity: 0.85; /* slightly lower contrast than headline for clear hierarchy */
 }
 
 .mapper-hero-caption {
-  font-size: 0.94rem;
-  color: rgba(0, 0, 0, 0.68);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--soft-brown); /* use soft-brown for tertiary text */
+  opacity: 0.8;
 }
 
 .mapper-card__panel {
@@ -395,13 +429,14 @@ body {
 }
 
 .mapper-capture-block {
-  border: 3px solid rgba(0, 0, 0, 0.09);
+  border: 2px solid rgba(30, 23, 20, 0.12); /* slightly darker for proper contrast */
   border-radius: 18px;
   padding: 1.35rem;
   background: color-mix(in srgb, var(--module-shell, #fff8f1) 85%, #ffffff);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 15px 50px rgba(15, 10, 8, 0.08);
+  /* Medium shadow - sits below hero, above button */
+  box-shadow: 0 6px 14px rgba(30, 23, 20, 0.10);
 }
 
 .mapper-block-header {
@@ -439,27 +474,51 @@ body {
 }
 
 .mapper-unified-input {
-  border: 3px solid rgba(0, 0, 0, 0.1);
-  border-radius: 16px;
+  border: 2px solid rgba(30, 23, 20, 0.18); /* DARKER border - proper contrast */
+  border-radius: 12px; /* tighter radius for intentional shape */
   padding: 1.1rem;
   transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
-  background: rgba(255, 255, 255, 0.96); /* single slab, no nested boxes */
+  background: var(--soft-cream); /* warm cream golden master */
   cursor: text;
   position: relative;
+  /* Proper inner framing - gives it texture and depth */
+  box-shadow:
+    inset 0 1px 2px rgba(30, 23, 20, 0.06),
+    inset 0 0 0 1px rgba(30, 23, 20, 0.08);
 }
 
 .mapper-unified-input:not(.is-recording):hover {
-  border-color: rgba(0, 0, 0, 0.25);
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 15px 30px rgba(10, 8, 5, 0.08);
+  border-color: rgba(30, 23, 20, 0.28); /* even darker on hover */
+  background: var(--soft-cream-dark);
+  box-shadow:
+    inset 0 1px 2px rgba(30, 23, 20, 0.08),
+    inset 0 0 0 1px rgba(30, 23, 20, 0.10),
+    0 6px 16px rgba(30, 23, 20, 0.08);
 }
 
 .mapper-unified-input textarea {
   min-height: 160px;
-  border-radius: 12px;
+  border-radius: 10px;
   border: none;
-  background: rgba(0, 0, 0, 0.015);
-  padding-right: 3rem;
+  background: transparent; /* sits directly on the cream surface */
+  padding-right: 3.5rem;
+  /* Thinking mode line-height - not stiff paragraph mode */
+  line-height: 1.5;
+  font-size: 15px; /* slightly larger for better presence */
+  color: var(--soft-black);
+}
+
+/* PLACEHOLDER STYLING - friendly, confident, warm (NOT timid hospital grey) */
+.mapper-unified-input textarea::placeholder {
+  color: rgba(30, 23, 20, 0.62); /* warm brown-grey, NOT cold grey - 62% opacity for presence */
+  font-size: 15px; /* same as body text - NOT microscopic */
+  line-height: 1.5;
+  font-weight: 500; /* slightly bolder for clarity */
+  opacity: 1; /* override browser defaults */
+}
+
+.mapper-unified-input textarea:focus::placeholder {
+  opacity: 0.5; /* fade slightly when typing */
 }
 
 .mapper-unified-input.is-drop {
@@ -513,34 +572,45 @@ body {
   color: rgba(0, 0, 0, 0.6);
 }
 
-/* Inline paperclip control lives inside the unified input slab */
+/* Inline paperclip control - MUST be visible and intentional, not a ghost */
 .mapper-clip-btn {
   position: absolute;
-  bottom: 0.85rem;
-  right: 0.85rem;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  border: 2px solid rgba(0, 0, 0, 0.15);
-  background: rgba(255, 255, 255, 0.96);
+  bottom: 12px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  /* DARKER border for actual presence - not a ghost outline */
+  border: 2px solid rgba(30, 23, 20, 0.20);
+  background: var(--soft-cream-dark);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--module-ink);
+  /* Icon must be CLEARLY VISIBLE */
+  color: var(--soft-black);
   cursor: pointer;
-  transition: border-color 150ms ease, transform 150ms ease;
+  transition: all 150ms ease;
+  /* Stronger shadow so it doesn't disappear into the background */
+  box-shadow: 0 3px 8px rgba(30, 23, 20, 0.12);
 }
 
-.mapper-clip-btn svg {
-  width: 16px;
-  height: 16px;
+.mapper-clip-btn i {
+  font-size: 18px; /* larger icon for clarity */
+  opacity: 0.85;
 }
 
 .mapper-clip-btn:hover,
 .mapper-clip-btn:focus-visible {
   border-color: var(--accent-electric);
-  transform: translate(-1px, -1px);
+  background: rgba(255, 255, 255, 0.95);
+  transform: scale(1.05); /* subtle playful scale */
+  box-shadow: 0 4px 12px rgba(255, 92, 141, 0.20);
   outline: none;
+}
+
+.mapper-clip-btn:hover i {
+  opacity: 1;
+  color: var(--accent-electric);
 }
 
 .mapper-record-visual {
@@ -595,16 +665,19 @@ body {
 
 .mapper-slab-button {
   width: 100%;
-  padding: 1.1rem 1.6rem;
-  border-radius: 14px;
-  border: 3px solid var(--module-ink);
-  background: var(--module-ink);
+  padding: 1rem 1.5rem;
+  border-radius: 13px;
+  border: 2.5px solid var(--soft-black); /* use unified soft-black */
+  background: var(--soft-black);
   color: white;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em; /* slightly more tracking for readability */
   text-transform: uppercase;
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.16);
+  /* 3D toy-style offset shadow for playful neo-brutalism */
+  box-shadow:
+    4px 4px 0 0 rgba(30, 23, 20, 0.25),  /* Offset shadow for 3D effect */
+    0 3px 8px rgba(30, 23, 20, 0.14);     /* Soft underlay */
   transition: transform 120ms ease, box-shadow 120ms ease, background 200ms ease;
   will-change: transform;
   --mapper-scale: 1;
@@ -627,10 +700,15 @@ body {
 .mapper-slab-button:not(:disabled):hover {
   --mapper-translate-x: -2px;
   --mapper-translate-y: -2px;
-  box-shadow: 0 9px 0 rgba(0, 0, 0, 0.18);
+  /* Expanded 3D shadow on hover */
+  box-shadow:
+    6px 6px 0 0 rgba(30, 23, 20, 0.25),
+    0 6px 16px rgba(30, 23, 20, 0.2);
 }
 
 .mapper-slab-button:not(:disabled):active {
+  --mapper-translate-x: 2px;
+  --mapper-translate-y: 2px;
   animation: mapperSpring 0.6s linear(
     0, 0.006, 0.025 0.9%, 0.101 1.8%, 0.539 6.5%, 0.826 10%,
     0.967 11.8%, 1.037 13.1%, 1.078 14.2%, 1.103 15.3%,
@@ -650,18 +728,23 @@ body {
     1.032 95.9%, 1.029 97.5%, 1.026 98.5%, 1.024 99.1%,
     1.022 99.5%, 1.021 99.8%, 1.02 100%
   ) forwards;
-  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.18);
+  /* Compressed 3D shadow on press */
+  box-shadow:
+    2px 2px 0 0 rgba(30, 23, 20, 0.25),
+    0 2px 4px rgba(30, 23, 20, 0.14);
 }
 
 .mapper-slab-button--record {
-  background: var(--module-ink);
-  border-color: var(--module-ink);
+  background: var(--soft-black); /* use unified color system */
+  border-color: var(--soft-black);
   color: #fff;
-  box-shadow: 0 18px 30px rgba(20, 16, 13, 0.25);
+  /* Same base shadow as all buttons - consistency in hierarchy */
+  box-shadow: 0 3px 8px rgba(30, 23, 20, 0.14);
 }
 
 .mapper-slab-button--record:not(:disabled):hover {
-  box-shadow: 0 22px 35px rgba(255, 92, 141, 0.45);
+  /* Subtle pink hint on hover */
+  box-shadow: 0 5px 14px rgba(255, 92, 141, 0.22);
 }
 
 .mapper-info-note {
@@ -692,18 +775,42 @@ body {
   padding: 18px;
   font-size: 15px;
   line-height: 1.5;
-  border: 2px solid var(--module-ink);
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.02);
-  color: #2c2c2c;
+  border: none; /* border is handled by .mapper-unified-input wrapper */
+  border-radius: 10px;
+  background: transparent; /* sits on cream surface of parent */
+  color: var(--soft-black); /* use unified color system */
   transition: border-color 160ms ease, background 160ms ease;
-  box-shadow: inset 0 4px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: none; /* shadow is on parent wrapper */
+  outline: none; /* no default outline, parent handles focus states */
 }
 
 .mapper-textarea:focus {
-  border-color: var(--color-accent);
-  background: white;
+  background: transparent; /* stay transparent on cream */
   outline: none;
+}
+
+/* ===================================================================
+   HISTORY DRAWER ITEMS (Performance-optimized)
+   ================================================================ */
+
+.history-item {
+  padding: 1rem;
+  border-radius: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.history-item:hover:not(.active) {
+  border-color: rgba(232, 131, 156, 0.3);
+  background: rgba(232, 131, 156, 0.04);
+  transform: translateX(-2px);
+}
+
+.history-item.active {
+  border: 3px solid rgba(232, 131, 156, 0.5);
+  background: rgba(232, 131, 156, 0.08);
 }
 
 @keyframes mapperSpring {
