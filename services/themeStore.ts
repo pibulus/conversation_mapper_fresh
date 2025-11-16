@@ -1,26 +1,13 @@
 // ===================================================================
 // THEME STORE
-// Preact signals-based theme management with localStorage persistence
-// Now locked to Golden Master SoftStack aesthetic
+// Simple preset-based theme system with localStorage persistence
 // ===================================================================
 
 import { signal, effect } from "@preact/signals";
-import { ThemeRandomizerService } from "./ThemeRandomizerService.ts";
-import { GOLDEN_MASTER_THEME } from "./GoldenMasterTheme.ts";
+import { THEMES, applyTheme as applyThemeStyles, getRandomTheme, type Theme } from "./themes.ts";
 
-// Type for theme data
-export interface Theme {
-  harmony?: string;
-  [key: string]: string | undefined;
-}
-
-// Default theme = Golden Master (canonical SoftStack aesthetic)
-const defaultTheme: Theme = {
-  ...GOLDEN_MASTER_THEME,
-};
-
-// Create the theme signal
-export const themeSignal = signal<Theme>(defaultTheme);
+// Create the theme signal - start with first theme (Soft Pink)
+export const themeSignal = signal<Theme>(THEMES[0]);
 
 // Storage key for localStorage
 const THEME_STORAGE_KEY = 'conversation-mapper-theme';
@@ -37,7 +24,10 @@ export function loadThemeFromStorage(): Theme | null {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      const themeName = stored;
+      // Find theme by name
+      const theme = THEMES.find(t => t.name === themeName);
+      return theme || null;
     }
   } catch (error) {
     console.error('Error loading theme from storage:', error);
@@ -53,7 +43,8 @@ export function saveThemeToStorage(theme: Theme): void {
   if (typeof localStorage === 'undefined') return;
 
   try {
-    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
+    // Just store the theme name
+    localStorage.setItem(THEME_STORAGE_KEY, theme.name);
   } catch (error) {
     console.error('Error saving theme to storage:', error);
   }
@@ -72,41 +63,43 @@ export function initializeTheme(): void {
   // Try to load from localStorage
   const stored = loadThemeFromStorage();
   if (stored) {
-    console.log('🎨 Loaded theme from localStorage:', stored);
+    console.log('🎨 Loaded theme from localStorage:', stored.name);
     themeSignal.value = stored;
-    ThemeRandomizerService.applyTheme(stored);
+    applyThemeStyles(stored);
   } else {
-    console.log('🎨 No stored theme, using Golden Master default');
-    ThemeRandomizerService.applyTheme(defaultTheme);
+    console.log('🎨 No stored theme, using Soft Pink default');
+    applyThemeStyles(THEMES[0]);
   }
 
   // Set up effect to save theme when it changes
   effect(() => {
     const currentTheme = themeSignal.value;
     saveThemeToStorage(currentTheme);
+    applyThemeStyles(currentTheme);
   });
 
   console.log('✅ Theme system initialized');
 }
 
 /**
- * Randomize theme and apply it
+ * Randomize theme - pick a random preset
  */
 export function randomizeTheme(): void {
-  console.log('🎨 Randomizing theme...');
-  const newTheme = ThemeRandomizerService.randomizeTheme();
-  console.log('🎨 Generated new theme:', newTheme);
+  console.log('🎨 Shuffling theme...');
+  const newTheme = getRandomTheme();
+  console.log('🎨 Selected theme:', newTheme.name);
   themeSignal.value = newTheme;
-  ThemeRandomizerService.applyTheme(newTheme);
-  console.log('✅ Theme applied to DOM');
+  console.log('✅ Theme applied');
 }
 
 /**
- * Apply a specific theme
+ * Apply a specific theme by name
  */
-export function applyTheme(theme: Theme): void {
-  themeSignal.value = theme;
-  ThemeRandomizerService.applyTheme(theme);
+export function applyTheme(themeName: string): void {
+  const theme = THEMES.find(t => t.name === themeName);
+  if (theme) {
+    themeSignal.value = theme;
+  }
 }
 
 /**
@@ -114,4 +107,11 @@ export function applyTheme(theme: Theme): void {
  */
 export function getCurrentTheme(): Theme {
   return themeSignal.value;
+}
+
+/**
+ * Get all available themes
+ */
+export function getAvailableThemes(): Theme[] {
+  return THEMES;
 }
