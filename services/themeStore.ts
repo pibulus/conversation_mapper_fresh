@@ -4,10 +4,10 @@
 // ===================================================================
 
 import { signal, effect } from "@preact/signals";
-import { THEMES, applyTheme as applyThemeStyles, getRandomTheme, type Theme } from "./themes.ts";
+import { generateRandomTheme, applyTheme as applyThemeStyles, type Theme } from "./themes.ts";
 
-// Create the theme signal - start with first theme (Soft Pink)
-export const themeSignal = signal<Theme>(THEMES[0]);
+// Create the theme signal - generate initial random theme
+export const themeSignal = signal<Theme>(generateRandomTheme());
 
 // Storage key for localStorage
 const THEME_STORAGE_KEY = 'conversation-mapper-theme';
@@ -24,10 +24,7 @@ export function loadThemeFromStorage(): Theme | null {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
     if (stored) {
-      const themeName = stored;
-      // Find theme by name
-      const theme = THEMES.find(t => t.name === themeName);
-      return theme || null;
+      return JSON.parse(stored) as Theme;
     }
   } catch (error) {
     console.error('Error loading theme from storage:', error);
@@ -43,8 +40,7 @@ export function saveThemeToStorage(theme: Theme): void {
   if (typeof localStorage === 'undefined') return;
 
   try {
-    // Just store the theme name
-    localStorage.setItem(THEME_STORAGE_KEY, theme.name);
+    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(theme));
   } catch (error) {
     console.error('Error saving theme to storage:', error);
   }
@@ -63,12 +59,14 @@ export function initializeTheme(): void {
   // Try to load from localStorage
   const stored = loadThemeFromStorage();
   if (stored) {
-    console.log('🎨 Loaded theme from localStorage:', stored.name);
+    console.log('🎨 Loaded theme from localStorage');
     themeSignal.value = stored;
     applyThemeStyles(stored);
   } else {
-    console.log('🎨 No stored theme, using Soft Pink default');
-    applyThemeStyles(THEMES[0]);
+    console.log('🎨 Generating fresh random theme');
+    const fresh = generateRandomTheme();
+    themeSignal.value = fresh;
+    applyThemeStyles(fresh);
   }
 
   // Set up effect to save theme when it changes
@@ -82,24 +80,13 @@ export function initializeTheme(): void {
 }
 
 /**
- * Randomize theme - pick a random preset
+ * Randomize theme - generate new random colors
  */
 export function randomizeTheme(): void {
   console.log('🎨 Shuffling theme...');
-  const newTheme = getRandomTheme();
-  console.log('🎨 Selected theme:', newTheme.name);
+  const newTheme = generateRandomTheme();
   themeSignal.value = newTheme;
-  console.log('✅ Theme applied');
-}
-
-/**
- * Apply a specific theme by name
- */
-export function applyTheme(themeName: string): void {
-  const theme = THEMES.find(t => t.name === themeName);
-  if (theme) {
-    themeSignal.value = theme;
-  }
+  console.log('✅ New theme applied');
 }
 
 /**
@@ -107,11 +94,4 @@ export function applyTheme(themeName: string): void {
  */
 export function getCurrentTheme(): Theme {
   return themeSignal.value;
-}
-
-/**
- * Get all available themes
- */
-export function getAvailableThemes(): Theme[] {
-  return THEMES;
 }
