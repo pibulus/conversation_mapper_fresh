@@ -234,25 +234,22 @@ body {
 .mapper-scene {
   min-height: 100vh;
   position: relative;
-  /* Risograph-style fluro pastel splashes - strong color moments */
+  /* Risograph-style fluro pastel splashes OVER dynamic theme gradient */
   background:
     /* Fluro pink splash - top left */
     radial-gradient(circle at 15% 10%,
-      rgba(255, 179, 217, 0.35),
+      rgba(255, 179, 217, 0.28),
       transparent 40%),
     /* Fluro peach splash - bottom right */
     radial-gradient(circle at 85% 90%,
-      rgba(255, 203, 164, 0.32),
+      rgba(255, 203, 164, 0.25),
       transparent 45%),
     /* Fluro lavender accent - mid left */
     radial-gradient(circle at 5% 50%,
-      rgba(245, 200, 255, 0.22),
+      rgba(245, 200, 255, 0.18),
       transparent 35%),
-    /* Warm cream base with subtle gradient */
-    linear-gradient(135deg,
-      #fff8f1 0%,
-      #ffe9ef 50%,
-      #fff5e8 100%);
+    /* Dynamic gradient from theme randomizer */
+    var(--gradient-bg, linear-gradient(135deg, #fff8f1 0%, #ffe9ef 50%, #fff5e8 100%));
   overflow: hidden;
   animation: mapperGradient 18s ease-in-out infinite alternate;
 }
