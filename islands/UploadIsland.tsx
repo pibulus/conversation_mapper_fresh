@@ -413,7 +413,7 @@ export default function UploadIsland() {
         style={{ display: 'none' }}
       />
 
-      {isProcessing.value && <LoadingModal />}
+      {isProcessing.value && <LoadingModal isOpen={isProcessing.value} />}
     </div>
   );
 }
