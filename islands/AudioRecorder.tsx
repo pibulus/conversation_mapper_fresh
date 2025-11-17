@@ -216,8 +216,12 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to process");
+        const errorData = await response.json();
+        // Create detailed error with suggestion
+        const error: any = new Error(errorData.error || "Failed to process");
+        error.suggestion = errorData.suggestion;
+        error.details = errorData.details;
+        throw error;
       }
 
       const result = await response.json();
@@ -245,9 +249,15 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
       const pendingCount = result.actionItems.filter((i: any) => i.status === 'pending').length;
 
       showToast(`Recording added! ${pendingCount} pending • ${completedCount} completed`, "success");
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Error processing audio:", error);
-      showToast(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, "error");
+
+      // Show error with helpful suggestion if available
+      const errorMessage = error.message || 'Unknown error occurred';
+      const suggestion = error.suggestion;
+      const displayMessage = suggestion ? `${errorMessage}. ${suggestion}` : errorMessage;
+
+      showToast(displayMessage, "error", 5000); // Longer duration for error messages with suggestions
     } finally {
       isProcessing.value = false;
     }

@@ -17,6 +17,28 @@ import type { ConversationFlowResult } from "@core/orchestration/conversation-fl
 import type { ActionItem } from "@core/types/index.ts";
 
 /**
+ * Format timestamp for append operations
+ */
+function formatAppendTimestamp(date: Date = new Date()): string {
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+}
+
+/**
+ * Create a professional section divider for appended content
+ */
+function createSectionDivider(recordingNumber: number, timestamp: string): string {
+  const divider = '─'.repeat(60);
+  return `\n\n${divider}\n📎 Recording #${recordingNumber} • ${timestamp}\n${divider}\n\n`;
+}
+
+/**
  * Check if two action items are similar enough to be considered duplicates
  * Uses token-based similarity with normalized text
  */
@@ -54,6 +76,14 @@ function areSimilarActionItems(desc1: string, desc2: string): boolean {
   return similarity > 0.6;
 }
 
+/**
+ * Append Audio API Handler
+ *
+ * Processes new audio recordings and appends them to existing conversations.
+ * Features smart deduplication, status tracking, and professional formatting.
+ *
+ * @returns {Response} JSON response with updated conversation data
+ */
 export const handler: Handlers = {
   async POST(req) {
     try {
@@ -147,16 +177,24 @@ export const handler: Handlers = {
         existingNodes
       );
 
-      // Merge transcripts if we have existing content
+      // Calculate recording number based on existing content
+      const recordingNumber = existingTranscript
+        ? (existingTranscript.match(/📎 Recording #/g) || []).length + 1
+        : 1;
+      const timestamp = formatAppendTimestamp();
+
+      // Merge transcripts with professional formatting
       if (existingTranscript) {
-        const combinedTranscript = `${existingTranscript}\n\n--- New Recording ---\n\n${result.transcript.text}`;
+        const divider = createSectionDivider(recordingNumber, timestamp);
+        const combinedTranscript = `${existingTranscript}${divider}${result.transcript.text}`;
         result.transcript.text = combinedTranscript;
         result.conversation.transcript = combinedTranscript;
       }
 
-      // Append summaries if we have existing summary
+      // Append summaries with context and timestamp
       if (existingSummary && result.summary) {
-        result.summary = `${existingSummary}\n\n**Update from latest recording:**\n${result.summary}`;
+        const updateHeader = `\n\n### 📝 Update #${recordingNumber} — ${timestamp}\n\n`;
+        result.summary = `${existingSummary}${updateHeader}${result.summary}`;
       }
 
       // Process status updates from AI analysis
@@ -227,11 +265,51 @@ export const handler: Handlers = {
 
     } catch (error) {
       console.error("❌ Append error:", error);
+
+      // Provide helpful, actionable error messages
+      let errorMessage = "Failed to append recording";
+      let suggestion = "Please try again";
+      let statusCode = 500;
+
+      if (error instanceof Error) {
+        // API key issues
+        if (error.message.includes("API key") || error.message.includes("GEMINI_API_KEY")) {
+          errorMessage = "AI service configuration error";
+          suggestion = "Please check that your GEMINI_API_KEY is set correctly";
+          statusCode = 503;
+        }
+        // Network/timeout issues
+        else if (error.message.includes("fetch") || error.message.includes("network") || error.message.includes("timeout")) {
+          errorMessage = "Network connection error";
+          suggestion = "Check your internet connection and try again";
+          statusCode = 503;
+        }
+        // Audio format issues
+        else if (error.message.includes("audio") || error.message.includes("format") || error.message.includes("codec")) {
+          errorMessage = "Audio format not supported";
+          suggestion = "Try recording again or use a different browser";
+          statusCode = 415;
+        }
+        // File size issues (already handled above, but just in case)
+        else if (error.message.includes("size") || error.message.includes("large")) {
+          errorMessage = "Recording too large";
+          suggestion = "Try a shorter recording (max 50MB)";
+          statusCode = 413;
+        }
+        // Generic fallback with actual error
+        else {
+          errorMessage = `Processing failed: ${error.message}`;
+          suggestion = "Try again or contact support if this persists";
+        }
+      }
+
       return new Response(
         JSON.stringify({
-          error: error instanceof Error ? error.message : "Unknown error"
+          error: errorMessage,
+          suggestion,
+          details: error instanceof Error ? error.message : "Unknown error"
         }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        { status: statusCode, headers: { "Content-Type": "application/json" } }
       );
     }
   }

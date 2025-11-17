@@ -178,7 +178,18 @@ export interface StoredRecording {
 
 /**
  * Save recordings for a conversation to localStorage
- * Converts Blob to base64 for storage
+ *
+ * Converts audio Blobs to base64 for persistent storage.
+ * Automatically handles format conversion and error recovery.
+ *
+ * @param conversationId - Unique conversation identifier
+ * @param recordings - Array of recording objects with Blob data
+ * @returns Promise that resolves when save is complete
+ *
+ * @example
+ * await saveRecordings('conv-123', [
+ *   { id: 'rec-1', conversation_id: 'conv-123', file_name: 'Recording 1', data: audioBlob, created_at: '2025-01-01' }
+ * ]);
  */
 export async function saveRecordings(
   conversationId: string,
@@ -210,7 +221,16 @@ export async function saveRecordings(
 
 /**
  * Load recordings for a conversation from localStorage
- * Converts base64 back to Blob
+ *
+ * Retrieves saved recordings and converts base64 back to audio Blobs.
+ * Returns empty array if no recordings found or on error.
+ *
+ * @param conversationId - Unique conversation identifier
+ * @returns Array of recording objects with reconstructed Blob data
+ *
+ * @example
+ * const recordings = loadRecordings('conv-123');
+ * // Returns: [{ id, conversation_id, file_name, data: Blob, created_at }]
  */
 export function loadRecordings(
   conversationId: string

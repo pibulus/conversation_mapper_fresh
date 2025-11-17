@@ -39,6 +39,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
   const showAssigneeDropdown = useSignal(false);
   const activeAssigneeDropdown = useSignal<string | null>(null);
   const showExportDropdown = useSignal(false);
+  const showKeyboardHelp = useSignal(false);
 
   // Drag-and-drop state
   const draggedItemId = useSignal<string | null>(null);
@@ -121,6 +122,90 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [showAddModal.value]);
+
+  // Global keyboard shortcuts for action items
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input/textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      // "a" - Add new action item
+      if (e.key === 'a' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        showAddModal.value = true;
+        return;
+      }
+
+      // "/" - Focus search
+      if (e.key === '/') {
+        e.preventDefault();
+        const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
+        if (searchInput) searchInput.focus();
+        return;
+      }
+
+      // Arrow Down - Select next item
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const maxIndex = sortedActionItems.length - 1;
+        selectedItemIndex.value = Math.min(selectedItemIndex.value + 1, maxIndex);
+
+        // Scroll into view
+        if (listContainerRef.current) {
+          const items = listContainerRef.current.querySelectorAll('.action-item-row');
+          items[selectedItemIndex.value]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+        return;
+      }
+
+      // Arrow Up - Select previous item
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedItemIndex.value = Math.max(selectedItemIndex.value - 1, 0);
+
+        // Scroll into view
+        if (listContainerRef.current) {
+          const items = listContainerRef.current.querySelectorAll('.action-item-row');
+          items[selectedItemIndex.value]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+        return;
+      }
+
+      // "e" - Edit selected item
+      if (e.key === 'e' && selectedItemIndex.value >= 0) {
+        e.preventDefault();
+        const item = sortedActionItems[selectedItemIndex.value];
+        if (item && item.status === 'pending') {
+          startEditing(item.id, item.description, item.assignee, item.due_date);
+        }
+        return;
+      }
+
+      // "d" or "Delete" - Delete selected item
+      if ((e.key === 'd' || e.key === 'Delete') && selectedItemIndex.value >= 0) {
+        e.preventDefault();
+        const item = sortedActionItems[selectedItemIndex.value];
+        if (item) {
+          deleteItem(item.id);
+        }
+        return;
+      }
+
+      // Space or Enter - Toggle completion of selected item
+      if ((e.key === ' ' || e.key === 'Enter') && selectedItemIndex.value >= 0) {
+        e.preventDefault();
+        const item = sortedActionItems[selectedItemIndex.value];
+        if (item) {
+          toggleCompletion(item.id);
+        }
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [selectedItemIndex.value, sortedActionItems]);
 
   // Focus trap: Keep Tab within modal
   useEffect(() => {
@@ -545,10 +630,45 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
               <button
                 onClick={() => showAddModal.value = true}
                 class="btn btn-xs"
-                title="Add new item"
+                title="Add new item (or press 'a')"
                 aria-label="Add new action item"
               >
                 ➕
+              </button>
+
+              {/* Keyboard shortcuts help */}
+              <button
+                onClick={() => showKeyboardHelp.value = !showKeyboardHelp.value}
+                class="btn btn-xs"
+                title="Keyboard shortcuts"
+                aria-label="Show keyboard shortcuts"
+                style={{ position: 'relative' }}
+              >
+                ⌨️
+                {showKeyboardHelp.value && (
+                  <div
+                    class="absolute right-0 mt-2 rounded-lg shadow-lg z-50 p-3"
+                    style={{
+                      top: '100%',
+                      background: 'var(--color-secondary)',
+                      border: '2px solid var(--color-border)',
+                      minWidth: '200px',
+                      fontSize: 'var(--tiny-size)',
+                      whiteSpace: 'nowrap'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div style={{ fontWeight: '600', marginBottom: '0.5rem', fontSize: 'var(--small-size)' }}>Keyboard Shortcuts</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <div><kbd style={{ background: 'var(--surface-cream)', padding: '2px 6px', borderRadius: '3px', border: '1px solid var(--color-border)' }}>a</kbd> Add item</div>
+                      <div><kbd style={{ background: 'var(--surface-cream)', padding: '2px 6px', borderRadius: '3px', border: '1px solid var(--color-border)' }}>/</kbd> Search</div>
+                      <div><kbd style={{ background: 'var(--surface-cream)', padding: '2px 6px', borderRadius: '3px', border: '1px solid var(--color-border)' }}>↑↓</kbd> Navigate</div>
+                      <div><kbd style={{ background: 'var(--surface-cream)', padding: '2px 6px', borderRadius: '3px', border: '1px solid var(--color-border)' }}>e</kbd> Edit</div>
+                      <div><kbd style={{ background: 'var(--surface-cream)', padding: '2px 6px', borderRadius: '3px', border: '1px solid var(--color-border)' }}>d</kbd> Delete</div>
+                      <div><kbd style={{ background: 'var(--surface-cream)', padding: '2px 6px', borderRadius: '3px', border: '1px solid var(--color-border)' }}>Space</kbd> Toggle</div>
+                    </div>
+                  </div>
+                )}
               </button>
             </div>
           </div>
@@ -584,7 +704,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                 <div class="empty-state-text">All clear</div>
               </div>
             ) : (
-              <div class="space-y-3">
+              <div ref={listContainerRef} class="space-y-3">
                 {sortedActionItems.map((item, index) => {
                   const isDragging = draggedItemId.value === item.id;
                   const isDragOver = dragOverItemId.value === item.id;
@@ -633,7 +753,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => canDrag && handleDrop(e, item.id)}
                       onClick={() => selectedItemIndex.value = index}
-                      class="group relative p-4 rounded-lg transition-all"
+                      class="action-item-row group relative p-4 rounded-lg transition-all"
                       style={{
                         background: 'var(--surface-cream)',
                         border: `2px solid ${isSelected ? 'var(--color-accent)' : isDragOver ? 'var(--color-accent)' : 'var(--color-border)'}`,
