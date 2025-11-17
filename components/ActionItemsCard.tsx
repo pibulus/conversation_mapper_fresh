@@ -557,7 +557,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                                     borderBottom: '1px solid var(--color-border)',
                                     background: 'transparent'
                                   }}
-                                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232, 131, 156, 0.08)')}
+                                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(var(--color-accent-rgb), 0.08)')}
                                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                                 >
                                   None
@@ -577,7 +577,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                                     }}
                                     onMouseEnter={(e) => {
                                       if (item.assignee !== assignee) {
-                                        e.currentTarget.style.background = 'rgba(232, 131, 156, 0.08)';
+                                        e.currentTarget.style.background = 'rgba(var(--color-accent-rgb), 0.08)';
                                       }
                                     }}
                                     onMouseLeave={(e) => {
@@ -778,7 +778,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                         }}
                         onMouseEnter={(e) => {
                           if (index !== dropdownSelectedIndex.value) {
-                            e.currentTarget.style.background = 'rgba(232, 131, 156, 0.08)';
+                            e.currentTarget.style.background = 'rgba(var(--color-accent-rgb), 0.08)';
                           }
                         }}
                         onMouseLeave={(e) => {

@@ -15,7 +15,7 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameIdRef = useRef<number | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
-  const accentColorRef = useRef<string>('rgba(232, 131, 156, 0.8)');
+  const accentColorRef = useRef<string>('#E8839C'); // Fallback, overridden from CSS variable
 
   useEffect(() => {
     if (!analyser || !canvasRef.current) {
@@ -32,7 +32,7 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
       return;
     }
 
-    // Read accent color from CSS variables
+    // Read accent color from CSS variables (theme-aware)
     const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
     if (accentColor) {
       accentColorRef.current = accentColor;

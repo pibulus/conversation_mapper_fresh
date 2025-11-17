@@ -160,8 +160,8 @@ export default function MobileHistoryMenu() {
       >
         {/* Header */}
         <div style={{
-          background: 'rgba(232, 131, 156, 0.15)',
-          borderBottom: '2px solid rgba(232, 131, 156, 0.3)',
+          background: 'rgba(var(--color-accent-rgb), 0.15)',
+          borderBottom: '2px solid rgba(var(--color-accent-rgb), 0.3)',
           padding: '1.25rem 1.5rem',
           display: 'flex',
           justifyContent: 'space-between',

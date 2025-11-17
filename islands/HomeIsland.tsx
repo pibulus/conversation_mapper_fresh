@@ -136,7 +136,7 @@ export default function HomeIsland() {
                   cursor: 'pointer'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(232, 131, 156, 0.08)';
+                  e.currentTarget.style.background = 'rgba(var(--color-accent-rgb), 0.08)';
                   e.currentTarget.style.transform = 'translateX(2px)';
                 }}
                 onMouseLeave={(e) => {

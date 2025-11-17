@@ -130,7 +130,7 @@ export default function ConversationList() {
                 class="p-3 rounded-lg"
                 style={{
                   border: `2px solid ${isActive ? 'var(--color-accent)' : 'var(--border-cream)'}`,
-                  background: isActive ? 'rgba(232, 131, 156, 0.08)' : 'var(--surface-cream)',
+                  background: isActive ? 'rgba(var(--color-accent-rgb), 0.08)' : 'var(--surface-cream)',
                   transition: 'all 0.15s ease',
                   cursor: 'pointer'
                 }}

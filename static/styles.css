@@ -66,16 +66,16 @@
   --line-height: 1.6;
 
   /* Shadows - Warm browns (DEPRECATED - use --shadow-* below) */
-  --shadow-soft: 0 4px 12px rgba(30, 23, 20, 0.08);
-  --shadow-lifted: 0 8px 24px rgba(30, 23, 20, 0.12);
-  --shadow-card: 0 2px 8px rgba(30, 23, 20, 0.06);
-  --shadow-xl: 0 20px 40px rgba(30, 23, 20, 0.15);
+  --shadow-soft: 0 4px 12px rgba(var(--soft-black-rgb), 0.08);
+  --shadow-lifted: 0 8px 24px rgba(var(--soft-black-rgb), 0.12);
+  --shadow-card: 0 2px 8px rgba(var(--soft-black-rgb), 0.06);
+  --shadow-xl: 0 20px 40px rgba(var(--soft-black-rgb), 0.15);
 
   /* Glassmorphism - Warm cream tint */
   --glass-bg: var(--surface-glass-warm);           /* Warm glassmorphism */
-  --glass-bg-dark: rgba(30, 23, 20, 0.2);          /* Warm dark overlay */
+  --glass-bg-dark: rgba(var(--soft-black-rgb), 0.2);          /* Warm dark overlay */
   --glass-border: rgba(255, 247, 239, 0.2);        /* Warm glass border */
-  --glass-border-dark: rgba(30, 23, 20, 0.1);      /* Warm dark border */
+  --glass-border-dark: rgba(var(--soft-black-rgb), 0.1);      /* Warm dark border */
   --glass-blur: 10px;
 
   /* Animations */
@@ -99,6 +99,7 @@
      SOFTSTACK COLOR SYSTEM - Golden Master (no pure white, no cold greys)
      ================================================================ */
   --soft-black: #1E1714;           /* Main dark neutral - use for headlines, borders, button backgrounds */
+  --soft-black-rgb: 30, 23, 20;    /* RGB version for opacity blending */
   --soft-brown: #3A2A22;           /* Secondary warm dark - use for accents/secondary text */
   --soft-cream: #FFF7EF;           /* Warm cream for input backgrounds - NOT pure white */
   --soft-cream-dark: #FAF3E9;      /* Slightly darker cream for subtle inset areas */
@@ -118,12 +119,12 @@
   --font-size-3xl: 2rem;           /* 32px - hero text */
 
   /* Warm Shadows - Using soft-black instead of pure black */
-  --shadow-xs: 0 1px 2px rgba(30, 23, 20, 0.05);
-  --shadow-sm: 0 2px 4px rgba(30, 23, 20, 0.08);
-  --shadow-md: 0 4px 8px rgba(30, 23, 20, 0.10);
-  --shadow-lg: 0 8px 16px rgba(30, 23, 20, 0.12);
-  --shadow-xl-warm: 0 20px 40px rgba(30, 23, 20, 0.15);
-  --shadow-slab: 4px 4px 0 rgba(30, 23, 20, 0.25); /* Neo-brutalist offset shadow */
+  --shadow-xs: 0 1px 2px rgba(var(--soft-black-rgb), 0.05);
+  --shadow-sm: 0 2px 4px rgba(var(--soft-black-rgb), 0.08);
+  --shadow-md: 0 4px 8px rgba(var(--soft-black-rgb), 0.10);
+  --shadow-lg: 0 8px 16px rgba(var(--soft-black-rgb), 0.12);
+  --shadow-xl-warm: 0 20px 40px rgba(var(--soft-black-rgb), 0.15);
+  --shadow-slab: 4px 4px 0 rgba(var(--soft-black-rgb), 0.25); /* Neo-brutalist offset shadow */
 
   /* Warm Surface Colors */
   --surface-cream: var(--soft-cream);              /* Main card backgrounds */
@@ -132,9 +133,9 @@
   --surface-glass-warm: rgba(255, 247, 239, 0.65); /* Warm glassmorphism */
 
   /* Warm Borders */
-  --border-cream: rgba(30, 23, 20, 0.12);          /* Subtle warm borders */
-  --border-cream-medium: rgba(30, 23, 20, 0.18);   /* Medium contrast borders */
-  --border-cream-strong: rgba(30, 23, 20, 0.25);   /* High contrast borders */
+  --border-cream: rgba(var(--soft-black-rgb), 0.12);          /* Subtle warm borders */
+  --border-cream-medium: rgba(var(--soft-black-rgb), 0.18);   /* Medium contrast borders */
+  --border-cream-strong: rgba(var(--soft-black-rgb), 0.25);   /* High contrast borders */
 }
 
 /* ===================================================================
@@ -167,12 +168,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(30, 23, 20, 0.12);  /* Warm brown instead of cold black */
+  background: rgba(var(--soft-black-rgb), 0.12);  /* Warm brown instead of cold black */
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(30, 23, 20, 0.20);  /* Warm brown hover */
+  background: rgba(var(--soft-black-rgb), 0.20);  /* Warm brown hover */
 }
 
 /* ===================================================================
@@ -922,14 +923,14 @@ body {
 }
 
 .history-item:hover:not(.active) {
-  border-color: rgba(232, 131, 156, 0.3);
-  background: rgba(232, 131, 156, 0.04);
+  border-color: rgba(var(--color-accent-rgb), 0.3);
+  background: rgba(var(--color-accent-rgb), 0.04);
   transform: translateX(-2px);
 }
 
 .history-item.active {
-  border: 3px solid rgba(232, 131, 156, 0.5);
-  background: rgba(232, 131, 156, 0.08);
+  border: 3px solid rgba(var(--color-accent-rgb), 0.5);
+  background: rgba(var(--color-accent-rgb), 0.08);
 }
 
 @keyframes mapperSpring {
@@ -1116,7 +1117,7 @@ textarea:focus,
 select:focus {
   outline: none;
   border-color: var(--color-accent) !important;
-  box-shadow: 0 0 0 3px rgba(232, 131, 156, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.1);
   transform: translateY(-1px);
 }
 
