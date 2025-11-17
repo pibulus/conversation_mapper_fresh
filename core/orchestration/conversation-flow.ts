@@ -40,11 +40,19 @@ export async function processAudio(
 	existingActionItems: ActionItem[] = [],
 	existingNodes: NodeInput[] = []
 ): Promise<ConversationFlowResult> {
-	// Parallel AI analysis
-	const analysis = await analyzeAudio(aiService, audioBlob, existingActionItems, existingNodes);
+	// First, transcribe the audio (must happen sequentially)
+	const transcription = await aiService.transcribeAudio(audioBlob);
 
-	// Generate title from transcription
-	const title = await aiService.generateTitle(analysis.transcription.text);
+	// Then run all analysis in parallel (including title generation)
+	const [topics, actionItems, statusUpdates, summary, title] = await Promise.all([
+		aiService.extractTopics(transcription.text, existingNodes),
+		aiService.extractActionItems(audioBlob, transcription.speakers, existingActionItems),
+		existingActionItems.length > 0
+			? aiService.checkActionItemStatus(audioBlob, existingActionItems)
+			: Promise.resolve([]),
+		aiService.generateSummary(transcription.text),
+		aiService.generateTitle(transcription.text)
+	]);
 
 	// Build result
 	return {
@@ -52,17 +60,17 @@ export async function processAudio(
 			id: conversationId,
 			title,
 			source: 'audio',
-			transcript: analysis.transcription.text
+			transcript: transcription.text
 		},
 		transcript: {
 			id: crypto.randomUUID(),
 			conversation_id: conversationId,
-			text: analysis.transcription.text,
-			speakers: analysis.transcription.speakers,
+			text: transcription.text,
+			speakers: transcription.speakers,
 			source: 'audio',
 			created_at: new Date().toISOString()
 		},
-		nodes: analysis.topics.nodes.map((node) => ({
+		nodes: topics.nodes.map((node) => ({
 			id: node.id,
 			conversation_id: conversationId,
 			label: node.label,
@@ -70,7 +78,7 @@ export async function processAudio(
 			color: node.color,
 			created_at: new Date().toISOString()
 		})),
-		edges: analysis.topics.edges.map((edge) => ({
+		edges: topics.edges.map((edge) => ({
 			id: crypto.randomUUID(),
 			conversation_id: conversationId,
 			source_topic_id: edge.source_topic_id,
@@ -78,7 +86,7 @@ export async function processAudio(
 			color: edge.color,
 			created_at: new Date().toISOString()
 		})),
-		actionItems: analysis.actionItems.map((item) => ({
+		actionItems: actionItems.map((item) => ({
 			id: crypto.randomUUID(),
 			conversation_id: conversationId,
 			description: item.description,
@@ -88,8 +96,8 @@ export async function processAudio(
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString()
 		})),
-		summary: analysis.summary,
-		statusUpdates: analysis.statusUpdates
+		summary,
+		statusUpdates
 	};
 }
 
@@ -104,11 +112,11 @@ export async function processText(
 	existingActionItems: ActionItem[] = [],
 	existingNodes: NodeInput[] = []
 ): Promise<ConversationFlowResult> {
-	// Parallel AI analysis
-	const analysis = await analyzeText(aiService, text, speakers, existingActionItems, existingNodes);
-
-	// Generate title
-	const title = await aiService.generateTitle(text);
+	// Parallel AI analysis (including title generation)
+	const [analysis, title] = await Promise.all([
+		analyzeText(aiService, text, speakers, existingActionItems, existingNodes),
+		aiService.generateTitle(text)
+	]);
 
 	// Build result
 	return {
