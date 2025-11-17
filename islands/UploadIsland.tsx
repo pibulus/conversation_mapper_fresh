@@ -335,7 +335,7 @@ export default function UploadIsland() {
                 <div
                   style={{
                     width: `${(recordingTime.value / MAX_RECORDING_TIME) * 100}%`,
-                    background: showTimeWarning.value ? '#EF4444' : 'var(--accent-electric)'
+                    background: showTimeWarning.value ? 'var(--color-danger)' : 'var(--accent-electric)'
                   }}
                 ></div>
               </div>

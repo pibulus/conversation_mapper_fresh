@@ -63,40 +63,98 @@ export default function ShareButton() {
   }
 
   return (
-    <div class="space-y-3">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
       {/* Share Button */}
       <button
         onClick={handleShare}
         disabled={!canShare.value || isGenerating.value}
-        class={`w-full font-bold py-2 px-4 rounded-lg border-2 transition-colors ${
-          canShare.value && !isGenerating.value
-            ? "bg-green-500 text-white border-green-700 hover:bg-green-600"
-            : "bg-gray-300 text-gray-500 border-gray-400 cursor-not-allowed"
-        }`}
+        class="btn btn-sm"
+        style={{
+          width: '100%',
+          background: canShare.value && !isGenerating.value ? 'var(--color-accent)' : 'var(--surface-cream-hover)',
+          color: canShare.value && !isGenerating.value ? 'white' : 'var(--color-text-secondary)',
+          borderColor: canShare.value && !isGenerating.value ? 'var(--color-accent)' : 'var(--border-cream-medium)',
+          cursor: canShare.value && !isGenerating.value ? 'pointer' : 'not-allowed',
+          fontWeight: '600',
+          fontSize: 'var(--font-size-sm)'
+        }}
+        onMouseEnter={(e) => {
+          if (canShare.value && !isGenerating.value) {
+            e.currentTarget.style.background = 'var(--soft-brown)';
+            e.currentTarget.style.borderColor = 'var(--soft-brown)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (canShare.value && !isGenerating.value) {
+            e.currentTarget.style.background = 'var(--color-accent)';
+            e.currentTarget.style.borderColor = 'var(--color-accent)';
+          }
+        }}
       >
-        {isGenerating.value ? "🔄 Generating..." : "🔗 Share Conversation"}
+        {isGenerating.value ? "🔄 Generating..." : "🔗 Share"}
       </button>
 
       {/* Share URL Display */}
       {shareUrl.value && (
-        <div class="bg-green-50 border-2 border-green-300 rounded-lg p-3 space-y-2">
-          <p class="text-xs font-bold text-green-800">Share Link:</p>
+        <div class="rounded-lg" style={{
+          background: 'rgba(var(--color-accent-rgb), 0.06)',
+          border: '2px solid rgba(var(--color-accent-rgb), 0.2)',
+          padding: '0.75rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.5rem'
+        }}>
+          <p style={{
+            fontSize: 'var(--font-size-xs)',
+            fontWeight: '700',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            color: 'var(--color-accent)'
+          }}>
+            Share Link
+          </p>
           <div class="flex gap-2">
             <input
               type="text"
               value={shareUrl.value}
               readonly
-              class="flex-1 text-xs px-2 py-1 bg-white border-2 border-green-300 rounded font-mono"
+              class="flex-1 rounded"
+              style={{
+                fontSize: 'var(--font-size-xs)',
+                padding: '0.5rem',
+                background: 'var(--surface-white-warm)',
+                border: '2px solid var(--border-cream-medium)',
+                fontFamily: 'monospace',
+                color: 'var(--color-text)'
+              }}
               onClick={(e) => (e.target as HTMLInputElement).select()}
             />
             <button
               onClick={handleCopyAgain}
-              class="bg-green-500 text-white px-3 py-1 rounded border-2 border-green-700 hover:bg-green-600 text-xs font-bold"
+              class="btn btn-sm"
+              style={{
+                background: 'var(--color-accent)',
+                color: 'white',
+                borderColor: 'var(--color-accent)',
+                padding: '0.5rem 0.75rem',
+                minWidth: '2.5rem'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--soft-brown)';
+                e.currentTarget.style.borderColor = 'var(--soft-brown)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--color-accent)';
+                e.currentTarget.style.borderColor = 'var(--color-accent)';
+              }}
             >
               📋
             </button>
           </div>
-          <p class="text-xs text-green-700">
+          <p style={{
+            fontSize: 'var(--font-size-xs)',
+            color: 'var(--color-text-secondary)'
+          }}>
             ✅ Link expires in 30 days
           </p>
         </div>
@@ -104,8 +162,17 @@ export default function ShareButton() {
 
       {/* Copied Notification */}
       {showCopied.value && (
-        <div class="bg-purple-100 border-2 border-purple-400 rounded-lg p-2 text-center animate-pulse">
-          <p class="text-sm font-bold text-purple-700">
+        <div class="rounded-lg text-center" style={{
+          background: 'rgba(var(--color-accent-rgb), 0.12)',
+          border: '2px solid rgba(var(--color-accent-rgb), 0.3)',
+          padding: '0.5rem',
+          animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+        }}>
+          <p style={{
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: '600',
+            color: 'var(--color-accent)'
+          }}>
             ✨ Copied to clipboard!
           </p>
         </div>
@@ -113,7 +180,11 @@ export default function ShareButton() {
 
       {/* Help Text */}
       {!canShare.value && (
-        <p class="text-xs text-gray-500 text-center">
+        <p style={{
+          fontSize: 'var(--font-size-xs)',
+          color: 'var(--color-text-secondary)',
+          textAlign: 'center'
+        }}>
           Upload a conversation to enable sharing
         </p>
       )}

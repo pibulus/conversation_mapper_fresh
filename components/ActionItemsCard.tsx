@@ -630,8 +630,8 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                         color: 'var(--soft-brown)'
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#FFE5E5';
-                        e.currentTarget.style.color = '#C74444';
+                        e.currentTarget.style.background = 'var(--color-danger-bg)';
+                        e.currentTarget.style.color = 'var(--color-danger)';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.background = 'var(--surface-cream-hover)';
