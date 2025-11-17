@@ -39,7 +39,7 @@ export default function DashboardIsland() {
   return (
     <div>
       {/* Grid Container - Simple CSS Grid */}
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style={{ gap: 'clamp(1rem, 2.5vw, 1.5rem)' }}>
 
         {/* Card 1: Transcript */}
         <TranscriptCard transcript={transcript} />

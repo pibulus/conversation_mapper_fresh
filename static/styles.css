@@ -44,9 +44,9 @@
      ================================================================ */
 
   /* Spacing - Responsive */
-  --card-padding: clamp(1rem, 2vw, 1.25rem);
-  --card-gap: clamp(1rem, 2vw, 1.25rem);
-  --section-gap: clamp(1.25rem, 3vw, 1.5rem);
+  --card-padding: clamp(1.25rem, 2.5vw, 1.5rem);
+  --card-gap: clamp(1rem, 2.5vw, 1.5rem);
+  --section-gap: clamp(1.5rem, 3vw, 2rem);
 
   /* Borders & Corners */
   --border-width: 1px;
@@ -1067,7 +1067,7 @@ body {
 
 .dashboard-card-body {
   padding: var(--card-padding);
-  max-height: 24rem;
+  max-height: 28rem;  /* More vertical space for content */
   overflow-y: auto;
 }
 
