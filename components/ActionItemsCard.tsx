@@ -5,6 +5,8 @@
 
 import { useSignal, useComputed } from "@preact/signals";
 import { useEffect, useRef, useMemo } from "preact/hooks";
+import { showToast } from "../utils/toast.ts";
+import { conversationData } from "../signals/conversationStore.ts";
 
 interface ActionItem {
   id: string;
@@ -51,11 +53,18 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
   // Common assignee names (can be customized)
   const commonAssignees = ['Me', 'Team Lead', 'Developer', 'Designer', 'QA', 'Product Manager', 'Client'];
 
+  // State for undo functionality
+  const undoTimeout = useRef<number | null>(null);
+  const undoAction = useSignal<{ type: 'delete' | 'complete', item: ActionItem } | null>(null);
+
   // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       if (dropdownTimeoutRef.current !== null) {
         clearTimeout(dropdownTimeoutRef.current);
+      }
+      if (undoTimeout.current !== null) {
+        clearTimeout(undoTimeout.current);
       }
     };
   }, []);
@@ -242,6 +251,8 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     editingDescription.value = '';
     editingAssignee.value = '';
     editingDueDate.value = '';
+
+    showToast('Changes saved', 'success');
   }
 
   function cancelEdit() {
@@ -270,8 +281,40 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
   }
 
   function deleteItem(itemId: string) {
-    if (!confirm('Delete this action item?')) return;
+    const itemToDelete = actionItems.find(item => item.id === itemId);
+    if (!itemToDelete) return;
+
+    // Clear any pending undo
+    if (undoTimeout.current !== null) {
+      clearTimeout(undoTimeout.current);
+    }
+
+    // Store for undo
+    undoAction.value = { type: 'delete', item: itemToDelete };
+
+    // Remove item
     onUpdateItems(actionItems.filter(item => item.id !== itemId));
+
+    // Clear undo after timeout
+    undoTimeout.current = setTimeout(() => {
+      undoAction.value = null;
+      undoTimeout.current = null;
+    }, 4000) as unknown as number;
+  }
+
+  function undoDelete() {
+    if (!undoAction.value || undoAction.value.type !== 'delete') return;
+
+    const item = undoAction.value.item;
+    onUpdateItems([...actionItems, item]);
+    undoAction.value = null;
+
+    if (undoTimeout.current !== null) {
+      clearTimeout(undoTimeout.current);
+      undoTimeout.current = null;
+    }
+
+    showToast('Action item restored', 'success');
   }
 
   function formatFriendlyDate(dateString: string): string {
@@ -286,7 +329,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
 
     const newItem: ActionItem = {
       id: crypto.randomUUID(),
-      conversation_id: actionItems[0]?.conversation_id || '',
+      conversation_id: conversationData.value?.conversation.id || '',
       description: newItemDescription.value,
       assignee: newItemAssignee.value || null,
       due_date: newItemDueDate.value || null,
@@ -302,6 +345,9 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     newItemAssignee.value = '';
     newItemDueDate.value = '';
     showAddModal.value = false;
+
+    // Show success toast
+    showToast('Action item added!', 'success');
   }
 
   function cycleSortMode() {
@@ -432,8 +478,40 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                   const canDrag = item.status === 'pending' && sortMode.value === 'manual';
                   const isSelected = selectedItemIndex.value === index;
 
+                  // Check if this is the first completed item (show separator)
+                  const isFirstCompleted = item.status === 'completed' &&
+                    (index === 0 || sortedActionItems[index - 1].status === 'pending');
+
                   return (
-                    <div
+                    <>
+                      {isFirstCompleted && (
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            margin: '1.5rem 0',
+                            color: 'var(--color-text-secondary)',
+                            fontSize: 'var(--tiny-size)',
+                            fontWeight: '600',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}
+                        >
+                          <div style={{
+                            flex: 1,
+                            height: '1px',
+                            background: 'var(--color-border)'
+                          }}></div>
+                          <span>Completed</span>
+                          <div style={{
+                            flex: 1,
+                            height: '1px',
+                            background: 'var(--color-border)'
+                          }}></div>
+                        </div>
+                      )}
+                      <div
                       key={item.id}
                       draggable={canDrag}
                       onDragStart={(e) => canDrag && handleDragStart(e, item.id)}
@@ -442,7 +520,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => canDrag && handleDrop(e, item.id)}
                       onClick={() => selectedItemIndex.value = index}
-                      class="relative p-4 rounded-lg transition-all"
+                      class="group relative p-4 rounded-lg transition-all"
                       style={{
                         background: 'var(--surface-cream)',
                         border: `2px solid ${isSelected ? 'var(--color-accent)' : isDragOver ? 'var(--color-accent)' : 'var(--color-border)'}`,
@@ -517,14 +595,35 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                             </div>
                           </div>
                         ) : (
-                          <p
-                            class={`leading-relaxed ${item.status === 'completed' ? 'line-through opacity-60' : ''}`}
-                            style={{ fontSize: 'var(--text-size)', color: 'var(--color-text)' }}
-                            onDblClick={() => startEditing(item.id, item.description, item.assignee, item.due_date)}
-                            title="Double-click to edit"
-                          >
-                            {item.description}
-                          </p>
+                          <div class="flex items-start gap-2">
+                            <p
+                              class={`leading-relaxed flex-1 ${item.status === 'completed' ? 'line-through opacity-60' : ''}`}
+                              style={{ fontSize: 'var(--text-size)', color: 'var(--color-text)' }}
+                              onDblClick={() => startEditing(item.id, item.description, item.assignee, item.due_date)}
+                              title="Double-click to edit"
+                            >
+                              {item.description}
+                            </p>
+                            {item.status === 'pending' && (
+                              <button
+                                onClick={() => startEditing(item.id, item.description, item.assignee, item.due_date)}
+                                class="opacity-0 group-hover:opacity-100 transition-opacity"
+                                style={{
+                                  padding: '0.25rem',
+                                  color: 'var(--color-text-secondary)',
+                                  background: 'transparent',
+                                  border: 'none',
+                                  cursor: 'pointer'
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-accent)')}
+                                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
+                                title="Edit item"
+                                aria-label="Edit action item"
+                              >
+                                <i class="fa fa-pencil text-xs"></i>
+                              </button>
+                            )}
+                          </div>
                         )}
 
                         {/* Metadata row - assignee & due date */}
@@ -649,13 +748,42 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                     >
                       <i class="fa fa-times text-xs"></i>
                     </button>
-                  </div>
+                      </div>
+                    </>
                   );
                 })}
               </div>
             )}
           </div>
         </div>
+
+        {/* Undo Banner */}
+        {undoAction.value && (
+          <div
+            class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg"
+            style={{
+              background: 'var(--soft-black)',
+              color: 'white',
+              animation: 'slideInRight 0.3s ease-out'
+            }}
+          >
+            <span style={{ fontSize: 'var(--text-size)' }}>
+              Action item deleted
+            </span>
+            <button
+              onClick={undoDelete}
+              class="px-3 py-1 rounded font-bold text-xs"
+              style={{
+                background: 'var(--color-accent)',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              Undo
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Add New Item Modal */}
