@@ -396,7 +396,10 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
           <h3>Export</h3>
           <button
             onClick={onClose}
-            class="text-white hover:text-gray-200 cursor-pointer transition-colors"
+            class="text-white cursor-pointer transition-opacity"
+            style={{ opacity: 0.9 }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
             title="Close"
             aria-label="Close export"
           >
@@ -427,7 +430,7 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                 class={`btn btn-sm flex-1 min-w-[calc(50%-0.25rem)] ${
                   selectedPromptId.value === promptOption.id
                     ? 'bg-soft-purple text-white border-purple-600'
-                    : 'bg-white border-2 border-gray-300 hover:border-soft-purple'
+                    : ''
                 }`}
                 onClick={() => generateFromPreset(promptOption.id)}
                 disabled={loading.value}
@@ -441,7 +444,11 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
           <div class="mb-4">
             <label class="block text-sm font-semibold mb-2">Custom Prompt</label>
             <textarea
-              class="w-full h-24 border-2 border-gray-300 rounded px-3 py-2 text-sm focus:border-soft-purple focus:outline-none"
+              class="w-full h-24 rounded px-3 py-2 text-sm focus:border-soft-purple focus:outline-none"
+              style={{
+                border: '2px solid var(--color-border)',
+                background: 'var(--surface-cream)'
+              }}
               placeholder="Type your own custom prompt here..."
               value={customPrompt.value}
               onInput={(e) => customPrompt.value = (e.target as HTMLTextAreaElement).value}
@@ -481,28 +488,40 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                 <span class="font-bold text-white">Preview</span>
                 <div class="flex gap-2">
                   <button
-                    class="text-white hover:text-gray-200 cursor-pointer transition-colors"
+                    class="text-white cursor-pointer transition-opacity"
+                    style={{ opacity: 0.9 }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={copyToClipboard}
                     title="Copy to clipboard"
                   >
                     <i class="fa fa-copy"></i>
                   </button>
                   <button
-                    class="text-white hover:text-gray-200 cursor-pointer transition-colors"
+                    class="text-white cursor-pointer transition-opacity"
+                    style={{ opacity: 0.9 }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={downloadMarkdown}
                     title="Download as .md file"
                   >
                     <i class="fa fa-download"></i>
                   </button>
                   <button
-                    class="text-white hover:text-gray-200 cursor-pointer transition-colors"
+                    class="text-white cursor-pointer transition-opacity"
+                    style={{ opacity: 0.9 }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={downloadPDF}
                     title="Download as PDF"
                   >
                     <i class="fa fa-file-pdf"></i>
                   </button>
                   <button
-                    class="text-white hover:text-gray-200 cursor-pointer transition-colors"
+                    class="text-white cursor-pointer transition-opacity"
+                    style={{ opacity: 0.9 }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={saveOutput}
                     title="Save to localStorage"
                   >
@@ -510,7 +529,7 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                   </button>
                 </div>
               </div>
-              <div class="p-4 bg-white max-h-96 overflow-y-auto">
+              <div class="p-4 max-h-96 overflow-y-auto" style={{ background: 'var(--surface-cream)' }}>
                 <pre class="text-sm whitespace-pre-wrap font-mono">{markdown.value}</pre>
               </div>
             </div>
@@ -518,15 +537,24 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
 
           {/* Saved Outputs */}
           {savedOutputs.value.length > 0 && (
-            <div class="border-t-2 border-gray-200 pt-4 mt-4">
+            <div class="pt-4 mt-4" style={{ borderTop: '2px solid var(--color-border)' }}>
               <h4 class="font-bold text-sm mb-3">💾 Saved Outputs</h4>
               <div class="space-y-2">
                 {savedOutputs.value.map((output) => (
-                  <div key={output.id} class="border-2 border-gray-300 rounded-lg p-3 bg-white">
+                  <div
+                    key={output.id}
+                    class="rounded-lg p-3"
+                    style={{
+                      border: '2px solid var(--color-border)',
+                      background: 'var(--surface-cream)'
+                    }}
+                  >
                     <div class="flex justify-between items-start mb-2">
                       <div class="flex-1 min-w-0">
                         <p class="font-semibold text-sm text-purple-600">{output.prompt}</p>
-                        <p class="text-xs text-gray-500">{new Date(output.created_at).toLocaleString()}</p>
+                        <p class="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                          {new Date(output.created_at).toLocaleString()}
+                        </p>
                       </div>
                       <div class="flex gap-1 ml-2">
                         <button
@@ -545,7 +573,7 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                         </button>
                       </div>
                     </div>
-                    <div class="text-xs text-gray-600 line-clamp-3">
+                    <div class="text-xs line-clamp-3" style={{ color: 'var(--color-text-secondary)' }}>
                       {output.content.substring(0, 150)}...
                     </div>
                   </div>
