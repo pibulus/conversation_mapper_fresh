@@ -83,7 +83,7 @@ export default function ConversationList() {
         borderBottom: '2px solid var(--border-cream)'
       }}>
         <h2 style={{
-          fontSize: '16px',
+          fontSize: 'var(--font-size-md)',
           fontWeight: '600',
           color: 'var(--soft-black)'
         }}>Conversations</h2>
@@ -153,7 +153,7 @@ export default function ConversationList() {
                     class="flex-1 text-left"
                   >
                     <h3 class="truncate" style={{
-                      fontSize: '14px',
+                      fontSize: 'var(--font-size-sm)',
                       fontWeight: '600',
                       color: 'var(--soft-black)',
                       marginBottom: '4px'
@@ -161,7 +161,7 @@ export default function ConversationList() {
                       {truncatedTitle}
                     </h3>
                     <div class="flex items-center gap-2" style={{
-                      fontSize: '12px',
+                      fontSize: 'var(--font-size-xs)',
                       color: 'var(--color-text-secondary)'
                     }}>
                       <span>{conv.nodes.length} topics</span>
@@ -169,8 +169,8 @@ export default function ConversationList() {
                       <span>{conv.actionItems.length} items</span>
                     </div>
                     <p style={{
-                      fontSize: '11px',
-                      color: '#999',
+                      fontSize: 'var(--font-size-xs)',
+                      color: 'var(--color-text-secondary)',
                       marginTop: '4px'
                     }}>
                       {new Date(conv.updatedAt).toLocaleDateString()}
@@ -181,8 +181,8 @@ export default function ConversationList() {
                     onClick={() => handleDelete(conv.id)}
                     class="p-1"
                     style={{
-                      color: '#EF4444',
-                      fontSize: '14px',
+                      color: 'var(--color-danger)',
+                      fontSize: 'var(--font-size-sm)',
                       transition: 'opacity 0.15s ease',
                       opacity: 0.5
                     }}
@@ -212,12 +212,12 @@ export default function ConversationList() {
             onClick={(e) => e.stopPropagation()}
           >
             <h3 class="mb-3" style={{
-              fontSize: '18px',
+              fontSize: 'var(--font-size-lg)',
               fontWeight: '600',
               color: 'var(--soft-black)'
             }}>Delete Conversation?</h3>
             <p class="mb-6" style={{
-              fontSize: '14px',
+              fontSize: 'var(--font-size-sm)',
               color: 'var(--color-text-secondary)',
               lineHeight: '1.5'
             }}>

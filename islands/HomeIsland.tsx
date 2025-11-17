@@ -71,14 +71,14 @@ export default function HomeIsland() {
                   class="btn btn-ghost btn-xs flex-shrink-0 flex items-center justify-center w-9 h-9"
                   title="Back to home"
                 >
-                  <i class="fa fa-arrow-left" style={{ fontSize: '14px', color: 'var(--color-text)' }}></i>
+                  <i class="fa fa-arrow-left" style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text)' }}></i>
                 </button>
                 <h1
                   class="truncate"
                   style={{
-                    fontSize: '22px',
+                    fontSize: 'var(--font-size-2xl)',
                     fontWeight: '800',
-                    color: 'var(--soft-black)', /* use unified soft-black */
+                    color: 'var(--soft-black)',
                     letterSpacing: '-0.03em'
                   }}
                 >
@@ -123,9 +123,9 @@ export default function HomeIsland() {
               <a
                 href="/"
                 style={{
-                  fontSize: '22px',
+                  fontSize: 'var(--font-size-2xl)',
                   fontWeight: '800',
-                  color: 'var(--soft-black)', /* use unified soft-black */
+                  color: 'var(--soft-black)',
                   letterSpacing: '-0.03em',
                   flex: 1,
                   textDecoration: 'none',
