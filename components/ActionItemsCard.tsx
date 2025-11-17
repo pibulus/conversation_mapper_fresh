@@ -4,7 +4,7 @@
  */
 
 import { useSignal, useComputed } from "@preact/signals";
-import { useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef, useMemo } from "preact/hooks";
 
 interface ActionItem {
   id: string;
@@ -132,7 +132,8 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
   }, [showAddModal.value]);
 
   // Filter and sort action items (memoized for performance)
-  const sortedActionItems = useComputed(() => {
+  // Using useMemo since we depend on props, not just signals
+  const sortedActionItems = useMemo(() => {
     let filteredItems = [...actionItems];
 
     // Apply search filter
@@ -168,11 +169,11 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     };
 
     return [...sortGroup(pending), ...sortGroup(completed)];
-  });
+  }, [actionItems, searchQuery.value, sortMode.value]);
 
   // Arrow key navigation in action items list
   useEffect(() => {
-    if (!listContainerRef.current || sortedActionItems.value.length === 0) return;
+    if (!listContainerRef.current || sortedActionItems.length === 0) return;
 
     function handleArrowKeys(e: KeyboardEvent) {
       // Only handle if we're not in an input/textarea
@@ -183,7 +184,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
         e.preventDefault();
         selectedItemIndex.value = Math.min(
           selectedItemIndex.value + 1,
-          sortedActionItems.value.length - 1
+          sortedActionItems.length - 1
         );
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
@@ -193,7 +194,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
         );
       } else if (e.key === 'Enter' && selectedItemIndex.value >= 0) {
         e.preventDefault();
-        const item = sortedActionItems.value[selectedItemIndex.value];
+        const item = sortedActionItems[selectedItemIndex.value];
         toggleActionItem(item.id);
       }
     }
@@ -202,7 +203,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     container.addEventListener('keydown', handleArrowKeys);
 
     return () => container.removeEventListener('keydown', handleArrowKeys);
-  }, [sortedActionItems.value.length]);
+  }, [sortedActionItems.length]);
 
   // Handlers
   function toggleActionItem(itemId: string) {
@@ -418,14 +419,14 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
             style={{ padding: '0.5rem var(--card-padding) var(--card-padding)' }}
             class="max-h-96 overflow-y-auto focus:outline-none"
           >
-            {sortedActionItems.value.length === 0 ? (
+            {sortedActionItems.length === 0 ? (
               <div class="empty-state">
                 <div class="empty-state-icon">✓</div>
                 <div class="empty-state-text">All clear</div>
               </div>
             ) : (
               <div class="space-y-3">
-                {sortedActionItems.value.map((item, index) => {
+                {sortedActionItems.map((item, index) => {
                   const isDragging = draggedItemId.value === item.id;
                   const isDragOver = dragOverItemId.value === item.id;
                   const canDrag = item.status === 'pending' && sortMode.value === 'manual';

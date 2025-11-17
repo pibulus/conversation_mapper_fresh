@@ -26,15 +26,27 @@ export default function DashboardIsland() {
     );
   }
 
-  const { conversation, transcript, actionItems, nodes, summary } = conversationData.value;
-
   // Handler to update action items
-  function handleUpdateActionItems(updatedItems: typeof actionItems) {
+  function handleUpdateActionItems(updatedItems: any[]) {
+    if (!conversationData.value) return;
+
+    // Create completely new object to ensure signal reactivity
+    const currentData = conversationData.value;
     conversationData.value = {
-      ...conversationData.value!,
-      actionItems: updatedItems
+      conversation: { ...currentData.conversation },
+      transcript: { ...currentData.transcript },
+      nodes: [...currentData.nodes],
+      edges: [...currentData.edges],
+      actionItems: updatedItems,
+      statusUpdates: currentData.statusUpdates ? [...currentData.statusUpdates] : [],
+      summary: currentData.summary
     };
   }
+
+  // Access signal properties directly in render to maintain reactivity
+  const data = conversationData.value;
+  const { conversation, transcript, nodes, summary } = data;
+  const actionItems = data.actionItems;
 
   return (
     <div>
