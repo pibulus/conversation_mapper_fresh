@@ -110,8 +110,8 @@ export default function MobileHistoryMenu() {
           boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.1)',
           cursor: 'pointer',
           fontWeight: '700',
-          fontSize: '15px',
-          color: '#2C2C2C',
+          fontSize: 'var(--font-size-base)',
+          color: 'var(--color-text)',
           gap: '8px'
         }}
         onMouseEnter={(e) => {
@@ -169,8 +169,8 @@ export default function MobileHistoryMenu() {
         }}>
           <h2 style={{
             fontWeight: '700',
-            fontSize: '1.25rem',
-            color: '#2C2C2C',
+            fontSize: 'var(--font-size-xl)',
+            color: 'var(--color-text)',
             letterSpacing: '-0.01em'
           }}>Your Conversations</h2>
           <button
@@ -186,8 +186,8 @@ export default function MobileHistoryMenu() {
               justifyContent: 'center',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
-              color: '#2C2C2C',
-              fontSize: '18px',
+              color: 'var(--color-text)',
+              fontSize: 'var(--font-size-lg)',
               fontWeight: '600'
             }}
             onMouseEnter={(e) => {
@@ -212,9 +212,9 @@ export default function MobileHistoryMenu() {
               padding: '14px 20px',
               fontSize: '16px',
               fontWeight: '700',
-              border: '2px solid #1A1A1A',
+              border: '2px solid var(--soft-black)',
               borderRadius: '12px',
-              background: '#1A1A1A',
+              background: 'var(--soft-black)',
               color: 'white',
               cursor: 'pointer',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -255,11 +255,11 @@ export default function MobileHistoryMenu() {
             <div style={{
               textAlign: 'center',
               padding: '3rem 1rem',
-              color: '#6B6B6B'
+              color: 'var(--color-text-secondary)'
             }}>
               <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.4 }}>✨</div>
               <p style={{
-                fontSize: '15px',
+                fontSize: 'var(--font-size-base)',
                 fontWeight: '500',
                 lineHeight: '1.6'
               }}>
@@ -293,8 +293,8 @@ export default function MobileHistoryMenu() {
                     >
                       <h3 style={{
                         fontWeight: '700',
-                        color: '#2C2C2C',
-                        fontSize: '15px',
+                        color: 'var(--color-text)',
+                        fontSize: 'var(--font-size-base)',
                         marginBottom: '0.5rem',
                         lineHeight: '1.3'
                       }}>
@@ -306,30 +306,32 @@ export default function MobileHistoryMenu() {
                         alignItems: 'center',
                         gap: '0.5rem',
                         marginTop: '0.5rem',
-                        fontSize: '12px'
+                        fontSize: 'var(--font-size-xs)'
                       }}>
                         <span style={{
-                          background: 'rgba(59, 130, 246, 0.12)',
-                          color: '#2563EB',
+                          background: 'rgba(var(--color-accent-rgb), 0.12)',
+                          color: 'var(--color-accent)',
                           padding: '4px 8px',
                           borderRadius: '6px',
-                          fontWeight: '600'
+                          fontWeight: '600',
+                          fontSize: 'var(--font-size-xs)'
                         }}>
                           {conv.nodes.length} topics
                         </span>
                         <span style={{
-                          background: 'rgba(34, 197, 94, 0.12)',
-                          color: '#16A34A',
+                          background: 'rgba(var(--soft-black-rgb), 0.08)',
+                          color: 'var(--soft-brown)',
                           padding: '4px 8px',
                           borderRadius: '6px',
-                          fontWeight: '600'
+                          fontWeight: '600',
+                          fontSize: 'var(--font-size-xs)'
                         }}>
                           {conv.actionItems.length} items
                         </span>
                       </div>
                       <p style={{
-                        fontSize: '12px',
-                        color: '#8B7F77',
+                        fontSize: 'var(--font-size-xs)',
+                        color: 'var(--soft-brown)',
                         marginTop: '0.5rem',
                         fontWeight: '500'
                       }}>
@@ -383,7 +385,7 @@ export default function MobileHistoryMenu() {
         }}>
           <p style={{
             fontSize: '13px',
-            color: '#8B7F77',
+            color: 'var(--soft-brown)',
             textAlign: 'center',
             fontWeight: '500'
           }}>
@@ -414,12 +416,12 @@ export default function MobileHistoryMenu() {
               fontSize: '1.5rem',
               fontWeight: '700',
               marginBottom: '0.75rem',
-              color: '#2C2C2C',
+              color: 'var(--color-text)',
               lineHeight: '1.2'
             }}>Delete this conversation?</h3>
             <p style={{
-              fontSize: '15px',
-              color: '#6B6B6B',
+              fontSize: 'var(--font-size-base)',
+              color: 'var(--color-text-secondary)',
               marginBottom: '1.5rem',
               lineHeight: '1.6'
             }}>
@@ -433,9 +435,9 @@ export default function MobileHistoryMenu() {
                   padding: '14px 20px',
                   fontSize: '16px',
                   fontWeight: '700',
-                  border: '3px solid #DC2626',
+                  border: '3px solid var(--color-danger)',
                   borderRadius: '12px',
-                  background: '#EF4444',
+                  background: 'var(--color-danger)',
                   color: 'white',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
@@ -462,7 +464,7 @@ export default function MobileHistoryMenu() {
                   border: '3px solid rgba(0, 0, 0, 0.15)',
                   borderRadius: '12px',
                   background: 'rgba(0, 0, 0, 0.05)',
-                  color: '#2C2C2C',
+                  color: 'var(--color-text)',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
                   boxShadow: '0 4px 0 0 rgba(0, 0, 0, 0.08)'
