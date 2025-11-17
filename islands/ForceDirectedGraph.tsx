@@ -363,6 +363,7 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
           class="bg-white bg-opacity-70 hover:bg-opacity-100 shadow-lg rounded-full w-10 h-10 flex items-center justify-center text-lg cursor-pointer"
           onClick={exportAsPng}
           title="Export as PNG"
+          aria-label="Export visualization as PNG image"
         >
           📸
         </button>
@@ -372,6 +373,7 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
           class="bg-white bg-opacity-70 hover:bg-opacity-100 shadow-lg rounded-full w-10 h-10 flex items-center justify-center text-lg cursor-pointer"
           onClick={resetVisualization}
           title="Reset node positions"
+          aria-label="Reset node positions to default"
         >
           🔄
         </button>
@@ -381,6 +383,7 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
           class="bg-white bg-opacity-70 hover:bg-opacity-100 shadow-lg rounded-full w-10 h-10 flex items-center justify-center text-lg cursor-pointer"
           onClick={fitToView}
           title="Fit all nodes to view"
+          aria-label="Fit all nodes into visible area"
         >
           📐
         </button>
@@ -390,6 +393,7 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
           class="bg-white bg-opacity-70 hover:bg-opacity-100 shadow-lg rounded-full w-10 h-10 flex items-center justify-center text-lg cursor-pointer"
           onClick={toggleFullscreen}
           title="Toggle fullscreen view"
+          aria-label="Toggle fullscreen visualization"
         >
           ⛶
         </button>

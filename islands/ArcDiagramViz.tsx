@@ -14,6 +14,11 @@ export default function ArcDiagramViz() {
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
   const fullscreenPortalRef = useRef<HTMLDivElement | null>(null);
+
+  // Track event listeners for cleanup
+  const portalClickListenerRef = useRef<((e: MouseEvent) => void) | null>(null);
+  const escapeListenerRef = useRef<((e: KeyboardEvent) => void) | null>(null);
+
   const isFullscreen = useSignal(false);
   const width = useSignal(0);
   const height = useSignal(0);
@@ -21,6 +26,16 @@ export default function ArcDiagramViz() {
   // Toggle fullscreen
   function toggleFullscreen() {
     if (isFullscreen.value) {
+      // Remove event listeners before removing portal
+      if (fullscreenPortalRef.current && portalClickListenerRef.current) {
+        fullscreenPortalRef.current.removeEventListener('click', portalClickListenerRef.current);
+        portalClickListenerRef.current = null;
+      }
+      if (escapeListenerRef.current) {
+        document.removeEventListener('keydown', escapeListenerRef.current);
+        escapeListenerRef.current = null;
+      }
+
       // Remove fullscreen
       if (fullscreenPortalRef.current?.parentNode) {
         fullscreenPortalRef.current.parentNode.removeChild(
@@ -57,35 +72,51 @@ export default function ArcDiagramViz() {
     portal.style.justifyContent = "center";
     portal.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
 
+    // Get CSS color values
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
+    const softBlack = getComputedStyle(document.documentElement).getPropertyValue('--soft-black').trim();
+
     // Create modal container
     const modalContainer = document.createElement("div");
-    modalContainer.className = "bg-white rounded-lg border-4 border-purple-400 shadow-brutal";
+    modalContainer.className = "bg-white rounded-lg";
     modalContainer.style.width = "90%";
     modalContainer.style.height = "85%";
     modalContainer.style.padding = "1.5rem";
+    modalContainer.style.border = `4px solid ${accentColor}`;
+    modalContainer.style.boxShadow = 'var(--shadow-xl)';
 
     // Create header
     const header = document.createElement("div");
     header.className = "flex justify-between items-center mb-4";
 
     const title = document.createElement("h2");
-    title.className = "text-2xl font-bold text-purple-600";
+    title.className = "text-2xl font-bold";
+    title.style.color = softBlack;
     title.textContent = "Arc Diagram Visualization";
 
     const closeButton = document.createElement("button");
-    closeButton.className =
-      "bg-red-500 text-white font-bold px-4 py-2 rounded border-2 border-red-700 hover:bg-red-600";
+    closeButton.className = "font-bold px-4 py-2 rounded border-2";
+    closeButton.style.background = softBlack;
+    closeButton.style.color = 'white';
+    closeButton.style.borderColor = softBlack;
     closeButton.textContent = "✕ Close";
     closeButton.onclick = toggleFullscreen;
+    closeButton.onmouseenter = () => {
+      closeButton.style.opacity = '0.8';
+    };
+    closeButton.onmouseleave = () => {
+      closeButton.style.opacity = '1';
+    };
 
     header.appendChild(title);
     header.appendChild(closeButton);
 
     // Create container for visualization
     const container = document.createElement("div");
-    container.className = "bg-purple-50 rounded-lg";
+    container.className = "rounded-lg";
     container.style.width = "100%";
     container.style.height = "calc(100% - 4rem)";
+    container.style.background = 'var(--surface-cream-hover)';
     fullscreenContainerRef.current = container;
 
     // Assemble
@@ -93,21 +124,23 @@ export default function ArcDiagramViz() {
     modalContainer.appendChild(container);
     portal.appendChild(modalContainer);
 
-    // Click outside to close
-    portal.addEventListener("click", (e) => {
+    // Click outside to close (store listener for cleanup)
+    const clickListener = (e: MouseEvent) => {
       if (e.target === portal) {
         toggleFullscreen();
       }
-    });
+    };
+    portal.addEventListener("click", clickListener);
+    portalClickListenerRef.current = clickListener;
 
-    // Escape key to close
+    // Escape key to close (store listener for cleanup)
     const escListener = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         toggleFullscreen();
       }
     };
-    portal.tabIndex = 0;
-    portal.addEventListener("keydown", escListener);
+    document.addEventListener("keydown", escListener);
+    escapeListenerRef.current = escListener;
 
     // Add to document
     document.body.appendChild(portal);
@@ -154,6 +187,10 @@ export default function ArcDiagramViz() {
 
     const nodes = data.nodes;
     const edges = data.edges;
+
+    // Get CSS color values
+    const textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim();
+    const textSecondary = getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary').trim();
 
     // Clear existing SVG
     d3.select(targetContainer).select("svg").remove();
@@ -269,7 +306,7 @@ export default function ArcDiagramViz() {
       .append("text")
       .attr("x", width.value / 2 + 15)
       .attr("y", (_, i) => (yScale(i.toString()) || 0) + 4)
-      .attr("fill", "#374151")
+      .attr("fill", textColor)
       .attr("class", "text-sm")
       .text((d) => {
         const label = `${d.emoji} ${d.label}`;
@@ -282,7 +319,9 @@ export default function ArcDiagramViz() {
       .attr("x", width.value - 10)
       .attr("y", 20)
       .attr("text-anchor", "end")
-      .attr("class", "text-xs opacity-70 fill-gray-600")
+      .attr("class", "text-xs")
+      .attr("fill", textSecondary)
+      .attr("opacity", 0.8)
       .text(`${maxNodesToShow} of ${nodes.length} topics shown`);
   }
 
@@ -309,6 +348,14 @@ export default function ArcDiagramViz() {
     return () => {
       resizeObserver.disconnect();
       globalThis.removeEventListener("keydown", handleKeydown);
+
+      // Cleanup event listeners
+      if (fullscreenPortalRef.current && portalClickListenerRef.current) {
+        fullscreenPortalRef.current.removeEventListener('click', portalClickListenerRef.current);
+      }
+      if (escapeListenerRef.current) {
+        document.removeEventListener('keydown', escapeListenerRef.current);
+      }
 
       // Remove fullscreen portal
       if (fullscreenPortalRef.current?.parentNode) {
@@ -341,14 +388,32 @@ export default function ArcDiagramViz() {
     <div class="relative flex h-full w-full flex-col">
       <div
         ref={svgContainerRef}
-        class="mx-auto aspect-square w-full flex-1 overflow-hidden rounded-lg border-2 border-purple-200 bg-purple-50"
+        class="mx-auto aspect-square w-full flex-1 overflow-hidden rounded-lg border-2"
+        style={{
+          borderColor: 'var(--border-cream-medium)',
+          background: 'var(--surface-cream-hover)'
+        }}
       />
 
       {/* Fullscreen button */}
       <button
         onClick={toggleFullscreen}
-        class="absolute bottom-4 right-4 bg-purple-500 text-white font-bold px-3 py-2 rounded-full border-2 border-purple-700 hover:bg-purple-600 shadow-lg"
+        class="absolute bottom-4 right-4 font-bold px-3 py-2 rounded-full border-2 shadow-lg"
+        style={{
+          background: 'var(--color-accent)',
+          color: 'white',
+          borderColor: 'var(--color-accent)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'var(--soft-brown)';
+          e.currentTarget.style.borderColor = 'var(--soft-brown)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'var(--color-accent)';
+          e.currentTarget.style.borderColor = 'var(--color-accent)';
+        }}
         title="Toggle fullscreen view"
+        aria-label="Toggle fullscreen visualization"
       >
         🔍
       </button>

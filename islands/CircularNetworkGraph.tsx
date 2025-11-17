@@ -19,6 +19,10 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
   const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
   const fullscreenPortalRef = useRef<HTMLDivElement | null>(null);
 
+  // Track event listeners for cleanup
+  const portalClickListenerRef = useRef<((e: MouseEvent) => void) | null>(null);
+  const escapeListenerRef = useRef<((e: KeyboardEvent) => void) | null>(null);
+
   const isFullscreen = useSignal(false);
   const width = useSignal(0);
   const height = useSignal(0);
@@ -30,6 +34,16 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
   // Toggle fullscreen
   function toggleFullscreen() {
     if (isFullscreen.value) {
+      // Remove event listeners before removing portal
+      if (fullscreenPortalRef.current && portalClickListenerRef.current) {
+        fullscreenPortalRef.current.removeEventListener('click', portalClickListenerRef.current);
+        portalClickListenerRef.current = null;
+      }
+      if (escapeListenerRef.current) {
+        document.removeEventListener('keydown', escapeListenerRef.current);
+        escapeListenerRef.current = null;
+      }
+
       // Remove fullscreen
       if (fullscreenPortalRef.current?.parentNode) {
         fullscreenPortalRef.current.parentNode.removeChild(fullscreenPortalRef.current);
@@ -63,10 +77,12 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
 
     // Create modal container
     const modalContainer = document.createElement('div');
-    modalContainer.className = 'bg-white rounded-lg shadow-brutal border-4 border-purple-400';
+    modalContainer.className = 'bg-white rounded-lg';
     modalContainer.style.width = '90%';
     modalContainer.style.height = '85%';
     modalContainer.style.padding = '1.5rem';
+    modalContainer.style.border = '4px solid var(--color-accent)';
+    modalContainer.style.boxShadow = 'var(--shadow-xl)';
 
     // Create header
     const header = document.createElement('div');
@@ -97,20 +113,21 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
     modalContainer.appendChild(vizContainer);
     portal.appendChild(modalContainer);
 
-    // Click outside to close
-    portal.addEventListener('click', (e) => {
+    // Click outside to close (store listener for cleanup)
+    const clickListener = (e: MouseEvent) => {
       if (e.target === portal) toggleFullscreen();
-    });
+    };
+    portal.addEventListener('click', clickListener);
+    portalClickListenerRef.current = clickListener;
 
-    // Escape key to close
+    // Escape key to close (store listener for cleanup)
     const escListener = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         toggleFullscreen();
-        portal.removeEventListener('keydown', escListener);
       }
     };
-    portal.tabIndex = 0;
-    portal.addEventListener('keydown', escListener);
+    document.addEventListener('keydown', escListener);
+    escapeListenerRef.current = escListener;
 
     document.body.appendChild(portal);
     fullscreenPortalRef.current = portal;
@@ -131,6 +148,11 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
 
   function updateVisualization(container: HTMLElement) {
     if (!container || !width.value || !height.value || topics.value.length === 0) return;
+
+    // Get CSS color values
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
+    const textColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text').trim();
+    const textSecondary = getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary').trim();
 
     // Remove existing SVG
     d3.select(container).select('svg').remove();
@@ -202,8 +224,8 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
       .attr('cx', d => d.x)
       .attr('cy', d => d.y)
       .attr('r', baseNodeRadius)
-      .attr('fill', d => d.color || '#38b2ac')
-      .attr('stroke', '#333')
+      .attr('fill', d => d.color || accentColor)
+      .attr('stroke', textColor)
       .attr('stroke-width', 1.5 * sizeMultiplier)
       .attr('class', 'cursor-pointer')
       .on('mouseover', function(event, d) {
@@ -217,7 +239,7 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
         nodeGroup.selectAll('circle')
           .filter((node: any) => connectedIds.includes(node.id))
           .attr('stroke-width', 3 * sizeMultiplier)
-          .attr('stroke', '#2c7a7b');
+          .attr('stroke', accentColor);
 
         tooltip.style('opacity', 1)
           .html(`<div class="p-2"><strong>${d.emoji} ${d.label}</strong></div>`)
@@ -243,8 +265,8 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
         return d.label.length > maxLength ? d.label.substring(0, maxLength) + '...' : d.label;
       })
       .attr('font-size', `${baseFontSize}px`)
-      .attr('fill', '#2d3748')
-      .attr('opacity', 0.7);
+      .attr('fill', textSecondary)
+      .attr('opacity', 0.9);
 
     // Add zoom in fullscreen
     if (isFullscreen.value) {
@@ -276,8 +298,21 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
 
     return () => {
       resizeObserver.disconnect();
-      // Cleanup tooltip
-      d3.select('body').select('.absolute').remove();
+
+      // Cleanup tooltip (more specific selector to avoid removing unrelated elements)
+      d3.selectAll('body > div.absolute').filter(function() {
+        const text = d3.select(this).text();
+        return text && text.trim().length > 0; // Only remove tooltips with content
+      }).remove();
+
+      // Cleanup event listeners
+      if (fullscreenPortalRef.current && portalClickListenerRef.current) {
+        fullscreenPortalRef.current.removeEventListener('click', portalClickListenerRef.current);
+      }
+      if (escapeListenerRef.current) {
+        document.removeEventListener('keydown', escapeListenerRef.current);
+      }
+
       // Cleanup fullscreen portal
       if (fullscreenPortalRef.current?.parentNode) {
         fullscreenPortalRef.current.parentNode.removeChild(fullscreenPortalRef.current);
@@ -320,6 +355,7 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
         class="absolute bottom-4 right-4 bg-white bg-opacity-70 hover:bg-opacity-100 shadow-lg rounded-full w-10 h-10 flex items-center justify-center text-lg cursor-pointer"
         onClick={toggleFullscreen}
         title="Toggle fullscreen view"
+        aria-label="Toggle fullscreen visualization"
       >
         ⛶
       </button>

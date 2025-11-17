@@ -84,14 +84,14 @@ interface Config {
 const defaultConfig: Config = {
   width: 600,
   height: 400,
-  backgroundColor: '#fff',
-  linkColor: '#000',
+  backgroundColor: 'rgba(255,255,255,0.65)',
+  linkColor: 'rgba(0,0,0,0.3)',
   linkStrokeWidth: 3,
   linkOpacity: 1,
-  nodeColor: 'steelblue',
+  nodeColor: 'oklch(0.75 0.1 40)', // Warm accent color
   emojiFontSize: '28px',
   labelFontSize: '14px',
-  labelColor: '#333',
+  labelColor: 'oklch(0.35 0.03 30)', // Soft black
   linkDistance: 100,
   chargeStrength: -1500,
   collisionRadius: 50,
