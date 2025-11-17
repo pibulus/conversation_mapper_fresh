@@ -95,27 +95,13 @@ const defaultConfig: Config = {
   linkDistance: 100,
   chargeStrength: -1500,
   collisionRadius: 50,
-  onMouseOverNode: (event, d) => {
-    console.log('Mouse over node:', d.id);
-  },
-  onDoubleClickNode: (event, d) => {
-    console.log('Double clicked node:', d.id);
-  },
-  onRightClickNode: (event, d) => {
-    console.log('Right clicked node:', d.id);
-  },
-  onMouseOverEdge: (event, d) => {
-    console.log('Mouse over edge:', d.id);
-  },
-  onDoubleClickEdge: (event, d) => {
-    console.log('Double clicked edge:', d.id);
-  },
-  onRightClickEdge: (event, d) => {
-    console.log('Right clicked edge:', d.id);
-  },
-  onBackgroundClick: (event) => {
-    console.log('Background clicked. pointerType: ', event.pointerType);
-  },
+  onMouseOverNode: () => {},
+  onDoubleClickNode: () => {},
+  onRightClickNode: () => {},
+  onMouseOverEdge: () => {},
+  onDoubleClickEdge: () => {},
+  onRightClickEdge: () => {},
+  onBackgroundClick: () => {},
   onRightClickBackground: (event) => {
     event.preventDefault();
     // Dispatch custom event for external handling
@@ -187,24 +173,15 @@ function createGroups(g: d3.Selection<SVGGElement, unknown, null, undefined>) {
  * Maps raw edge data into objects suitable for D3 force simulation
  */
 function mapEdges(edges: EdgeData[] = []): EdgeData[] {
-  if (!edges || !Array.isArray(edges)) {
-    console.warn('Invalid edges data passed to mapEdges:', edges);
-    return [];
-  }
+  if (!edges || !Array.isArray(edges)) return [];
 
   return edges.map((edge, i) => {
-    if (!edge) {
-      console.warn('Null or undefined edge in mapEdges at index', i);
-      return null;
-    }
+    if (!edge) return null;
 
     const sourceId = edge.sourceTopicId || edge.source_topic_id || (typeof edge.source === 'string' ? edge.source : '');
     const targetId = edge.targetTopicId || edge.target_topic_id || (typeof edge.target === 'string' ? edge.target : '');
 
-    if (!sourceId || !targetId) {
-      console.warn('Edge missing source or target ID:', edge);
-      return null;
-    }
+    if (!sourceId || !targetId) return null;
 
     return {
       ...edge,
@@ -452,22 +429,14 @@ export function forceDirectedEmojimap(
   let { nodes = [], edges = [], config = {} } = params || {};
 
   // Ensure nodes and edges are arrays
-  if (!Array.isArray(nodes)) {
-    console.warn('Nodes is not an array, defaulting to empty array');
-    nodes = [];
-  }
-
-  if (!Array.isArray(edges)) {
-    console.warn('Edges is not an array, defaulting to empty array');
-    edges = [];
-  }
+  if (!Array.isArray(nodes)) nodes = [];
+  if (!Array.isArray(edges)) edges = [];
 
   // Merge with default config
   const mergedConfig: Config = { ...defaultConfig, ...config };
 
   // Process edges with error handling
   let currentEdges = mapEdges(edges);
-  console.log(`[Emojimap] Mapped ${currentEdges.length} edges from ${edges.length} raw edges`);
 
   // Initialize SVG, groups, and zoom behavior
   const svg = createSvg(node, mergedConfig);
@@ -480,38 +449,19 @@ export function forceDirectedEmojimap(
 
   // Validate nodes and build node map
   nodes.forEach((n) => {
-    if (!n.id) {
-      console.warn('Node missing ID, skipping:', n);
-      return;
-    }
+    if (!n.id) return;
     nodeMap.set(n.id, n);
   });
-
-  console.log(`[Emojimap] Created node map with ${nodeMap.size} nodes`);
 
   // Map edges to nodes
   currentEdges = currentEdges
     .map((e) => {
       const source = nodeMap.get(e.source as string);
       const target = nodeMap.get(e.target as string);
-
-      if (!source || !target) {
-        console.warn(
-          `Edge references missing node: ${!source ? 'source' : 'target'} missing`,
-          e
-        );
-        return null;
-      }
-
-      return {
-        ...e,
-        source,
-        target
-      };
+      if (!source || !target) return null;
+      return { ...e, source, target };
     })
     .filter((e): e is EdgeData => e !== null);
-
-  console.log(`[Emojimap] Final edge count: ${currentEdges.length}`);
 
   // Initialize simulation
   const simulation = d3
@@ -549,53 +499,26 @@ export function forceDirectedEmojimap(
   // Public API
   return {
     update(newParams) {
-      console.log(
-        '[Emojimap] Update called with params:',
-        newParams?.nodes?.length || 0,
-        'nodes',
-        newParams?.edges?.length || 0,
-        'edges'
-      );
-
-      if (!newParams) {
-        console.warn('[Emojimap] Update called with no parameters');
-        return;
-      }
+      if (!newParams) return;
 
       // Validate and set nodes
       if (Array.isArray(newParams.nodes)) {
         nodes = newParams.nodes;
-      } else {
-        console.warn('[Emojimap] Update called with invalid nodes:', newParams.nodes);
       }
 
       // Validate and set edges
       if (Array.isArray(newParams.edges)) {
         edges = newParams.edges;
-      } else {
-        console.warn('[Emojimap] Update called with invalid edges:', newParams.edges);
       }
 
       // Update config
       Object.assign(mergedConfig, newParams.config || {});
 
-      if (!nodes.length || !edges.length) {
-        console.warn(
-          '[Emojimap] Update skipped: nodes or edges empty.',
-          nodes.length,
-          'nodes,',
-          edges.length,
-          'edges'
-        );
-        return;
-      }
+      if (!nodes.length || !edges.length) return;
 
       // Ensure nodes have initial positions
       nodes.forEach((n) => {
-        if (!n.id) {
-          console.warn('[Emojimap] Node missing ID:', n);
-          return;
-        }
+        if (!n.id) return;
         if (n.x == null) n.x = mergedConfig.width / 2;
         if (n.y == null) n.y = mergedConfig.height / 2;
       });
@@ -606,38 +529,18 @@ export function forceDirectedEmojimap(
         if (n && n.id) newNodeMap.set(n.id, n);
       });
 
-      console.log(`[Emojimap] Update: node map has ${newNodeMap.size} nodes`);
-
       // Map and filter edges
       const mappedEdges = mapEdges(edges);
-      console.log(
-        `[Emojimap] Update: mapped ${mappedEdges.length} edges from ${edges.length} raw edges`
-      );
 
       currentEdges = mappedEdges
         .map((e) => {
           if (!e.source || !e.target) return null;
-
           const source = newNodeMap.get(e.source as string);
           const target = newNodeMap.get(e.target as string);
-
-          if (!source || !target) {
-            console.warn(
-              `[Emojimap] Edge references missing node:`,
-              !source ? `source (${e.source})` : `target (${e.target})`
-            );
-            return null;
-          }
-
-          return {
-            ...e,
-            source,
-            target
-          };
+          if (!source || !target) return null;
+          return { ...e, source, target };
         })
         .filter((e): e is EdgeData => e !== null);
-
-      console.log(`[Emojimap] Update: final edge count ${currentEdges.length}`);
 
       // Update simulation
       simulation.nodes(nodes);

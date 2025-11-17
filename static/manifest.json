@@ -1,0 +1,24 @@
+{
+  "name": "Conversation Mapper",
+  "short_name": "ConvoMap",
+  "description": "Turn messy meeting recordings into organized topic maps, action items, and summaries - automatically",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFE5EC",
+  "theme_color": "#FFE5EC",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "business", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

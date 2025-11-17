@@ -30,11 +30,19 @@ export default function App({ Component }: PageProps) {
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
+        {/* PWA Manifest */}
+        <link rel="manifest" href="/manifest.json" />
+
         {/* Canonical URL */}
         <link rel="canonical" href="https://conversationmapper.com/" />
 
         {/* Theme Color */}
         <meta name="theme-color" content="#FFE5EC" />
+
+        {/* Mobile Web App Capable */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="ConvoMap" />
 
         {/* Styles */}
         <link rel="stylesheet" href="/styles.css" />
@@ -88,6 +96,19 @@ export default function App({ Component }: PageProps) {
               }
             } catch (e) {
               console.error('Error setting initial theme:', e);
+            }
+          `
+        }} />
+
+        {/* Service Worker Registration for PWA */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                  .then(reg => console.log('Service Worker registered:', reg.scope))
+                  .catch(err => console.error('Service Worker registration failed:', err));
+              });
             }
           `
         }} />

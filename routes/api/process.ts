@@ -10,9 +10,70 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createGeminiService } from "@core/ai/gemini.ts";
 import { processText, processAudio } from "@core/orchestration/conversation-flow.ts";
 
+// ===================================================================
+// RATE LIMITING
+// ===================================================================
+
+const rateLimiter = new Map<string, number[]>();
+const MAX_REQUESTS = 10; // per minute
+const WINDOW_MS = 60000; // 1 minute
+
+function getClientIP(req: Request): string {
+  return req.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+         req.headers.get("x-real-ip") ||
+         "unknown";
+}
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const requests = rateLimiter.get(ip) || [];
+
+  // Filter out requests outside the window
+  const recentRequests = requests.filter(timestamp => now - timestamp < WINDOW_MS);
+
+  if (recentRequests.length >= MAX_REQUESTS) {
+    return false;
+  }
+
+  // Add current request
+  recentRequests.push(now);
+  rateLimiter.set(ip, recentRequests);
+
+  // Cleanup old entries periodically
+  if (Math.random() < 0.01) {
+    for (const [key, timestamps] of rateLimiter.entries()) {
+      const validTimestamps = timestamps.filter(t => now - t < WINDOW_MS);
+      if (validTimestamps.length === 0) {
+        rateLimiter.delete(key);
+      } else {
+        rateLimiter.set(key, validTimestamps);
+      }
+    }
+  }
+
+  return true;
+}
+
 export const handler: Handlers = {
   async POST(req) {
     try {
+      // Rate limiting check
+      const clientIP = getClientIP(req);
+      if (!checkRateLimit(clientIP)) {
+        return new Response(
+          JSON.stringify({
+            error: "Too many requests. Please wait a moment and try again.",
+            retryAfter: 60
+          }),
+          {
+            status: 429,
+            headers: {
+              "Content-Type": "application/json",
+              "Retry-After": "60"
+            }
+          }
+        );
+      }
       const contentType = req.headers.get("content-type") || "";
 
       // Initialize Gemini AI
