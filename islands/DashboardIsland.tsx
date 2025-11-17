@@ -30,16 +30,10 @@ export default function DashboardIsland() {
   function handleUpdateActionItems(updatedItems: any[]) {
     if (!conversationData.value) return;
 
-    // Create completely new object to ensure signal reactivity
-    const currentData = conversationData.value;
+    // Update signal with new action items
     conversationData.value = {
-      conversation: { ...currentData.conversation },
-      transcript: { ...currentData.transcript },
-      nodes: [...currentData.nodes],
-      edges: [...currentData.edges],
-      actionItems: updatedItems,
-      statusUpdates: currentData.statusUpdates ? [...currentData.statusUpdates] : [],
-      summary: currentData.summary
+      ...conversationData.value,
+      actionItems: updatedItems
     };
   }
 

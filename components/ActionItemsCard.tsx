@@ -197,7 +197,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
         e.preventDefault();
         const item = sortedActionItems[selectedItemIndex.value];
         if (item) {
-          toggleCompletion(item.id);
+          toggleActionItem(item.id);
         }
         return;
       }
@@ -280,40 +280,6 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
 
     return [...sortGroup(pending), ...sortGroup(completed)];
   }, [actionItems, searchQuery.value, sortMode.value]);
-
-  // Arrow key navigation in action items list
-  useEffect(() => {
-    if (!listContainerRef.current || sortedActionItems.length === 0) return;
-
-    function handleArrowKeys(e: KeyboardEvent) {
-      // Only handle if we're not in an input/textarea
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
-
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        selectedItemIndex.value = Math.min(
-          selectedItemIndex.value + 1,
-          sortedActionItems.length - 1
-        );
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        selectedItemIndex.value = Math.max(
-          selectedItemIndex.value - 1,
-          0
-        );
-      } else if (e.key === 'Enter' && selectedItemIndex.value >= 0) {
-        e.preventDefault();
-        const item = sortedActionItems[selectedItemIndex.value];
-        toggleActionItem(item.id);
-      }
-    }
-
-    const container = listContainerRef.current;
-    container.addEventListener('keydown', handleArrowKeys);
-
-    return () => container.removeEventListener('keydown', handleArrowKeys);
-  }, [sortedActionItems.length]);
 
   // Handlers
   function toggleActionItem(itemId: string) {
