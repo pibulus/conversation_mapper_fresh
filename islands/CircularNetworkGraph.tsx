@@ -7,7 +7,8 @@
 
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal, useComputed } from "@preact/signals";
-import * as d3 from "d3";
+import { select, selectAll } from "d3-selection";
+import { zoom as d3Zoom } from "d3-zoom";
 import { conversationData } from "../signals/conversationStore.ts";
 
 interface CircularNetworkGraphProps {
@@ -155,9 +156,9 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
     const textSecondary = getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary').trim();
 
     // Remove existing SVG
-    d3.select(container).select('svg').remove();
+    select(container).select('svg').remove();
 
-    const svg = d3.select(container)
+    const svg = select(container)
       .append('svg')
       .attr('width', width.value)
       .attr('height', height.value)
@@ -208,7 +209,7 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
     const nodeGroup = svg.append('g').attr('class', 'nodes');
 
     // Create tooltip
-    const tooltip = d3.select('body')
+    const tooltip = select('body')
       .append('div')
       .attr('class', 'absolute bg-white text-sm shadow-lg rounded px-2 py-1 border border-gray-300')
       .style('position', 'absolute')
@@ -229,7 +230,7 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
       .attr('stroke-width', 1.5 * sizeMultiplier)
       .attr('class', 'cursor-pointer')
       .on('mouseover', function(event, d) {
-        d3.select(this).attr('r', baseNodeRadius * 1.5);
+        select(this).attr('r', baseNodeRadius * 1.5);
 
         // Highlight connected nodes
         const connectedIds = relationships.value
@@ -247,7 +248,7 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
           .style('top', event.pageY - 20 + 'px');
       })
       .on('mouseout', function() {
-        d3.select(this).attr('r', baseNodeRadius);
+        select(this).attr('r', baseNodeRadius);
         nodeGroup.selectAll('circle').attr('stroke-width', 1.5 * sizeMultiplier);
         tooltip.style('opacity', 0);
       });
@@ -300,8 +301,8 @@ export default function CircularNetworkGraph({ loading = false }: CircularNetwor
       resizeObserver.disconnect();
 
       // Cleanup tooltip (more specific selector to avoid removing unrelated elements)
-      d3.selectAll('body > div.absolute').filter(function() {
-        const text = d3.select(this).text();
+      selectAll('body > div.absolute').filter(function() {
+        const text = select(this).text();
         return text && text.trim().length > 0; // Only remove tooltips with content
       }).remove();
 

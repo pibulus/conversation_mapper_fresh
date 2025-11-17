@@ -7,7 +7,9 @@
 
 import { useEffect, useRef } from "preact/hooks";
 import { useSignal } from "@preact/signals";
-import * as d3 from "d3";
+import { select } from "d3-selection";
+import { scalePoint, scaleOrdinal } from "d3-scale";
+import { schemeCategory10 } from "d3-scale-chromatic";
 import { conversationData } from "../signals/conversationStore.ts";
 
 export default function ArcDiagramViz() {
@@ -193,10 +195,9 @@ export default function ArcDiagramViz() {
     const textSecondary = getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary').trim();
 
     // Clear existing SVG
-    d3.select(targetContainer).select("svg").remove();
+    select(targetContainer).select("svg").remove();
 
-    const svg = d3
-      .select(targetContainer)
+    const svg = select(targetContainer)
       .append("svg")
       .attr("width", width.value)
       .attr("height", height.value)
@@ -211,13 +212,12 @@ export default function ArcDiagramViz() {
 
     // Y scale for vertical positioning
     const padding = height.value * 0.15;
-    const yScale = d3
-      .scalePoint()
+    const yScale = scalePoint()
       .domain(nodesToShow.map((_, i) => i.toString()))
       .range([padding, height.value - padding]);
 
     // Color scale
-    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    const colorScale = scaleOrdinal(schemeCategory10);
 
     // Build node index map
     const nodeIndex = new Map();

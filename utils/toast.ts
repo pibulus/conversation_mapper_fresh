@@ -23,52 +23,98 @@ export function showToast(
 ): HTMLElement | null {
   if (typeof window === 'undefined') return null;
 
+  // Create toast container if it doesn't exist
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.style.cssText = `
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      pointer-events: none;
+    `;
+    document.body.appendChild(container);
+  }
+
   const toast = document.createElement('div');
-  toast.className = 'toast toast-bottom toast-end z-[9999]';
+  toast.style.cssText = `
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    max-width: 350px;
+    pointer-events: auto;
+    animation: slideInRight 0.3s ease-out;
+    backdrop-filter: blur(10px);
+  `;
 
   // Icon and color mapping
   const config = {
     success: {
-      icon: 'fa-check-circle',
-      bg: 'bg-success',
-      text: 'text-success-content'
+      emoji: '✓',
+      bg: 'oklch(0.75 0.1 145)',
+      color: 'oklch(0.25 0.03 145)'
     },
     error: {
-      icon: 'fa-exclamation-circle',
-      bg: 'bg-error',
-      text: 'text-error-content'
+      emoji: '⚠',
+      bg: 'oklch(0.75 0.15 25)',
+      color: 'oklch(0.25 0.03 25)'
     },
     info: {
-      icon: 'fa-info-circle',
-      bg: 'bg-info',
-      text: 'text-info-content'
+      emoji: 'ℹ',
+      bg: 'oklch(0.75 0.1 240)',
+      color: 'oklch(0.25 0.03 240)'
     },
     warning: {
-      icon: 'fa-exclamation-triangle',
-      bg: 'bg-warning',
-      text: 'text-warning-content'
+      emoji: '⚡',
+      bg: 'oklch(0.80 0.15 80)',
+      color: 'oklch(0.25 0.03 80)'
     }
   };
 
-  const { icon, bg, text } = config[type];
+  const { emoji, bg, color } = config[type];
+
+  toast.style.backgroundColor = bg;
+  toast.style.color = color;
 
   toast.innerHTML = `
-    <div class="alert ${bg} ${text} shadow-lg animate-slide-in-right">
-      <div class="flex items-center gap-2">
-        <i class="fas ${icon}"></i>
-        <span>${message}</span>
-      </div>
-    </div>`;
+    <span style="font-size: 1.25rem;">${emoji}</span>
+    <span>${escapeHtml(message)}</span>
+  `;
 
-  document.body.appendChild(toast);
+  container.appendChild(toast);
 
   // Auto-remove after duration
   setTimeout(() => {
-    toast.classList.add('animate-slide-out-right');
-    setTimeout(() => toast.remove(), 300);
+    toast.style.animation = 'slideOutRight 0.3s ease-out';
+    setTimeout(() => {
+      toast.remove();
+      // Remove container if empty
+      if (container && container.children.length === 0) {
+        container.remove();
+      }
+    }, 300);
   }, duration);
 
   return toast;
+}
+
+/**
+ * Escape HTML to prevent XSS in toast messages
+ */
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 /**

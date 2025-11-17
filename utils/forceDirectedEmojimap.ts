@@ -5,7 +5,11 @@
  * Ported from Svelte conversation_mapper implementation
  */
 
-import * as d3 from "d3";
+import { select, selectAll } from "d3-selection";
+import { zoom as d3Zoom, zoomIdentity, type ZoomBehavior } from "d3-zoom";
+import { drag as d3Drag } from "d3-drag";
+import { forceSimulation, forceLink, forceManyBody, forceX, forceY, forceCollide, type Simulation, type ForceLink } from "d3-force";
+import { min as d3Min, max as d3Max } from "d3-array";
 
 // Simple debounce implementation
 function debounce<T extends (...args: any[]) => any>(
@@ -195,7 +199,7 @@ function mapEdges(edges: EdgeData[] = []): EdgeData[] {
 /**
  * Drag event handlers
  */
-function dragstarted(event: any, d: NodeData, simulation: d3.Simulation<NodeData, undefined>) {
+function dragstarted(event: any, d: NodeData, simulation: Simulation<NodeData, undefined>) {
   if (!event.active) simulation.alphaTarget(0.3).restart();
   d.fx = d.x;
   d.fy = d.y;
@@ -206,7 +210,7 @@ function dragged(event: any, d: NodeData) {
   d.fy = event.y;
 }
 
-function dragended(event: any, d: NodeData, simulation: d3.Simulation<NodeData, undefined>) {
+function dragended(event: any, d: NodeData, simulation: Simulation<NodeData, undefined>) {
   if (!event.active) simulation.alphaTarget(0);
   d.fx = null;
   d.fy = null;
@@ -218,7 +222,7 @@ function dragended(event: any, d: NodeData, simulation: d3.Simulation<NodeData, 
 function createNodeGroup(
   selection: d3.Selection<SVGGElement, NodeData, SVGGElement, unknown>,
   config: Config,
-  simulation: d3.Simulation<NodeData, undefined>
+  simulation: Simulation<NodeData, undefined>
 ) {
   selection
     .attr('class', 'node-group')
@@ -283,7 +287,7 @@ function updateElements({
   nodes: NodeData[];
   currentEdges: EdgeData[];
   config: Config;
-  simulation: d3.Simulation<NodeData, undefined>;
+  simulation: Simulation<NodeData, undefined>;
 }) {
   // Update links
   const linkElements = linkGroup
@@ -362,10 +366,10 @@ function fitAllIcons(
   const padding = 50;
   const fillFactor = 0.8;
 
-  const minX = d3.min(nodes, (d) => d.x || 0) || 0;
-  const maxX = d3.max(nodes, (d) => d.x || 0) || 0;
-  const minY = d3.min(nodes, (d) => d.y || 0) || 0;
-  const maxY = d3.max(nodes, (d) => d.y || 0) || 0;
+  const minX = d3Min(nodes, (d) => d.x || 0) || 0;
+  const maxX = d3Max(nodes, (d) => d.x || 0) || 0;
+  const minY = d3Min(nodes, (d) => d.y || 0) || 0;
+  const maxY = d3Max(nodes, (d) => d.y || 0) || 0;
 
   const boxWidth = maxX - minX;
   const boxHeight = maxY - minY;
@@ -390,7 +394,7 @@ function fitAllIcons(
   svg
     .transition()
     .duration(750)
-    .call(zoom.transform, d3.zoomIdentity.translate(translateX, translateY).scale(scale));
+    .call(zoom.transform, zoomIdentity.translate(translateX, translateY).scale(scale));
 }
 
 // ===================================================================
@@ -464,19 +468,17 @@ export function forceDirectedEmojimap(
     .filter((e): e is EdgeData => e !== null);
 
   // Initialize simulation
-  const simulation = d3
-    .forceSimulation(nodes)
+  const simulation = forceSimulation(nodes)
     .force(
       'link',
-      d3
-        .forceLink<NodeData, EdgeData>(currentEdges)
+      forceLink<NodeData, EdgeData>(currentEdges)
         .id((d) => d.id)
         .distance(mergedConfig.linkDistance)
     )
-    .force('charge', d3.forceManyBody().strength(mergedConfig.chargeStrength))
-    .force('x', d3.forceX(mergedConfig.width / 2).strength(0.05))
-    .force('y', d3.forceY(mergedConfig.height / 2).strength(0.05))
-    .force('collide', d3.forceCollide(mergedConfig.collisionRadius))
+    .force('charge', forceManyBody().strength(mergedConfig.chargeStrength))
+    .force('x', forceX(mergedConfig.width / 2).strength(0.05))
+    .force('y', forceY(mergedConfig.height / 2).strength(0.05))
+    .force('collide', forceCollide(mergedConfig.collisionRadius))
     .on('tick', () => {
       const elems = updateElements({
         nodeGroup,
@@ -544,12 +546,12 @@ export function forceDirectedEmojimap(
 
       // Update simulation
       simulation.nodes(nodes);
-      const linkForce = simulation.force('link') as d3.ForceLink<NodeData, EdgeData>;
+      const linkForce = simulation.force('link') as ForceLink<NodeData, EdgeData>;
       if (linkForce) {
         linkForce.links(currentEdges);
       }
-      simulation.force('x', d3.forceX(mergedConfig.width / 2).strength(0.05));
-      simulation.force('y', d3.forceY(mergedConfig.height / 2).strength(0.05));
+      simulation.force('x', forceX(mergedConfig.width / 2).strength(0.05));
+      simulation.force('y', forceY(mergedConfig.height / 2).strength(0.05));
       simulation.alpha(1).restart();
     },
 
