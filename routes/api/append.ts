@@ -39,8 +39,8 @@ function createSectionDivider(recordingNumber: number, timestamp: string): strin
 }
 
 /**
- * Check if two action items are similar enough to be considered duplicates
- * Uses token-based similarity with normalized text
+ * Check if two action items are duplicates
+ * Simple normalized string comparison - AI-generated items are already consistent
  */
 function areSimilarActionItems(desc1: string, desc2: string): boolean {
   const normalize = (text: string) =>
@@ -49,31 +49,7 @@ function areSimilarActionItems(desc1: string, desc2: string): boolean {
       .replace(/[^\w\s]/g, '') // Remove punctuation
       .replace(/\s+/g, ' '); // Normalize whitespace
 
-  const text1 = normalize(desc1);
-  const text2 = normalize(desc2);
-
-  // Exact match after normalization
-  if (text1 === text2) return true;
-
-  // Check if one is a substring of the other (handles "fix bug" vs "fix the bug")
-  if (text1.includes(text2) || text2.includes(text1)) return true;
-
-  // Token-based similarity
-  const tokens1 = text1.split(' ').filter(t => t.length > 2); // Ignore short words
-  const tokens2 = text2.split(' ').filter(t => t.length > 2);
-
-  if (tokens1.length === 0 || tokens2.length === 0) return false;
-
-  // Calculate Jaccard similarity (intersection / union)
-  const set1 = new Set(tokens1);
-  const set2 = new Set(tokens2);
-  const intersection = new Set([...set1].filter(x => set2.has(x)));
-  const union = new Set([...set1, ...set2]);
-
-  const similarity = intersection.size / union.size;
-
-  // Consider similar if >60% token overlap
-  return similarity > 0.6;
+  return normalize(desc1) === normalize(desc2);
 }
 
 /**

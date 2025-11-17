@@ -1,6 +1,8 @@
 import { useSignal, useComputed } from "@preact/signals";
 import { useEffect, useRef } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
+import { showToast } from "../utils/toast.ts";
+import { MAX_RECORDING_TIME, WARNING_TIME } from "../core/constants.ts";
 import LoadingModal from "../components/LoadingModal.tsx";
 import AudioVisualizer from "./AudioVisualizer.tsx";
 
@@ -22,9 +24,6 @@ export default function UploadIsland() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  const MAX_RECORDING_TIME = 10 * 60;
-  const WARNING_TIME = 30;
 
   const timeRemaining = useComputed(() => MAX_RECORDING_TIME - recordingTime.value);
   const hasText = useComputed(() => textInput.value.trim().length > 0);
@@ -105,7 +104,7 @@ export default function UploadIsland() {
       }, 1000) as unknown as number;
     } catch (error) {
       console.error('Error starting recording:', error);
-      alert('Could not access microphone. Please grant permission and try again.');
+      showToast('Could not access microphone. Please grant permission and try again.', 'error');
     }
   }
 
@@ -174,10 +173,10 @@ export default function UploadIsland() {
       const result = await response.json();
       console.log('✅ Processing complete:', { actionItems: result.actionItems.length, topics: result.nodes.length });
       conversationData.value = result;
-      alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
+      showToast(`Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`, 'success');
     } catch (error) {
       console.error('❌ Error processing audio:', error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showToast(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     } finally {
       console.log('🏁 Processing complete, hiding modal');
       isProcessing.value = false;
@@ -209,10 +208,10 @@ export default function UploadIsland() {
       console.log('✅ Processing complete:', { actionItems: result.actionItems.length, topics: result.nodes.length });
       conversationData.value = result;
       textInput.value = '';
-      alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
+      showToast(`Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`, 'success');
     } catch (error) {
       console.error('❌ Error processing text:', error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showToast(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     } finally {
       console.log('🏁 Processing complete, hiding modal');
       isProcessing.value = false;
@@ -253,10 +252,10 @@ export default function UploadIsland() {
       const result = await response.json();
       conversationData.value = result;
       lastUploadName.value = file.name;
-      alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
+      showToast(`Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`, 'success');
     } catch (error) {
       console.error('❌ Error processing audio:', error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showToast(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
     } finally {
       isProcessing.value = false;
       selectedFile.value = null;

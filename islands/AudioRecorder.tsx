@@ -14,6 +14,7 @@ import { useSignal, useComputed } from "@preact/signals";
 import { useEffect, useRef } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
 import { showToast } from "../utils/toast.ts";
+import { MAX_RECORDING_TIME, WARNING_TIME } from "../core/constants.ts";
 import LoadingModal from "../components/LoadingModal.tsx";
 import { saveRecordings, loadRecordings } from "../core/storage/localStorage.ts";
 
@@ -49,10 +50,6 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
   const recordingTimerRef = useRef<number | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const currentObjectURLRef = useRef<string | null>(null); // Track object URLs for cleanup
-
-  // Time constants
-  const MAX_RECORDING_TIME = 10 * 60; // 10 minutes in seconds
-  const WARNING_TIME = 30; // 30 seconds before limit
 
   const timeRemaining = useComputed(() => MAX_RECORDING_TIME - recordingTime.value);
 
