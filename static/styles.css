@@ -868,6 +868,45 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+/* ===================================================================
+   HOVER UTILITIES - Replace manual JavaScript hover handlers
+   ================================================================ */
+
+/* Brown hover variant - for export/action buttons */
+.btn-hover-brown {
+  background: var(--soft-black);
+  color: white;
+  border-color: var(--soft-black);
+  transition: all var(--transition-medium);
+}
+
+.btn-hover-brown:hover:not(:disabled) {
+  background: var(--soft-brown);
+  border-color: var(--soft-brown);
+}
+
+/* Accent link hover - for logo and navigation links */
+.link-hover-accent {
+  transition: all var(--transition-medium);
+  cursor: pointer;
+}
+
+.link-hover-accent:hover {
+  background: rgba(var(--color-accent-rgb), 0.08) !important;
+  transform: translateX(2px);
+}
+
+/* Icon button hover - subtle opacity effect */
+.icon-btn {
+  opacity: 0.9;
+  transition: opacity var(--transition-medium);
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  opacity: 1;
+}
+
 .mapper-info-note {
   font-size: 0.82rem;
   color: rgba(0, 0, 0, 0.65);

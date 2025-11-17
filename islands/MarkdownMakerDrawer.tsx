@@ -33,13 +33,6 @@ const loading = signal(false);
 const error = signal<string | null>(null);
 const savedOutputs = signal<SavedOutput[]>([]);
 
-// Bounce easing function - EXACT copy from Svelte version
-function bounceEasing(t: number): number {
-  const b = 3; // Bounce frequency
-  const d = 0.7; // Damping
-  return 1 - Math.pow(1 - t, 2) * (1 + d * Math.sin(b * Math.PI * t));
-}
-
 export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conversationId }: MarkdownMakerDrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
   const [shouldRender, setShouldRender] = useState(false);
@@ -396,10 +389,7 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
           <h3>Export</h3>
           <button
             onClick={onClose}
-            class="text-white cursor-pointer transition-opacity"
-            style={{ opacity: 0.9 }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
+            class="text-white icon-btn"
             title="Close"
             aria-label="Close export"
           >
@@ -552,56 +542,44 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                 </span>
                 <div class="flex gap-3">
                   <button
-                    class="text-white cursor-pointer transition-opacity"
+                    class="text-white icon-btn"
                     style={{
-                      opacity: 0.9,
                       padding: '0.25rem',
                       fontSize: 'var(--font-size-base)'
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={copyToClipboard}
                     title="Copy to clipboard"
                   >
                     <i class="fa fa-copy"></i>
                   </button>
                   <button
-                    class="text-white cursor-pointer transition-opacity"
+                    class="text-white icon-btn"
                     style={{
-                      opacity: 0.9,
                       padding: '0.25rem',
                       fontSize: 'var(--font-size-base)'
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={downloadMarkdown}
                     title="Download as .md file"
                   >
                     <i class="fa fa-download"></i>
                   </button>
                   <button
-                    class="text-white cursor-pointer transition-opacity"
+                    class="text-white icon-btn"
                     style={{
-                      opacity: 0.9,
                       padding: '0.25rem',
                       fontSize: 'var(--font-size-base)'
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={downloadPDF}
                     title="Download as PDF"
                   >
                     <i class="fa fa-file-pdf"></i>
                   </button>
                   <button
-                    class="text-white cursor-pointer transition-opacity"
+                    class="text-white icon-btn"
                     style={{
-                      opacity: 0.9,
                       padding: '0.25rem',
                       fontSize: 'var(--font-size-base)'
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={saveOutput}
                     title="Save to localStorage"
                   >

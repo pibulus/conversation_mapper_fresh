@@ -94,20 +94,7 @@ export default function HomeIsland() {
                 {/* Export button */}
                 <button
                   onClick={() => drawerOpen.value = !drawerOpen.value}
-                  class="btn btn-sm hidden sm:block"
-                  style={{
-                    background: 'var(--soft-black)',
-                    color: 'white',
-                    borderColor: 'var(--soft-black)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'var(--soft-brown)';
-                    e.currentTarget.style.borderColor = 'var(--soft-brown)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'var(--soft-black)';
-                    e.currentTarget.style.borderColor = 'var(--soft-black)';
-                  }}
+                  class="btn btn-sm btn-hover-brown hidden sm:block"
                   title="Export"
                 >
                   Export
@@ -122,6 +109,7 @@ export default function HomeIsland() {
             <>
               <a
                 href="/"
+                class="link-hover-accent"
                 style={{
                   fontSize: 'var(--font-size-2xl)',
                   fontWeight: '800',
@@ -131,17 +119,7 @@ export default function HomeIsland() {
                   textDecoration: 'none',
                   padding: '8px 12px',
                   borderRadius: '8px',
-                  transition: 'all 0.2s ease',
-                  display: 'inline-block',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(var(--color-accent-rgb), 0.08)';
-                  e.currentTarget.style.transform = 'translateX(2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.transform = 'translateX(0)';
+                  display: 'inline-block'
                 }}
               >
                 Conversation Mapper
