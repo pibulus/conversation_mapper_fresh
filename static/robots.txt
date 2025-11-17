@@ -1,0 +1,10 @@
+# Robots.txt for Conversation Mapper
+User-agent: *
+Allow: /
+Disallow: /shared/
+
+# Sitemap location
+Sitemap: https://conversationmapper.com/sitemap.xml
+
+# Crawl delay (be gentle)
+Crawl-delay: 1

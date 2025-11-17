@@ -9,6 +9,17 @@ import { PageProps } from "$fresh/server.ts";
 import { Head } from "$fresh/runtime.ts";
 import SharedConversationLoader from "../../islands/SharedConversationLoader.tsx";
 
+// Decompress data function (same as in shareService.ts)
+function decompressData(compressed: string): any {
+  try {
+    const jsonStr = decodeURIComponent(atob(compressed));
+    return JSON.parse(jsonStr);
+  } catch (error) {
+    console.error("Failed to decompress data:", error);
+    return null;
+  }
+}
+
 export default function SharedConversationQuery({ url }: PageProps) {
   const searchParams = new URL(url).searchParams;
   const data = searchParams.get("data");
@@ -19,6 +30,7 @@ export default function SharedConversationQuery({ url }: PageProps) {
       <>
         <Head>
           <title>Invalid Share Link | Conversation Mapper</title>
+          <meta name="robots" content="noindex" />
         </Head>
 
         <div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center px-6">
@@ -42,14 +54,37 @@ export default function SharedConversationQuery({ url }: PageProps) {
     );
   }
 
+  // Decompress data to extract metadata for SEO
+  const decompressed = decompressData(data);
+  const title = decompressed?.title || "Shared Conversation";
+  const summary = decompressed?.summary?.text || decompressed?.summary || "View this conversation analysis on Conversation Mapper";
+  const description = typeof summary === 'string'
+    ? summary.slice(0, 160)
+    : "View this conversation analysis with topics, action items, and insights.";
+
   // Pass data with "data:" prefix to indicate URL-based share
   const shareId = `data:${data}`;
 
   return (
     <>
       <Head>
-        <title>Shared Conversation | Conversation Mapper</title>
-        <meta name="description" content="View shared conversation analysis" />
+        <title>{title} | Conversation Mapper</title>
+        <meta name="description" content={description} />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={`${title} | Conversation Mapper`} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content="/og-image-share.png" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${title} | Conversation Mapper`} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content="/og-image-share.png" />
+
+        {/* Canonical */}
+        <link rel="canonical" href={url} />
       </Head>
 
       <div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">

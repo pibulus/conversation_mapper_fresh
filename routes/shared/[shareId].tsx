@@ -8,14 +8,32 @@ import { PageProps } from "$fresh/server.ts";
 import { Head } from "$fresh/runtime.ts";
 import SharedConversationLoader from "../../islands/SharedConversationLoader.tsx";
 
-export default function SharedConversation({ params }: PageProps) {
+export default function SharedConversation({ params, url }: PageProps) {
   const { shareId } = params;
 
   return (
     <>
       <Head>
         <title>Shared Conversation | Conversation Mapper</title>
-        <meta name="description" content="View shared conversation analysis" />
+        <meta name="description" content="View shared conversation analysis with topics, action items, and insights. Turn messy talks into actionable knowledge." />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content="Shared Conversation | Conversation Mapper" />
+        <meta property="og:description" content="View shared conversation analysis with topics, action items, and insights." />
+        <meta property="og:image" content="/og-image-share.png" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Shared Conversation | Conversation Mapper" />
+        <meta name="twitter:description" content="View shared conversation analysis with topics, action items, and insights." />
+        <meta name="twitter:image" content="/og-image-share.png" />
+
+        {/* Canonical */}
+        <link rel="canonical" href={url} />
+
+        {/* No indexing for shared conversations to avoid duplicate content */}
+        <meta name="robots" content="noindex, follow" />
       </Head>
 
       <div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
