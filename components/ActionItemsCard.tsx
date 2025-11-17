@@ -38,6 +38,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
   const searchQuery = useSignal('');
   const showAssigneeDropdown = useSignal(false);
   const activeAssigneeDropdown = useSignal<string | null>(null);
+  const showExportDropdown = useSignal(false);
 
   // Drag-and-drop state
   const draggedItemId = useSignal<string | null>(null);
@@ -68,6 +69,21 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
       }
     };
   }, []);
+
+  // Click outside to close export dropdown
+  useEffect(() => {
+    if (!showExportDropdown.value) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.relative')) {
+        showExportDropdown.value = false;
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showExportDropdown.value]);
 
   // Click outside to close active dropdown
   useEffect(() => {
@@ -356,6 +372,45 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     sortMode.value = modes[(currentIndex + 1) % modes.length];
   }
 
+  function exportAsJSON() {
+    const data = JSON.stringify(actionItems, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `action-items-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Action items exported as JSON', 'success');
+  }
+
+  function exportAsCSV() {
+    // CSV header
+    const headers = ['Description', 'Assignee', 'Due Date', 'Status', 'Created', 'Updated'];
+    const rows = actionItems.map(item => [
+      `"${item.description.replace(/"/g, '""')}"`, // Escape quotes
+      item.assignee || '',
+      item.due_date || '',
+      item.status,
+      new Date(item.created_at).toLocaleDateString(),
+      new Date(item.updated_at).toLocaleDateString()
+    ]);
+
+    const csv = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `action-items-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Action items exported as CSV', 'success');
+  }
+
   // Drag-and-drop handlers
   function handleDragStart(e: DragEvent, itemId: string) {
     draggedItemId.value = itemId;
@@ -429,6 +484,64 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
               >
                 {sortMode.value === 'manual' ? '🤚' : sortMode.value === 'assignee' ? '👤' : '📅'}
               </button>
+
+              {/* Export dropdown */}
+              <div class="relative" style={{ display: 'inline-block' }}>
+                <button
+                  onClick={() => showExportDropdown.value = !showExportDropdown.value}
+                  class="btn btn-xs"
+                  title="Export action items"
+                  aria-label="Export action items"
+                >
+                  📥
+                </button>
+                {showExportDropdown.value && (
+                  <div
+                    class="absolute right-0 mt-1 rounded-lg shadow-lg z-50"
+                    style={{
+                      background: 'var(--color-secondary)',
+                      border: '2px solid var(--color-border)',
+                      minWidth: '120px'
+                    }}
+                  >
+                    <button
+                      onClick={() => {
+                        exportAsJSON();
+                        showExportDropdown.value = false;
+                      }}
+                      class="w-full text-left px-3 py-2 hover:bg-white/30 transition-colors"
+                      style={{
+                        fontSize: 'var(--small-size)',
+                        color: 'var(--color-text)',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        borderRadius: '6px 6px 0 0'
+                      }}
+                    >
+                      📄 Export JSON
+                    </button>
+                    <button
+                      onClick={() => {
+                        exportAsCSV();
+                        showExportDropdown.value = false;
+                      }}
+                      class="w-full text-left px-3 py-2 hover:bg-white/30 transition-colors"
+                      style={{
+                        fontSize: 'var(--small-size)',
+                        color: 'var(--color-text)',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        borderRadius: '0 0 6px 6px'
+                      }}
+                    >
+                      📊 Export CSV
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <button
                 onClick={() => showAddModal.value = true}
                 class="btn btn-xs"

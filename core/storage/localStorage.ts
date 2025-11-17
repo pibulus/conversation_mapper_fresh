@@ -10,6 +10,7 @@ import type { ConversationData } from "../../signals/conversationStore.ts";
 // Storage keys
 const CONVERSATIONS_KEY = "conversation_mapper_conversations";
 const ACTIVE_ID_KEY = "conversation_mapper_active_id";
+const RECORDINGS_KEY = "conversation_mapper_recordings";
 
 // ===================================================================
 // TYPES
@@ -160,4 +161,134 @@ export function getStorageStats(): {
   } catch {
     return { used: 0, total: 0, percentage: 0 };
   }
+}
+
+// ===================================================================
+// RECORDINGS STORAGE
+// ===================================================================
+
+export interface StoredRecording {
+  id: string;
+  conversation_id: string;
+  file_name: string;
+  audio_data: string; // Base64 encoded audio blob
+  mime_type: string;
+  created_at: string;
+}
+
+/**
+ * Save recordings for a conversation to localStorage
+ * Converts Blob to base64 for storage
+ */
+export async function saveRecordings(
+  conversationId: string,
+  recordings: Array<{ id: string; conversation_id: string; file_name: string; data: Blob; created_at: string }>
+): Promise<void> {
+  if (typeof window === "undefined") return;
+
+  try {
+    const allRecordings = getAllRecordings();
+
+    // Convert Blobs to base64 for storage
+    const storedRecordings: StoredRecording[] = await Promise.all(
+      recordings.map(async (rec) => ({
+        id: rec.id,
+        conversation_id: rec.conversation_id,
+        file_name: rec.file_name,
+        audio_data: await blobToBase64(rec.data),
+        mime_type: rec.data.type,
+        created_at: rec.created_at
+      }))
+    );
+
+    allRecordings[conversationId] = storedRecordings;
+    localStorage.setItem(RECORDINGS_KEY, JSON.stringify(allRecordings));
+  } catch (error) {
+    console.error("Failed to save recordings:", error);
+  }
+}
+
+/**
+ * Load recordings for a conversation from localStorage
+ * Converts base64 back to Blob
+ */
+export function loadRecordings(
+  conversationId: string
+): Array<{ id: string; conversation_id: string; file_name: string; data: Blob; created_at: string }> {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const allRecordings = getAllRecordings();
+    const stored = allRecordings[conversationId] || [];
+
+    // Convert base64 back to Blobs
+    return stored.map((rec) => ({
+      id: rec.id,
+      conversation_id: rec.conversation_id,
+      file_name: rec.file_name,
+      data: base64ToBlob(rec.audio_data, rec.mime_type),
+      created_at: rec.created_at
+    }));
+  } catch (error) {
+    console.error("Failed to load recordings:", error);
+    return [];
+  }
+}
+
+/**
+ * Get all recordings (all conversations)
+ */
+function getAllRecordings(): Record<string, StoredRecording[]> {
+  if (typeof window === "undefined") return {};
+
+  try {
+    const data = localStorage.getItem(RECORDINGS_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch (error) {
+    console.error("Failed to load recordings:", error);
+    return {};
+  }
+}
+
+/**
+ * Clear recordings for a specific conversation
+ */
+export function clearRecordings(conversationId: string): void {
+  if (typeof window === "undefined") return;
+
+  const allRecordings = getAllRecordings();
+  delete allRecordings[conversationId];
+  localStorage.setItem(RECORDINGS_KEY, JSON.stringify(allRecordings));
+}
+
+/**
+ * Convert Blob to base64 string
+ */
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      // Remove data URL prefix (e.g., "data:audio/webm;base64,")
+      const base64 = result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
+ * Convert base64 string back to Blob
+ */
+function base64ToBlob(base64: string, mimeType: string): Blob {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: mimeType });
 }

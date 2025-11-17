@@ -15,6 +15,7 @@ import { useEffect, useRef } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
 import { showToast } from "../utils/toast.ts";
 import LoadingModal from "../components/LoadingModal.tsx";
+import { saveRecordings, loadRecordings } from "../core/storage/localStorage.ts";
 
 interface Recording {
   id: string;
@@ -54,6 +55,22 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
   const WARNING_TIME = 30; // 30 seconds before limit
 
   const timeRemaining = useComputed(() => MAX_RECORDING_TIME - recordingTime.value);
+
+  // Load recordings from localStorage on mount
+  useEffect(() => {
+    const loaded = loadRecordings(conversationId);
+    if (loaded.length > 0) {
+      recordings.value = loaded;
+      console.log(`📼 Loaded ${loaded.length} recordings from localStorage`);
+    }
+  }, [conversationId]);
+
+  // Auto-save recordings whenever they change
+  useEffect(() => {
+    if (recordings.value.length > 0) {
+      saveRecordings(conversationId, recordings.value);
+    }
+  }, [recordings.value, conversationId]);
 
   // Format time as MM:SS
   function formatTime(seconds: number): string {
@@ -391,7 +408,7 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
   return (
     <>
       {/* Loading modal during processing */}
-      <LoadingModal isOpen={isProcessing.value} />
+      <LoadingModal isOpen={isProcessing.value} message="processing audio & appending..." />
 
       <div class="relative">
         {/* Compact button in header */}
