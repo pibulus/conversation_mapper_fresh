@@ -167,12 +167,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(30, 23, 20, 0.12);  /* Warm brown instead of cold black */
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(30, 23, 20, 0.20);  /* Warm brown hover */
 }
 
 /* ===================================================================

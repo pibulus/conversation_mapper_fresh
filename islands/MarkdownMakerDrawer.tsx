@@ -429,7 +429,7 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                 key={promptOption.id}
                 class={`btn btn-sm flex-1 min-w-[calc(50%-0.25rem)] ${
                   selectedPromptId.value === promptOption.id
-                    ? 'bg-soft-purple text-white border-purple-600'
+                    ? 'btn-primary'
                     : ''
                 }`}
                 onClick={() => generateFromPreset(promptOption.id)}
@@ -444,11 +444,14 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
           <div class="mb-4">
             <label class="block text-sm font-semibold mb-2">Custom Prompt</label>
             <textarea
-              class="w-full h-24 rounded px-3 py-2 text-sm focus:border-soft-purple focus:outline-none"
+              class="w-full h-24 rounded px-3 py-2 text-sm focus:outline-none"
               style={{
                 border: '2px solid var(--color-border)',
-                background: 'var(--surface-cream)'
+                background: 'var(--surface-cream)',
+                transition: 'border-color var(--transition-fast)'
               }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--color-accent)')}
+              onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--color-border)')}
               placeholder="Type your own custom prompt here..."
               value={customPrompt.value}
               onInput={(e) => customPrompt.value = (e.target as HTMLTextAreaElement).value}
@@ -457,7 +460,7 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
 
           {/* Generate Custom Button */}
           <button
-            class="btn w-full bg-soft-purple text-white border-purple-600 hover:bg-purple-500 mb-4"
+            class="btn btn-primary w-full mb-4"
             onClick={generateFromCustom}
             disabled={loading.value || !customPrompt.value.trim() || !transcript.trim()}
           >
@@ -470,7 +473,7 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
           {/* Loading Indicator for Preset Buttons */}
           {loading.value && selectedPromptId.value !== null && (
             <div class="flex justify-center mb-4">
-              <span class="loading loading-spinner loading-lg text-soft-purple"></span>
+              <span class="loading loading-spinner loading-lg" style={{ color: 'var(--color-accent)' }}></span>
             </div>
           )}
 
@@ -483,8 +486,14 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
 
           {/* Markdown Preview */}
           {markdown.value && (
-            <div class="border-4 border-soft-blue rounded-lg shadow-brutal-sm overflow-hidden mb-4">
-              <div class="bg-soft-blue px-4 py-2 border-b-4 border-blue-600 flex justify-between items-center">
+            <div class="rounded-lg overflow-hidden mb-4" style={{
+              border: '4px solid var(--color-accent)',
+              boxShadow: 'var(--shadow-slab)'
+            }}>
+              <div class="px-4 py-2 flex justify-between items-center" style={{
+                background: 'var(--color-accent)',
+                borderBottom: '4px solid var(--soft-black)'
+              }}>
                 <span class="font-bold text-white">Preview</span>
                 <div class="flex gap-2">
                   <button
@@ -551,7 +560,7 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                   >
                     <div class="flex justify-between items-start mb-2">
                       <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-sm text-purple-600">{output.prompt}</p>
+                        <p class="font-semibold text-sm" style={{ color: 'var(--color-accent)' }}>{output.prompt}</p>
                         <p class="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                           {new Date(output.created_at).toLocaleString()}
                         </p>
