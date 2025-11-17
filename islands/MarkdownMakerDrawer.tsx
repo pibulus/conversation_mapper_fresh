@@ -421,34 +421,66 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
         </div>
 
         {/* Content */}
-        <div class="flex-1 overflow-y-auto p-4">
-          {/* Quick Prompt Buttons */}
-          <div class="mb-4 flex flex-wrap gap-2">
-            {markdownPrompts.map((promptOption) => (
-              <button
-                key={promptOption.id}
-                class={`btn btn-sm flex-1 min-w-[calc(50%-0.25rem)] ${
-                  selectedPromptId.value === promptOption.id
-                    ? 'btn-primary'
-                    : ''
-                }`}
-                onClick={() => generateFromPreset(promptOption.id)}
-                disabled={loading.value}
-              >
-                {promptOption.label}
-              </button>
-            ))}
-          </div>
+        <div class="flex-1 overflow-y-auto" style={{ padding: 'clamp(1.25rem, 3vw, 1.75rem)' }}>
+          {/* Section: Quick Prompts */}
+          <section style={{ marginBottom: 'clamp(1.5rem, 4vw, 2rem)' }}>
+            <h4 style={{
+              fontSize: 'var(--font-size-sm)',
+              fontWeight: '700',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              color: 'var(--color-text)',
+              marginBottom: '0.875rem'
+            }}>
+              Quick Prompts
+            </h4>
+            <div class="flex flex-wrap gap-3">
+              {markdownPrompts.map((promptOption) => (
+                <button
+                  key={promptOption.id}
+                  class={`btn flex-1 min-w-full ${
+                    selectedPromptId.value === promptOption.id
+                      ? 'btn-primary'
+                      : ''
+                  }`}
+                  style={{
+                    minHeight: '2.75rem',
+                    fontSize: 'var(--font-size-sm)',
+                    fontWeight: '600'
+                  }}
+                  onClick={() => generateFromPreset(promptOption.id)}
+                  disabled={loading.value}
+                >
+                  {promptOption.label}
+                </button>
+              ))}
+            </div>
+          </section>
 
-          {/* Custom Prompt Input */}
-          <div class="mb-4">
-            <label class="block text-sm font-semibold mb-2">Custom Prompt</label>
+          {/* Section: Custom Prompt */}
+          <section style={{ marginBottom: 'clamp(1.5rem, 4vw, 2rem)' }}>
+            <label style={{
+              display: 'block',
+              fontSize: 'var(--font-size-sm)',
+              fontWeight: '700',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              color: 'var(--color-text)',
+              marginBottom: '0.875rem'
+            }}>
+              Custom Prompt
+            </label>
             <textarea
-              class="w-full h-24 rounded px-3 py-2 text-sm focus:outline-none"
+              class="w-full rounded focus:outline-none"
               style={{
+                minHeight: '6rem',
+                padding: '0.875rem 1rem',
+                fontSize: 'var(--font-size-sm)',
+                lineHeight: '1.6',
                 border: '2px solid var(--color-border)',
                 background: 'var(--surface-cream)',
-                transition: 'border-color var(--transition-fast)'
+                transition: 'border-color var(--transition-fast)',
+                resize: 'vertical'
               }}
               onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--color-accent)')}
               onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--color-border)')}
@@ -456,49 +488,76 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
               value={customPrompt.value}
               onInput={(e) => customPrompt.value = (e.target as HTMLTextAreaElement).value}
             />
-          </div>
 
-          {/* Generate Custom Button */}
-          <button
-            class="btn btn-primary w-full mb-4"
-            onClick={generateFromCustom}
-            disabled={loading.value || !customPrompt.value.trim() || !transcript.trim()}
-          >
-            {loading.value && selectedPromptId.value === null ? (
-              <span class="loading loading-spinner loading-sm"></span>
-            ) : null}
-            Generate Custom
-          </button>
+            {/* Generate Custom Button */}
+            <button
+              class="btn btn-primary w-full"
+              style={{
+                marginTop: '1rem',
+                minHeight: '2.75rem',
+                fontSize: 'var(--font-size-sm)',
+                fontWeight: '600'
+              }}
+              onClick={generateFromCustom}
+              disabled={loading.value || !customPrompt.value.trim() || !transcript.trim()}
+            >
+              {loading.value && selectedPromptId.value === null ? (
+                <span class="loading loading-spinner loading-sm"></span>
+              ) : null}
+              Generate Custom
+            </button>
+          </section>
 
           {/* Loading Indicator for Preset Buttons */}
           {loading.value && selectedPromptId.value !== null && (
-            <div class="flex justify-center mb-4">
+            <section class="flex justify-center" style={{ marginBottom: 'clamp(1.5rem, 4vw, 2rem)' }}>
               <span class="loading loading-spinner loading-lg" style={{ color: 'var(--color-accent)' }}></span>
-            </div>
+            </section>
           )}
 
           {/* Error Display */}
           {error.value && (
-            <div class="alert alert-error mb-4">
-              <span class="text-sm">{error.value}</span>
-            </div>
+            <section class="alert alert-error" style={{
+              marginBottom: 'clamp(1.5rem, 4vw, 2rem)',
+              padding: '1rem',
+              fontSize: 'var(--font-size-sm)'
+            }}>
+              <span>{error.value}</span>
+            </section>
           )}
 
-          {/* Markdown Preview */}
+          {/* Section: Markdown Preview */}
           {markdown.value && (
-            <div class="rounded-lg overflow-hidden mb-4" style={{
+            <section style={{ marginBottom: 'clamp(1.5rem, 4vw, 2rem)' }}>
+              <div class="rounded-lg overflow-hidden" style={{
               border: '4px solid var(--color-accent)',
               boxShadow: 'var(--shadow-slab)'
             }}>
-              <div class="px-4 py-2 flex justify-between items-center" style={{
+              <div style={{
+                padding: '0.875rem 1.25rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 background: 'var(--color-accent)',
                 borderBottom: '4px solid var(--soft-black)'
               }}>
-                <span class="font-bold text-white">Preview</span>
-                <div class="flex gap-2">
+                <span style={{
+                  fontWeight: '700',
+                  fontSize: 'var(--font-size-sm)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: 'white'
+                }}>
+                  Preview
+                </span>
+                <div class="flex gap-3">
                   <button
                     class="text-white cursor-pointer transition-opacity"
-                    style={{ opacity: 0.9 }}
+                    style={{
+                      opacity: 0.9,
+                      padding: '0.25rem',
+                      fontSize: 'var(--font-size-base)'
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
                     onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={copyToClipboard}
@@ -508,7 +567,11 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                   </button>
                   <button
                     class="text-white cursor-pointer transition-opacity"
-                    style={{ opacity: 0.9 }}
+                    style={{
+                      opacity: 0.9,
+                      padding: '0.25rem',
+                      fontSize: 'var(--font-size-base)'
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
                     onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={downloadMarkdown}
@@ -518,7 +581,11 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                   </button>
                   <button
                     class="text-white cursor-pointer transition-opacity"
-                    style={{ opacity: 0.9 }}
+                    style={{
+                      opacity: 0.9,
+                      padding: '0.25rem',
+                      fontSize: 'var(--font-size-base)'
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
                     onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={downloadPDF}
@@ -528,7 +595,11 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                   </button>
                   <button
                     class="text-white cursor-pointer transition-opacity"
-                    style={{ opacity: 0.9 }}
+                    style={{
+                      opacity: 0.9,
+                      padding: '0.25rem',
+                      fontSize: 'var(--font-size-base)'
+                    }}
                     onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
                     onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
                     onClick={saveOutput}
@@ -538,57 +609,113 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                   </button>
                 </div>
               </div>
-              <div class="p-4 max-h-96 overflow-y-auto" style={{ background: 'var(--surface-cream)' }}>
-                <pre class="text-sm whitespace-pre-wrap font-mono">{markdown.value}</pre>
+              <div style={{
+                padding: '1.25rem',
+                maxHeight: '24rem',
+                overflowY: 'auto',
+                background: 'var(--surface-cream)'
+              }}>
+                <pre style={{
+                  fontSize: 'var(--font-size-sm)',
+                  lineHeight: '1.6',
+                  whiteSpace: 'pre-wrap',
+                  fontFamily: 'monospace',
+                  margin: 0
+                }}>
+                  {markdown.value}
+                </pre>
               </div>
             </div>
+            </section>
           )}
 
-          {/* Saved Outputs */}
+          {/* Section: Saved Outputs */}
           {savedOutputs.value.length > 0 && (
-            <div class="pt-4 mt-4" style={{ borderTop: '2px solid var(--color-border)' }}>
-              <h4 class="font-bold text-sm mb-3">💾 Saved Outputs</h4>
-              <div class="space-y-2">
+            <section style={{
+              paddingTop: 'clamp(1.5rem, 4vw, 2rem)',
+              marginTop: 'clamp(1.5rem, 4vw, 2rem)',
+              borderTop: '2px solid var(--color-border)'
+            }}>
+              <h4 style={{
+                fontSize: 'var(--font-size-sm)',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--color-text)',
+                marginBottom: '1rem'
+              }}>
+                💾 Saved Outputs
+              </h4>
+              <div class="space-y-3">
                 {savedOutputs.value.map((output) => (
                   <div
                     key={output.id}
-                    class="rounded-lg p-3"
+                    class="rounded-lg"
                     style={{
+                      padding: '1rem',
                       border: '2px solid var(--color-border)',
                       background: 'var(--surface-cream)'
                     }}
                   >
-                    <div class="flex justify-between items-start mb-2">
+                    <div class="flex justify-between items-start" style={{ marginBottom: '0.75rem' }}>
                       <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-sm" style={{ color: 'var(--color-accent)' }}>{output.prompt}</p>
-                        <p class="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                        <p style={{
+                          fontWeight: '600',
+                          fontSize: 'var(--font-size-sm)',
+                          color: 'var(--color-accent)',
+                          marginBottom: '0.25rem'
+                        }}>
+                          {output.prompt}
+                        </p>
+                        <p style={{
+                          fontSize: 'var(--font-size-xs)',
+                          color: 'var(--color-text-secondary)'
+                        }}>
                           {new Date(output.created_at).toLocaleString()}
                         </p>
                       </div>
-                      <div class="flex gap-1 ml-2">
+                      <div class="flex gap-2 ml-3">
                         <button
-                          class="btn btn-ghost btn-xs"
+                          class="btn btn-ghost btn-sm"
+                          style={{
+                            minHeight: '2rem',
+                            height: '2rem',
+                            padding: '0.25rem 0.625rem'
+                          }}
                           onClick={() => copySavedOutput(output.content)}
                           title="Copy"
                         >
-                          <i class="fa fa-copy text-xs"></i>
+                          <i class="fa fa-copy" style={{ fontSize: 'var(--font-size-xs)' }}></i>
                         </button>
                         <button
-                          class="btn btn-ghost btn-xs text-error"
+                          class="btn btn-ghost btn-sm text-error"
+                          style={{
+                            minHeight: '2rem',
+                            height: '2rem',
+                            padding: '0.25rem 0.625rem'
+                          }}
                           onClick={() => deleteOutput(output.id)}
                           title="Delete"
                         >
-                          <i class="fa fa-trash text-xs"></i>
+                          <i class="fa fa-trash" style={{ fontSize: 'var(--font-size-xs)' }}></i>
                         </button>
                       </div>
                     </div>
-                    <div class="text-xs line-clamp-3" style={{ color: 'var(--color-text-secondary)' }}>
+                    <div style={{
+                      fontSize: 'var(--font-size-xs)',
+                      lineHeight: '1.5',
+                      color: 'var(--color-text-secondary)',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}>
                       {output.content.substring(0, 150)}...
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </section>
           )}
         </div>
       </div>
