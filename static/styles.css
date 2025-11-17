@@ -30,6 +30,7 @@
   --color-base-solid: #FFEBD4;
   --color-secondary: rgba(255, 255, 255, 0.6);
   --color-accent: #E8839C;
+  --color-accent-rgb: 232, 131, 156;  /* RGB version for opacity blending */
   --color-text: #2C2C2C;
   --color-text-secondary: #6B6B6B;
   --color-border: rgba(61, 57, 53, 0.1);
@@ -778,6 +779,91 @@ body {
 .mapper-slab-button--record:not(:disabled):hover {
   /* Subtle pink hint on hover */
   box-shadow: 0 5px 14px rgba(255, 92, 141, 0.22);
+}
+
+/* ===================================================================
+   UNIFIED BUTTON SYSTEM - Secondary and utility buttons
+   Use .btn for smaller actions, .mapper-slab-button for primary CTAs
+   ================================================================ */
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  border-radius: var(--border-radius-sm);
+  border: 2px solid var(--border-cream-medium);
+  background: var(--surface-cream);
+  color: var(--soft-black);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--surface-cream-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Button variants */
+.btn-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #ef7091; /* Slightly darker pink */
+  border-color: #ef7091;
+}
+
+.btn-slab {
+  box-shadow: var(--shadow-slab);
+  border-width: 2.5px;
+  font-weight: 700;
+}
+
+.btn-slab:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 rgba(30, 23, 20, 0.25);
+}
+
+.btn-slab:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 rgba(30, 23, 20, 0.25);
+}
+
+/* Size variants */
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: var(--font-size-sm);
+}
+
+.btn-xs {
+  padding: 0.25rem 0.75rem;
+  font-size: var(--font-size-xs);
+}
+
+/* Ghost variant - transparent background */
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border-cream-medium);
+  box-shadow: none;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-cream);
+  box-shadow: var(--shadow-sm);
 }
 
 .mapper-info-note {

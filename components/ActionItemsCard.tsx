@@ -376,22 +376,14 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
             <div class="flex gap-2">
               <button
                 onClick={cycleSortMode}
-                class="bg-white px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"
-                style={{
-                  fontSize: 'var(--tiny-size)',
-                  transition: 'var(--transition-fast)'
-                }}
+                class="btn btn-xs"
                 title={sortMode.value === 'manual' ? 'Sort: Manual (drag to reorder)' : sortMode.value === 'assignee' ? 'Sort: By assignee' : 'Sort: By due date'}
               >
                 {sortMode.value === 'manual' ? '🤚' : sortMode.value === 'assignee' ? '👤' : '📅'}
               </button>
               <button
                 onClick={() => showAddModal.value = true}
-                class="bg-white px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"
-                style={{
-                  fontSize: 'var(--tiny-size)',
-                  transition: 'var(--transition-fast)'
-                }}
+                class="btn btn-xs"
                 title="Add new item"
               >
                 ➕
@@ -413,7 +405,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
               }}
             />
             {sortMode.value === 'manual' && (
-              <p class="text-xs text-gray-500 mt-1 italic">
+              <p class="text-xs mt-1 italic" style={{ color: 'var(--color-text-secondary)' }}>
                 Drag to reorder
               </p>
             )}
@@ -447,15 +439,18 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                       onDragLeave={handleDragLeave}
                       onDrop={(e) => canDrag && handleDrop(e, item.id)}
                       onClick={() => selectedItemIndex.value = index}
-                      class="relative p-4 rounded-lg bg-white hover:bg-gray-50 transition-all"
+                      class="relative p-4 rounded-lg transition-all"
                       style={{
+                        background: 'var(--surface-cream)',
                         border: `2px solid ${isSelected ? 'var(--color-accent)' : isDragOver ? 'var(--color-accent)' : 'var(--color-border)'}`,
-                        boxShadow: item.status === 'completed' ? 'none' : '2px 2px 0 rgba(0,0,0,0.1)',
+                        boxShadow: item.status === 'completed' ? 'none' : 'var(--shadow-sm)',
                         opacity: isDragging ? '0.5' : '1',
                         cursor: canDrag ? 'move' : 'default',
                         outline: isSelected ? `2px solid var(--color-accent)` : 'none',
                         outlineOffset: '2px'
                       }}
+                      onMouseEnter={(e) => !item.status && (e.currentTarget.style.background = 'var(--surface-cream-hover)')}
+                      onMouseLeave={(e) => !item.status && (e.currentTarget.style.background = 'var(--surface-cream)')}
                     >
                       {/* Grid layout with drag handle, checkbox and content */}
                       <div class="grid grid-cols-[auto_auto_1fr] gap-3 items-start">
@@ -463,9 +458,15 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                         <div class="flex items-center pt-1">
                           {canDrag ? (
                             <i
-                              class="fa fa-grip-vertical text-gray-400 hover:text-gray-600 cursor-move"
+                              class="fa fa-grip-vertical cursor-move"
                               title="Drag to reorder"
-                              style={{ fontSize: '16px' }}
+                              style={{
+                                fontSize: '16px',
+                                color: 'var(--color-text-secondary)',
+                                transition: 'color var(--transition-fast)'
+                              }}
+                              onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-text)')}
+                              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
                             ></i>
                           ) : (
                             <div style={{ width: '16px' }}></div>
@@ -529,8 +530,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                           <div class="relative assignee-dropdown-container">
                             <button
                               onClick={() => activeAssigneeDropdown.value = activeAssigneeDropdown.value === item.id ? null : item.id}
-                              class="flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
-                              style={{ border: '2px solid var(--color-border)' }}
+                              class="btn btn-xs flex items-center gap-2"
                             >
                               <i class="fa fa-user text-xs"></i>
                               <span style={{ color: item.assignee ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
@@ -539,16 +539,26 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                             </button>
                             {activeAssigneeDropdown.value === item.id && (
                               <div
-                                class="absolute z-10 mt-1 bg-white rounded shadow-lg"
-                                style={{ border: '2px solid var(--color-border)', minWidth: '150px' }}
+                                class="absolute z-10 mt-1 rounded"
+                                style={{
+                                  border: '2px solid var(--color-border)',
+                                  minWidth: '150px',
+                                  background: 'var(--surface-white-warm)',
+                                  boxShadow: 'var(--shadow-md)'
+                                }}
                               >
                                 <button
                                   onClick={() => {
                                     updateAssignee(item.id, null);
                                     activeAssigneeDropdown.value = null;
                                   }}
-                                  class="w-full text-left px-3 py-2 text-xs hover:bg-purple-50"
-                                  style={{ borderBottom: '1px solid var(--color-border)' }}
+                                  class="w-full text-left px-3 py-2 text-xs transition-colors"
+                                  style={{
+                                    borderBottom: '1px solid var(--color-border)',
+                                    background: 'transparent'
+                                  }}
+                                  onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(232, 131, 156, 0.08)')}
+                                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                                 >
                                   None
                                 </button>
@@ -559,11 +569,21 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                                       updateAssignee(item.id, assignee);
                                       activeAssigneeDropdown.value = null;
                                     }}
-                                    class="w-full text-left px-3 py-2 text-xs hover:bg-purple-50"
+                                    class="w-full text-left px-3 py-2 text-xs transition-colors"
                                     style={{
                                       borderBottom: '1px solid var(--color-border)',
                                       background: item.assignee === assignee ? 'var(--color-accent)' : 'transparent',
                                       color: item.assignee === assignee ? 'white' : 'var(--color-text)'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      if (item.assignee !== assignee) {
+                                        e.currentTarget.style.background = 'rgba(232, 131, 156, 0.08)';
+                                      }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      if (item.assignee !== assignee) {
+                                        e.currentTarget.style.background = 'transparent';
+                                      }
                                     }}
                                   >
                                     {assignee}
@@ -589,8 +609,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                                   (input as any).showPicker();
                                 }
                               }}
-                              class="flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
-                              style={{ border: '2px solid var(--color-border)' }}
+                              class="btn btn-xs flex items-center gap-2"
                             >
                               <i class="fa fa-calendar text-xs"></i>
                               <span style={{ color: item.due_date ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
@@ -605,7 +624,19 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                     {/* Delete button */}
                     <button
                       onClick={() => deleteItem(item.id)}
-                      class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 hover:text-red-600 transition-colors"
+                      class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full transition-colors"
+                      style={{
+                        background: 'var(--surface-cream-hover)',
+                        color: 'var(--soft-brown)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#FFE5E5';
+                        e.currentTarget.style.color = '#C74444';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'var(--surface-cream-hover)';
+                        e.currentTarget.style.color = 'var(--soft-brown)';
+                      }}
                       title="Delete"
                     >
                       <i class="fa fa-times text-xs"></i>
@@ -714,13 +745,23 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                   <button
                     type="button"
                     onClick={() => showAssigneeDropdown.value = !showAssigneeDropdown.value}
-                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    class="absolute right-2 top-1/2 transform -translate-y-1/2"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-text)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-secondary)')}
                   >
                     ▼
                   </button>
                 </div>
                 {showAssigneeDropdown.value && (
-                  <div class="absolute z-10 w-full mt-1 bg-white border-2 border-gray-300 rounded shadow-lg max-h-40 overflow-y-auto">
+                  <div
+                    class="absolute z-10 w-full mt-1 rounded max-h-40 overflow-y-auto"
+                    style={{
+                      background: 'var(--surface-white-warm)',
+                      border: '2px solid var(--color-border)',
+                      boxShadow: 'var(--shadow-md)'
+                    }}
+                  >
                     {commonAssignees.map((assignee, index) => (
                       <button
                         type="button"
@@ -729,10 +770,21 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                           newItemAssignee.value = assignee;
                           showAssigneeDropdown.value = false;
                         }}
-                        class="w-full text-left px-3 py-2 text-sm hover:bg-purple-100 border-b border-gray-100 last:border-none"
+                        class="w-full text-left px-3 py-2 text-sm transition-colors last:border-none"
                         style={{
                           background: index === dropdownSelectedIndex.value ? 'var(--color-accent)' : 'transparent',
-                          color: index === dropdownSelectedIndex.value ? 'white' : 'var(--color-text)'
+                          color: index === dropdownSelectedIndex.value ? 'white' : 'var(--color-text)',
+                          borderBottom: '1px solid var(--color-border)'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (index !== dropdownSelectedIndex.value) {
+                            e.currentTarget.style.background = 'rgba(232, 131, 156, 0.08)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (index !== dropdownSelectedIndex.value) {
+                            e.currentTarget.style.background = 'transparent';
+                          }
                         }}
                       >
                         {assignee}
@@ -765,14 +817,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
               <button
                 onClick={addNewItem}
                 disabled={!newItemDescription.value.trim()}
-                class="flex-1 py-2 px-4 rounded font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  background: 'var(--color-accent)',
-                  color: 'white',
-                  border: `2px solid var(--color-border)`,
-                  fontSize: 'var(--text-size)',
-                  transition: 'var(--transition-fast)'
-                }}
+                class="btn btn-primary flex-1"
               >
                 Add Item
               </button>
@@ -783,13 +828,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                   newItemAssignee.value = '';
                   newItemDueDate.value = '';
                 }}
-                class="px-4 py-2 rounded hover:bg-gray-100"
-                style={{
-                  border: `2px solid var(--color-border)`,
-                  fontSize: 'var(--text-size)',
-                  transition: 'var(--transition-fast)',
-                  color: 'var(--color-text)'
-                }}
+                class="btn"
               >
                 Cancel
               </button>

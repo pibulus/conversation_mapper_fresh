@@ -21,8 +21,13 @@ export default function TranscriptCard({ transcript }: TranscriptCardProps) {
           <h3>Transcript</h3>
           <button
             onClick={() => transcript?.text && copyToClipboard(transcript.text)}
-            class="text-white hover:text-gray-200 cursor-pointer"
-            style={{ transition: 'var(--transition-fast)' }}
+            class="text-white cursor-pointer"
+            style={{
+              transition: 'var(--transition-fast)',
+              opacity: 0.9
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
             title="Copy transcript"
             aria-label="Copy transcript"
             disabled={!transcript?.text}
@@ -37,7 +42,13 @@ export default function TranscriptCard({ transcript }: TranscriptCardProps) {
               <div class="empty-state-text">Quiet here</div>
             </div>
           ) : (
-            <div class="relative p-4 rounded-lg bg-white" style={{ border: '2px solid var(--color-border)' }}>
+            <div
+              class="relative p-4 rounded-lg"
+              style={{
+                border: '2px solid var(--color-border)',
+                background: 'var(--surface-cream)'
+              }}
+            >
               {/* Format transcript with speaker highlighting (XSS-safe) */}
               <div
                 class="whitespace-pre-wrap leading-relaxed"

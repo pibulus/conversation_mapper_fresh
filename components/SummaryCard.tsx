@@ -56,8 +56,13 @@ export default function SummaryCard({ summary, nodes, conversationSource }: Summ
           <div class="flex items-center gap-2">
             <button
               onClick={() => summary && copyToClipboard(summary)}
-              class="text-white hover:text-gray-200 cursor-pointer"
-              style={{ transition: 'var(--transition-fast)' }}
+              class="text-white cursor-pointer"
+              style={{
+                transition: 'var(--transition-fast)',
+                opacity: 0.9
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.9')}
               title="Copy summary"
               aria-label="Copy summary"
               disabled={!summary}
@@ -75,7 +80,13 @@ export default function SummaryCard({ summary, nodes, conversationSource }: Summ
           ) : (
             <div>
               {/* Main summary with markdown formatting (XSS-safe) */}
-              <div class="p-4 rounded-lg bg-white" style={{ border: '2px solid var(--color-border)' }}>
+              <div
+                class="p-4 rounded-lg"
+                style={{
+                  border: '2px solid var(--color-border)',
+                  background: 'var(--surface-cream)'
+                }}
+              >
                 <div
                   style={{ fontSize: 'var(--text-size)', color: 'var(--color-text)' }}
                   dangerouslySetInnerHTML={{ __html: formatMarkdownSafe(summary) }}
