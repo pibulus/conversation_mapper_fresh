@@ -8,7 +8,6 @@
 import { signal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
-import { initializeTheme } from "../services/themeStore.ts";
 import { getActiveConversationId, loadConversation } from "../core/storage/localStorage.ts";
 import UploadIsland from "./UploadIsland.tsx";
 import DashboardIsland from "./DashboardIsland.tsx";
@@ -17,15 +16,12 @@ import MobileHistoryMenu from "./MobileHistoryMenu.tsx";
 import ShareButton from "./ShareButton.tsx";
 import MarkdownMakerDrawer from "./MarkdownMakerDrawer.tsx";
 import AudioRecorder from "./AudioRecorder.tsx";
-import ThemeShuffler from "./ThemeShuffler.tsx";
 
 const drawerOpen = signal(false);
 
 export default function HomeIsland() {
-  // Initialize theme + restore last conversation on mount
+  // Restore last conversation on mount
   useEffect(() => {
-    initializeTheme();
-
     // Auto-restore last active conversation from localStorage
     const activeId = getActiveConversationId();
     if (activeId && !conversationData.value) {

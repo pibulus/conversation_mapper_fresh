@@ -18,7 +18,8 @@
       "Bash(then head -100 ~/Documents/reference/BRAND-design-reference.md)",
       "Bash(else echo \"Not found\")",
       "mcp__sequential-thinking__sequentialthinking_tools",
-      "Bash(git show-ref:*)"
+      "Bash(git show-ref:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

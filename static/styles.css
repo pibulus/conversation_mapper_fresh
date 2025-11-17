@@ -64,17 +64,17 @@
   --tiny-size: 0.75rem;
   --line-height: 1.6;
 
-  /* Shadows - Softer, more subtle */
-  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lifted: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+  /* Shadows - Warm browns (DEPRECATED - use --shadow-* below) */
+  --shadow-soft: 0 4px 12px rgba(30, 23, 20, 0.08);
+  --shadow-lifted: 0 8px 24px rgba(30, 23, 20, 0.12);
+  --shadow-card: 0 2px 8px rgba(30, 23, 20, 0.06);
+  --shadow-xl: 0 20px 40px rgba(30, 23, 20, 0.15);
 
-  /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.6);
-  --glass-bg-dark: rgba(0, 0, 0, 0.2);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-border-dark: rgba(255, 255, 255, 0.1);
+  /* Glassmorphism - Warm cream tint */
+  --glass-bg: var(--surface-glass-warm);           /* Warm glassmorphism */
+  --glass-bg-dark: rgba(30, 23, 20, 0.2);          /* Warm dark overlay */
+  --glass-border: rgba(255, 247, 239, 0.2);        /* Warm glass border */
+  --glass-border-dark: rgba(30, 23, 20, 0.1);      /* Warm dark border */
   --glass-blur: 10px;
 
   /* Animations */
@@ -101,6 +101,39 @@
   --soft-brown: #3A2A22;           /* Secondary warm dark - use for accents/secondary text */
   --soft-cream: #FFF7EF;           /* Warm cream for input backgrounds - NOT pure white */
   --soft-cream-dark: #FAF3E9;      /* Slightly darker cream for subtle inset areas */
+
+  /* ===================================================================
+     UNIFIED DESIGN SYSTEM - Typography, Shadows, Surfaces
+     ================================================================ */
+
+  /* Typography Scale - Modular scale based on 1rem */
+  --font-size-xs: 0.75rem;         /* 12px - tiny labels */
+  --font-size-sm: 0.875rem;        /* 14px - small text */
+  --font-size-base: 0.9375rem;     /* 15px - body text */
+  --font-size-md: 1rem;            /* 16px - default */
+  --font-size-lg: 1.125rem;        /* 18px - subheadings */
+  --font-size-xl: 1.25rem;         /* 20px - card titles */
+  --font-size-2xl: 1.5rem;         /* 24px - page titles */
+  --font-size-3xl: 2rem;           /* 32px - hero text */
+
+  /* Warm Shadows - Using soft-black instead of pure black */
+  --shadow-xs: 0 1px 2px rgba(30, 23, 20, 0.05);
+  --shadow-sm: 0 2px 4px rgba(30, 23, 20, 0.08);
+  --shadow-md: 0 4px 8px rgba(30, 23, 20, 0.10);
+  --shadow-lg: 0 8px 16px rgba(30, 23, 20, 0.12);
+  --shadow-xl-warm: 0 20px 40px rgba(30, 23, 20, 0.15);
+  --shadow-slab: 4px 4px 0 rgba(30, 23, 20, 0.25); /* Neo-brutalist offset shadow */
+
+  /* Warm Surface Colors */
+  --surface-cream: var(--soft-cream);              /* Main card backgrounds */
+  --surface-cream-hover: var(--soft-cream-dark);   /* Hover state for cards */
+  --surface-white-warm: #FFFEF7;                   /* Warmest near-white */
+  --surface-glass-warm: rgba(255, 247, 239, 0.65); /* Warm glassmorphism */
+
+  /* Warm Borders */
+  --border-cream: rgba(30, 23, 20, 0.12);          /* Subtle warm borders */
+  --border-cream-medium: rgba(30, 23, 20, 0.18);   /* Medium contrast borders */
+  --border-cream-strong: rgba(30, 23, 20, 0.25);   /* High contrast borders */
 }
 
 /* ===================================================================
@@ -248,8 +281,8 @@ body {
     radial-gradient(circle at 5% 50%,
       rgba(245, 200, 255, 0.18),
       transparent 35%),
-    /* Dynamic gradient from theme randomizer */
-    var(--gradient-bg, linear-gradient(135deg, #fff8f1 0%, #ffe9ef 50%, #fff5e8 100%));
+    /* Warm gradient base: cream → peach → warm white */
+    linear-gradient(135deg, #FFF8F1 0%, #FFE9EF 35%, #FFEEDC 70%, #FFFEF7 100%);
   overflow: hidden;
   animation: mapperGradient 18s ease-in-out infinite alternate;
 }
