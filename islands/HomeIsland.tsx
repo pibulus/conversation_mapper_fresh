@@ -42,11 +42,11 @@ export default function HomeIsland() {
     <div class="mapper-scene min-h-screen">
       {/* Top Bar - Brand presence */}
       <header style={{
-        background: 'rgba(255, 250, 245, 0.92)',
+        background: 'var(--surface-glass-warm)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '2px solid rgba(0, 0, 0, 0.08)',
-        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)',
+        borderBottom: '2px solid var(--border-cream-medium)',
+        boxShadow: 'var(--shadow-md)',
         height: '80px',
         display: 'flex',
         alignItems: 'center',
@@ -68,13 +68,10 @@ export default function HomeIsland() {
                     conversationData.value = null;
                     window.history.pushState({}, '', '/');
                   }}
-                  class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg hover:bg-black/5 transition-all"
-                  style={{
-                    border: '1px solid rgba(0, 0, 0, 0.1)'
-                  }}
+                  class="btn btn-ghost btn-xs flex-shrink-0 flex items-center justify-center w-9 h-9"
                   title="Back to home"
                 >
-                  <i class="fa fa-arrow-left" style={{ fontSize: '14px', color: '#2C2C2C' }}></i>
+                  <i class="fa fa-arrow-left" style={{ fontSize: '14px', color: 'var(--color-text)' }}></i>
                 </button>
                 <h1
                   class="truncate"
@@ -97,21 +94,19 @@ export default function HomeIsland() {
                 {/* Export button */}
                 <button
                   onClick={() => drawerOpen.value = !drawerOpen.value}
-                  class="px-3 py-1.5 rounded-lg transition-all hidden sm:block"
+                  class="btn btn-sm hidden sm:block"
                   style={{
-                    background: '#1A1A1A',
+                    background: 'var(--soft-black)',
                     color: 'white',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    border: 'none'
+                    borderColor: 'var(--soft-black)'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#2C2C2C';
-                    e.currentTarget.style.transform = 'scale(1.02)';
+                    e.currentTarget.style.background = 'var(--soft-brown)';
+                    e.currentTarget.style.borderColor = 'var(--soft-brown)';
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#1A1A1A';
-                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.background = 'var(--soft-black)';
+                    e.currentTarget.style.borderColor = 'var(--soft-black)';
                   }}
                   title="Export"
                 >
@@ -120,9 +115,6 @@ export default function HomeIsland() {
 
                 {/* Share button */}
                 <ShareButton />
-
-                {/* Theme shuffler */}
-                <ThemeShuffler />
               </div>
             </>
           ) : (
@@ -144,7 +136,7 @@ export default function HomeIsland() {
                   cursor: 'pointer'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(var(--color-accent), 0.08)';
+                  e.currentTarget.style.background = 'rgba(232, 131, 156, 0.08)';
                   e.currentTarget.style.transform = 'translateX(2px)';
                 }}
                 onMouseLeave={(e) => {
@@ -154,7 +146,6 @@ export default function HomeIsland() {
               >
                 Conversation Mapper
               </a>
-              <ThemeShuffler />
             </>
           )}
         </div>
