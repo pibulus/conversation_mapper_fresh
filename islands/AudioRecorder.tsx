@@ -13,6 +13,8 @@
 import { useSignal, useComputed } from "@preact/signals";
 import { useEffect, useRef } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
+import { showToast } from "../utils/toast.ts";
+import LoadingModal from "../components/LoadingModal.tsx";
 
 interface Recording {
   id: string;
@@ -127,7 +129,7 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
 
     } catch (error) {
       console.error("❌ Error starting recording:", error);
-      alert("Failed to start recording. Please check microphone permissions.");
+      showToast("Failed to start recording. Please check microphone permissions.", "error");
       cleanup();
     }
   }
@@ -225,10 +227,10 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
       const completedCount = result.actionItems.filter((i: any) => i.status === 'completed').length;
       const pendingCount = result.actionItems.filter((i: any) => i.status === 'pending').length;
 
-      alert(`✅ Recording added!\n${pendingCount} pending • ${completedCount} completed`);
+      showToast(`Recording added! ${pendingCount} pending • ${completedCount} completed`, "success");
     } catch (error) {
       console.error("❌ Error processing audio:", error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showToast(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, "error");
     } finally {
       isProcessing.value = false;
     }
@@ -296,7 +298,7 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
           URL.revokeObjectURL(currentObjectURLRef.current);
           currentObjectURLRef.current = null;
         }
-        alert('Error playing audio. The file may be corrupted.');
+        showToast('Error playing audio. The file may be corrupted.', 'error');
       };
 
       audio.play().catch(error => {
@@ -308,7 +310,7 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
           URL.revokeObjectURL(currentObjectURLRef.current);
           currentObjectURLRef.current = null;
         }
-        alert('Failed to play audio. Please check your browser settings.');
+        showToast('Failed to play audio. Please check your browser settings.', 'error');
       });
 
       audioElementRef.current = audio;
@@ -387,13 +389,17 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
   }, [isExpanded.value, isRecording.value]);
 
   return (
-    <div class="relative">
-      {/* Compact button in header */}
-      <button
+    <>
+      {/* Loading modal during processing */}
+      <LoadingModal isOpen={isProcessing.value} />
+
+      <div class="relative">
+        {/* Compact button in header */}
+        <button
         onClick={() => isExpanded.value = !isExpanded.value}
         class="flex items-center gap-2 px-3 py-2 rounded-lg hover:brightness-110 transition-all relative"
         style={{
-          background: isRecording.value ? '#EF4444' : 'var(--color-accent)',
+          background: isRecording.value ? 'oklch(0.60 0.20 25)' : 'var(--color-accent)',
           border: `2px solid var(--color-border)`,
           color: 'white',
           fontWeight: '600',
@@ -458,7 +464,7 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
               class="w-full py-3 font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed mb-3"
               style={{
                 border: `var(--border-width) solid var(--color-border)`,
-                background: isRecording.value ? '#EF4444' : 'var(--color-accent)',
+                background: isRecording.value ? 'oklch(0.60 0.20 25)' : 'var(--color-accent)',
                 color: 'white',
                 boxShadow: 'var(--shadow-soft)',
                 transition: 'var(--transition-medium)',
@@ -561,6 +567,7 @@ export default function AudioRecorder({ conversationId, onRecordingComplete }: A
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

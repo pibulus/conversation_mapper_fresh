@@ -16,6 +16,44 @@ import { processAudio } from "@core/orchestration/conversation-flow.ts";
 import type { ConversationFlowResult } from "@core/orchestration/conversation-flow.ts";
 import type { ActionItem } from "@core/types/index.ts";
 
+/**
+ * Check if two action items are similar enough to be considered duplicates
+ * Uses token-based similarity with normalized text
+ */
+function areSimilarActionItems(desc1: string, desc2: string): boolean {
+  const normalize = (text: string) =>
+    text.toLowerCase()
+      .trim()
+      .replace(/[^\w\s]/g, '') // Remove punctuation
+      .replace(/\s+/g, ' '); // Normalize whitespace
+
+  const text1 = normalize(desc1);
+  const text2 = normalize(desc2);
+
+  // Exact match after normalization
+  if (text1 === text2) return true;
+
+  // Check if one is a substring of the other (handles "fix bug" vs "fix the bug")
+  if (text1.includes(text2) || text2.includes(text1)) return true;
+
+  // Token-based similarity
+  const tokens1 = text1.split(' ').filter(t => t.length > 2); // Ignore short words
+  const tokens2 = text2.split(' ').filter(t => t.length > 2);
+
+  if (tokens1.length === 0 || tokens2.length === 0) return false;
+
+  // Calculate Jaccard similarity (intersection / union)
+  const set1 = new Set(tokens1);
+  const set2 = new Set(tokens2);
+  const intersection = new Set([...set1].filter(x => set2.has(x)));
+  const union = new Set([...set1, ...set2]);
+
+  const similarity = intersection.size / union.size;
+
+  // Consider similar if >60% token overlap
+  return similarity > 0.6;
+}
+
 export const handler: Handlers = {
   async POST(req) {
     try {
@@ -163,13 +201,13 @@ export const handler: Handlers = {
 
       for (const newItem of updatedActionItems) {
         const isDuplicate = mergedActionItems.some(
-          existing =>
-            existing.description.toLowerCase().trim() ===
-            newItem.description.toLowerCase().trim()
+          existing => areSimilarActionItems(existing.description, newItem.description)
         );
 
         if (!isDuplicate) {
           mergedActionItems.push(newItem);
+        } else {
+          console.log(`⏭️  Skipping duplicate action item: "${newItem.description}"`);
         }
       }
 
