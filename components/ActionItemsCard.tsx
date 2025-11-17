@@ -378,6 +378,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                 onClick={cycleSortMode}
                 class="btn btn-xs"
                 title={sortMode.value === 'manual' ? 'Sort: Manual (drag to reorder)' : sortMode.value === 'assignee' ? 'Sort: By assignee' : 'Sort: By due date'}
+                aria-label={sortMode.value === 'manual' ? 'Sort by manual order, drag to reorder' : sortMode.value === 'assignee' ? 'Sort by assignee' : 'Sort by due date'}
               >
                 {sortMode.value === 'manual' ? '🤚' : sortMode.value === 'assignee' ? '👤' : '📅'}
               </button>
@@ -385,6 +386,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                 onClick={() => showAddModal.value = true}
                 class="btn btn-xs"
                 title="Add new item"
+                aria-label="Add new action item"
               >
                 ➕
               </button>
@@ -531,6 +533,9 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                             <button
                               onClick={() => activeAssigneeDropdown.value = activeAssigneeDropdown.value === item.id ? null : item.id}
                               class="btn btn-xs flex items-center gap-2"
+                              aria-label={`Assign to: ${item.assignee || 'None'}`}
+                              aria-haspopup="listbox"
+                              aria-expanded={activeAssigneeDropdown.value === item.id}
                             >
                               <i class="fa fa-user text-xs"></i>
                               <span style={{ color: item.assignee ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
@@ -610,6 +615,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                                 }
                               }}
                               class="btn btn-xs flex items-center gap-2"
+                              aria-label={`Due date: ${item.due_date ? formatFriendlyDate(item.due_date) : 'None'}`}
                             >
                               <i class="fa fa-calendar text-xs"></i>
                               <span style={{ color: item.due_date ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
@@ -638,6 +644,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                         e.currentTarget.style.color = 'var(--soft-brown)';
                       }}
                       title="Delete"
+                      aria-label="Delete action item"
                     >
                       <i class="fa fa-times text-xs"></i>
                     </button>
@@ -652,11 +659,16 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
 
       {/* Add New Item Modal */}
       {showAddModal.value && (
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div
+          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="add-item-modal-title"
+        >
           <div ref={modalRef} class="dashboard-card max-w-md w-full mx-4" style={{
             padding: 'var(--card-padding)'
           }}>
-            <h3 style={{
+            <h3 id="add-item-modal-title" style={{
               fontSize: 'calc(var(--heading-size) * 1.2)',
               fontWeight: 'var(--heading-weight)',
               color: 'var(--color-text)',
