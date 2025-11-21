@@ -102,8 +102,9 @@ Transform the same conversation into multiple formats:
    only used to open a short-lived HttpOnly session cookie, so it’s never stored
    in LocalStorage and you’ll be prompted again when the session expires.
 
-   Every time you stop recording, we automatically save a `.webm` backup in your
-   Downloads folder so you can re-upload if anything goes wrong.
+   Whenever you stop a clip that’s at least 30 seconds long, we automatically
+   save a `.webm` backup in your Downloads folder so you can re-upload if
+   anything goes wrong.
 
 ### First Use
 

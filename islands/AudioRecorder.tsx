@@ -40,9 +40,11 @@ export default function AudioRecorder(
   const showTimeWarning = useSignal(false);
   const isExpanded = useSignal(false);
 
-  // Recordings list
+  // Recordings list + backup notice
   const recordings = useSignal<Recording[]>([]);
   const playingRecordingId = useSignal<string | null>(null);
+  const lastBackupNotice = useSignal<string | null>(null);
+  const lastRecordingBlobRef = useRef<Blob | null>(null);
 
   // Audio recording refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -55,6 +57,7 @@ export default function AudioRecorder(
   // Time constants
   const MAX_RECORDING_TIME = 10 * 60; // 10 minutes in seconds
   const WARNING_TIME = 30; // 30 seconds before limit
+  const MIN_BACKUP_DURATION = 30; // only auto-save clips >= 30s
 
   const timeRemaining = useComputed(() =>
     MAX_RECORDING_TIME - recordingTime.value
@@ -161,8 +164,19 @@ export default function AudioRecorder(
       mediaRecorder.onstop = async () => {
         const mimeType = mediaRecorder.mimeType || "audio/webm";
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        lastRecordingBlobRef.current = audioBlob;
+        const shouldSaveBackup = recordingTime.value >= MIN_BACKUP_DURATION;
         try {
-          saveAudioBackup(audioBlob, conversationId);
+          if (shouldSaveBackup) {
+            saveAudioBackup(audioBlob, conversationId);
+            lastBackupNotice.value =
+              `Saved a backup copy to your Downloads folder`;
+            setTimeout(() => {
+              if (lastBackupNotice.value) {
+                lastBackupNotice.value = null;
+              }
+            }, 4000);
+          }
         } catch (error) {
           console.warn("⚠️ Failed to auto-save recording backup:", error);
         }
@@ -174,6 +188,11 @@ export default function AudioRecorder(
 
       mediaRecorder.stop();
     });
+  }
+
+  async function retryLastRecording() {
+    if (!lastRecordingBlobRef.current) return;
+    await processAudioAppend(lastRecordingBlobRef.current);
   }
 
   // Process audio and append to conversation
@@ -650,6 +669,23 @@ export default function AudioRecorder(
                 </div>
               )}
           </div>
+        </div>
+      )}
+      {lastBackupNotice.value && (
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          <div class="inline-flex items-center gap-2 rounded-full border border-[#f5c999] bg-[#fff6eb] px-4 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#7a4b1f] shadow-sm">
+            <span aria-hidden="true">💾</span>
+            <span>{lastBackupNotice.value}</span>
+          </div>
+          {lastRecordingBlobRef.current && (
+            <button
+              class="rounded-full border border-[#7a4b1f]/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#7a4b1f] transition hover:border-[#7a4b1f] hover:text-[#4d2b0f]"
+              onClick={retryLastRecording}
+              disabled={isProcessing.value}
+            >
+              Retry Last Recording
+            </button>
+          )}
         </div>
       )}
     </div>
