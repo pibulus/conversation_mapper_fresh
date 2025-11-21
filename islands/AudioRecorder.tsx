@@ -14,6 +14,7 @@ import { useComputed, useSignal } from "@preact/signals";
 import { useEffect, useRef } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
 import { ensureApiSession } from "../utils/apiAuth.ts";
+import { saveAudioBackup } from "../utils/downloadBackup.ts";
 import { enqueueApiRequest } from "../utils/requestQueue.ts";
 
 interface Recording {
@@ -160,6 +161,11 @@ export default function AudioRecorder(
       mediaRecorder.onstop = async () => {
         const mimeType = mediaRecorder.mimeType || "audio/webm";
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        try {
+          saveAudioBackup(audioBlob, conversationId);
+        } catch (error) {
+          console.warn("⚠️ Failed to auto-save recording backup:", error);
+        }
 
         await processAudioAppend(audioBlob);
         cleanup();
