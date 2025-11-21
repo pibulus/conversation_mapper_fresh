@@ -10,57 +10,57 @@
  */
 
 import { Handlers } from "$fresh/server.ts";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { createGeminiService } from "@core/ai/gemini.ts";
 import { processAudio } from "@core/orchestration/conversation-flow.ts";
 import type { ConversationFlowResult } from "@core/orchestration/conversation-flow.ts";
 import type { ActionItem } from "@core/types/index.ts";
+import { guardRequest } from "@services/requestGuard.ts";
+import { getGeminiService } from "@services/ai.ts";
+import { deleteUploadedFile, uploadAudioFile } from "@services/audio.ts";
+import { fileToAudioPart } from "@services/audio.ts";
 
 export const handler: Handlers = {
   async POST(req) {
     try {
+      const guardResponse = guardRequest(req);
+      if (guardResponse) {
+        return guardResponse;
+      }
+
       const contentType = req.headers.get("content-type") || "";
 
       if (!contentType.includes("multipart/form-data")) {
         return new Response(
           JSON.stringify({ error: "Expected multipart/form-data" }),
-          { status: 400, headers: { "Content-Type": "application/json" } }
+          { status: 400, headers: { "Content-Type": "application/json" } },
         );
       }
 
-      // Initialize Gemini AI
-      const apiKey = Deno.env.get("GEMINI_API_KEY");
-      if (!apiKey) {
-        return new Response(
-          JSON.stringify({ error: "Missing GEMINI_API_KEY environment variable" }),
-          { status: 500, headers: { "Content-Type": "application/json" } }
-        );
-      }
-
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      const aiService = createGeminiService(model);
+      const aiService = getGeminiService();
 
       // Parse form data
       const formData = await req.formData();
       const audioFile = formData.get("audio") as File;
       const conversationId = formData.get("conversationId") as string;
-      const existingTranscript = formData.get("existingTranscript") as string | null;
-      const existingActionItemsJson = formData.get("existingActionItems") as string | null;
+      const existingTranscript = formData.get("existingTranscript") as
+        | string
+        | null;
+      const existingActionItemsJson = formData.get("existingActionItems") as
+        | string
+        | null;
       const existingSummary = formData.get("existingSummary") as string | null;
       const existingNodesJson = formData.get("existingNodes") as string | null;
 
       if (!audioFile) {
         return new Response(
           JSON.stringify({ error: "No audio file provided" }),
-          { status: 400, headers: { "Content-Type": "application/json" } }
+          { status: 400, headers: { "Content-Type": "application/json" } },
         );
       }
 
       if (!conversationId) {
         return new Response(
           JSON.stringify({ error: "No conversation ID provided" }),
-          { status: 400, headers: { "Content-Type": "application/json" } }
+          { status: 400, headers: { "Content-Type": "application/json" } },
         );
       }
 
@@ -68,57 +68,54 @@ export const handler: Handlers = {
       const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
       if (audioFile.size > MAX_FILE_SIZE) {
         return new Response(
-          JSON.stringify({ error: `File too large. Maximum size is 50MB (received ${(audioFile.size / 1024 / 1024).toFixed(1)}MB)` }),
-          { status: 413, headers: { "Content-Type": "application/json" } }
+          JSON.stringify({
+            error: `File too large. Maximum size is 50MB (received ${
+              (audioFile.size / 1024 / 1024).toFixed(1)
+            }MB)`,
+          }),
+          { status: 413, headers: { "Content-Type": "application/json" } },
         );
       }
 
-      // Parse existing action items for smart completion detection
-      let existingActionItems: ActionItem[] = [];
-      if (existingActionItemsJson) {
-        try {
-          existingActionItems = JSON.parse(existingActionItemsJson);
-        } catch (error) {
-          console.warn("Failed to parse existing action items:", error);
-        }
-      }
-
-      // Parse existing nodes for topic deduplication
-      let existingNodes: any[] = [];
-      if (existingNodesJson) {
-        try {
-          existingNodes = JSON.parse(existingNodesJson);
-        } catch (error) {
-          console.warn("Failed to parse existing nodes:", error);
-        }
-      }
-
-      // Convert File to Blob
-      const audioBlob = new Blob([await audioFile.arrayBuffer()], { type: audioFile.type });
+      const existingActionItems = parseExistingActionItems(
+        existingActionItemsJson,
+        conversationId,
+      );
+      const existingNodes = parseExistingNodes(existingNodesJson);
+      const { part: audioPart, fileName } = await uploadAudioFile(audioFile);
 
       // Process audio through nervous system with existing action items and nodes
       console.log(`📎 Appending audio to conversation ${conversationId}`);
-      console.log(`📋 Found ${existingActionItems.length} existing action items`);
+      console.log(
+        `📋 Found ${existingActionItems.length} existing action items`,
+      );
       console.log(`🕸️ Found ${existingNodes.length} existing topics`);
 
-      const result: ConversationFlowResult = await processAudio(
-        aiService,
-        audioBlob,
-        conversationId,
-        existingActionItems,
-        existingNodes
-      );
+      let result: ConversationFlowResult;
+      try {
+        result = await processAudio(
+          aiService,
+          audioPart,
+          conversationId,
+          existingActionItems,
+          existingNodes,
+        );
+      } finally {
+        await deleteUploadedFile(fileName);
+      }
 
       // Merge transcripts if we have existing content
       if (existingTranscript) {
-        const combinedTranscript = `${existingTranscript}\n\n--- New Recording ---\n\n${result.transcript.text}`;
+        const combinedTranscript =
+          `${existingTranscript}\n\n--- New Recording ---\n\n${result.transcript.text}`;
         result.transcript.text = combinedTranscript;
         result.conversation.transcript = combinedTranscript;
       }
 
       // Append summaries if we have existing summary
       if (existingSummary && result.summary) {
-        result.summary = `${existingSummary}\n\n**Update from latest recording:**\n${result.summary}`;
+        result.summary =
+          `${existingSummary}\n\n**Update from latest recording:**\n${result.summary}`;
       }
 
       // Process status updates from AI analysis
@@ -126,30 +123,34 @@ export const handler: Handlers = {
       console.log(`✅ Status updates detected: ${result.statusUpdates.length}`);
 
       // Update existing action items with completion status
-      const updatedActionItems = result.actionItems.map(item => {
+      const updatedActionItems = result.actionItems.map((item) => {
         const statusUpdate = result.statusUpdates.find(
-          update => update.id === item.id
+          (update) => update.id === item.id,
         );
 
         // Handle bi-directional status updates (completed ↔ pending)
         if (statusUpdate) {
-          if (statusUpdate.status === 'completed') {
-            console.log(`✓ Marking action item as completed: ${item.description}`);
+          if (statusUpdate.status === "completed") {
+            console.log(
+              `✓ Marking action item as completed: ${item.description}`,
+            );
             return {
               ...item,
-              status: 'completed' as const,
+              status: "completed" as const,
               updated_at: new Date().toISOString(),
               ai_checked: true,
-              checked_reason: statusUpdate.reason
+              checked_reason: statusUpdate.reason,
             };
-          } else if (statusUpdate.status === 'pending') {
-            console.log(`↺ Reverting action item to pending: ${item.description}`);
+          } else if (statusUpdate.status === "pending") {
+            console.log(
+              `↺ Reverting action item to pending: ${item.description}`,
+            );
             return {
               ...item,
-              status: 'pending' as const,
+              status: "pending" as const,
               updated_at: new Date().toISOString(),
               ai_checked: true,
-              checked_reason: statusUpdate.reason
+              checked_reason: statusUpdate.reason,
             };
           }
         }
@@ -163,9 +164,9 @@ export const handler: Handlers = {
 
       for (const newItem of updatedActionItems) {
         const isDuplicate = mergedActionItems.some(
-          existing =>
+          (existing) =>
             existing.description.toLowerCase().trim() ===
-            newItem.description.toLowerCase().trim()
+              newItem.description.toLowerCase().trim(),
         );
 
         if (!isDuplicate) {
@@ -174,27 +175,114 @@ export const handler: Handlers = {
       }
 
       console.log(`📊 Final action items: ${mergedActionItems.length} total`);
-      console.log(`   - ${mergedActionItems.filter(i => i.status === 'completed').length} completed`);
-      console.log(`   - ${mergedActionItems.filter(i => i.status === 'pending').length} pending`);
+      console.log(
+        `   - ${
+          mergedActionItems.filter((i) => i.status === "completed").length
+        } completed`,
+      );
+      console.log(
+        `   - ${
+          mergedActionItems.filter((i) => i.status === "pending").length
+        } pending`,
+      );
 
       // Build final result
       const finalResult = {
         ...result,
-        actionItems: mergedActionItems
+        actionItems: mergedActionItems,
       };
 
       return new Response(JSON.stringify(finalResult), {
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       });
-
     } catch (error) {
       console.error("❌ Append error:", error);
       return new Response(
         JSON.stringify({
-          error: error instanceof Error ? error.message : "Unknown error"
+          error: error instanceof Error ? error.message : "Unknown error",
         }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        { status: 500, headers: { "Content-Type": "application/json" } },
       );
     }
-  }
+  },
 };
+
+function parseExistingActionItems(
+  json: string | null,
+  conversationId: string,
+): ActionItem[] {
+  if (!json) return [];
+  try {
+    const parsed = JSON.parse(json);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => sanitizeActionItem(item, conversationId))
+      .filter((item): item is ActionItem => Boolean(item))
+      .slice(0, 200);
+  } catch (error) {
+    console.warn("Failed to parse existing action items:", error);
+    return [];
+  }
+}
+
+function sanitizeActionItem(
+  raw: unknown,
+  conversationId: string,
+): ActionItem | null {
+  if (!raw || typeof raw !== "object") return null;
+  const record = raw as Record<string, unknown>;
+
+  const description = typeof record.description === "string"
+    ? record.description.trim()
+    : "";
+  const id = typeof record.id === "string" ? record.id.trim() : "";
+
+  if (!description || !id) {
+    return null;
+  }
+
+  const isoNow = new Date().toISOString();
+  const item: ActionItem = {
+    id,
+    conversation_id: typeof record.conversation_id === "string"
+      ? record.conversation_id
+      : conversationId,
+    description,
+    assignee: typeof record.assignee === "string" && record.assignee.trim()
+      ? record.assignee.trim()
+      : null,
+    due_date: typeof record.due_date === "string" && record.due_date.trim()
+      ? record.due_date
+      : null,
+    status: record.status === "completed" ? "completed" : "pending",
+    created_at: typeof record.created_at === "string"
+      ? record.created_at
+      : isoNow,
+    updated_at: typeof record.updated_at === "string"
+      ? record.updated_at
+      : isoNow,
+  };
+
+  if (record.ai_checked === true) {
+    item.ai_checked = true;
+  }
+
+  if (
+    typeof record.checked_reason === "string" && record.checked_reason.trim()
+  ) {
+    item.checked_reason = record.checked_reason.trim();
+  }
+
+  return item;
+}
+
+function parseExistingNodes(json: string | null) {
+  if (!json) return [];
+  try {
+    const parsed = JSON.parse(json);
+    return Array.isArray(parsed) ? parsed.slice(0, 200) : [];
+  } catch (error) {
+    console.warn("Failed to parse existing nodes:", error);
+    return [];
+  }
+}

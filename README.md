@@ -1,31 +1,41 @@
 # 🧠 Conversation Mapper
 
-> Turn messy meeting recordings into organized topic maps, action items, and summaries - automatically.
+> Turn messy meeting recordings into organized topic maps, action items, and
+> summaries - automatically.
 
-**Conversation Mapper** uses AI to transform unstructured conversations (audio or text) into structured knowledge: transcripts with speaker detection, auto-generated action items, topic relationship graphs, and customizable exports.
+**Conversation Mapper** uses AI to transform unstructured conversations (audio
+or text) into structured knowledge: transcripts with speaker detection,
+auto-generated action items, topic relationship graphs, and customizable
+exports.
 
 ## ✨ Key Features
 
 ### 🎤 Audio → Structure
+
 - **Record or upload** audio files
 - **Automatic transcription** with speaker diarization
 - **AI-powered analysis** extracts topics, action items, summaries
 - **Real-time visualizer** during recording
 
 ### 🤖 AI Self-Checkoff (The Magic Feature)
-User says: *"I finished writing that report"*
-→ AI automatically marks "Write report" action item as ✓ Complete
 
-The AI compares new audio/text against existing action items and updates their status with reasoning.
+User says: _"I finished writing that report"_ → AI automatically marks "Write
+report" action item as ✓ Complete
+
+The AI compares new audio/text against existing action items and updates their
+status with reasoning.
 
 ### 🕸️ Interactive Topic Graph (EmojimapViz)
+
 - **Non-chronological visualization** of conversation topics
 - **Emoji-based nodes** with relationship edges
 - **Force-directed layout** for organic topic clustering
 - Helps participants circle back to interrupted topics
 
 ### 📤 Flexible Export
+
 Transform the same conversation into multiple formats:
+
 - Blog posts
 - Technical documentation
 - Meeting summaries
@@ -33,6 +43,7 @@ Transform the same conversation into multiple formats:
 - Custom prompts
 
 ### 🎨 Beautiful, Responsive UI
+
 - **Mesh gradient backgrounds** (animated SVG)
 - **Clean Svelte-inspired aesthetic**
 - **Fully responsive** mobile layout
@@ -42,8 +53,11 @@ Transform the same conversation into multiple formats:
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Deno** (v1.40+): [Install Deno](https://deno.land/manual/getting_started/installation)
-- **Google Gemini API Key**: [Get API key](https://aistudio.google.com/app/apikey)
+
+- **Deno** (v1.40+):
+  [Install Deno](https://deno.land/manual/getting_started/installation)
+- **Google Gemini API Key**:
+  [Get API key](https://aistudio.google.com/app/apikey)
 
 ### Setup
 
@@ -61,6 +75,17 @@ Transform the same conversation into multiple formats:
    Edit `.env` and add your Gemini API key:
    ```bash
    GEMINI_API_KEY=your_api_key_here
+   API_AUTH_TOKEN=choose_a_secret_value
+   # Optional: harden server routes & sessions
+   ALLOWED_ORIGINS=http://localhost:8003
+   API_RATE_LIMIT=60
+   API_RATE_WINDOW_MS=60000
+   API_SESSION_TTL_MS=14400000
+   API_COOKIE_SECURE=false
+   GEMINI_DELETE_RETRIES=3
+   GEMINI_DELETE_RETRY_DELAY_MS=2000
+   # Override the default Gemini model if needed
+   # GEMINI_MODEL=gemini-2.5-flash-lite
    ```
 
 3. **Start the development server**
@@ -69,6 +94,13 @@ Transform the same conversation into multiple formats:
    ```
 
    The app will be available at `http://localhost:8003`
+
+4. **First API call**
+
+   When you trigger any AI-powered feature from the UI, the browser will prompt
+   you for the `API_AUTH_TOKEN`. Paste the same value you set in `.env`—it’s
+   only used to open a short-lived HttpOnly session cookie, so it’s never stored
+   in LocalStorage and you’ll be prompted again when the session expires.
 
 ### First Use
 
@@ -84,12 +116,10 @@ Transform the same conversation into multiple formats:
 
 ## 📚 Documentation
 
-- **[WHAT_IS_THIS.md](./WHAT_IS_THIS.md)** - Detailed feature overview
-- **[core/README.md](./core/README.md)** - Framework-agnostic AI logic documentation
-- **[FEATURE_PARITY.md](./FEATURE_PARITY.md)** - Comparison with Svelte version
-- **[AUDIO_RECORDING.md](./AUDIO_RECORDING.md)** - Audio recording implementation
-- **[SPEAKER_DIARIZATION.md](./SPEAKER_DIARIZATION.md)** - Speaker detection details
-- **[GLOSSARY.md](./GLOSSARY.md)** - Terms and concepts
+- **[CLAUDE.md](./CLAUDE.md)** - Development guide for future coding sessions
+- **[core/README.md](./core/README.md)** - Framework-agnostic AI logic
+  documentation
+- **[AUDIT_HISTORY.md](./AUDIT_HISTORY.md)** - Consolidated historical audit notes
 
 ## 🏗️ Architecture
 
@@ -106,10 +136,12 @@ Transform the same conversation into multiple formats:
 /routes/               # Fresh routes & API endpoints
 /signals/              # Global state (Preact signals)
 /utils/                # Utility functions
-/theme-system/         # Theme configuration
+/services/             # Server-side API/auth/audio helpers
 ```
 
-The core AI logic (`/core/`) is extracted into pure TypeScript and can be used in **any framework** (React, Vue, Svelte, etc.). Fresh is just the current UI implementation.
+The core AI logic (`/core/`) is extracted into pure TypeScript and can be used
+in **any framework** (React, Vue, Svelte, etc.). Fresh is just the current UI
+implementation.
 
 ## 🛠️ Development
 
@@ -125,7 +157,7 @@ deno task check      # Run linting and type checking
 ### Tech Stack
 
 - **Framework**: [Fresh](https://fresh.deno.dev/) (Deno + Preact)
-- **AI**: [Google Gemini](https://ai.google.dev/) (gemini-2.5-flash)
+- **AI**: [Google Gemini](https://ai.google.dev/) (gemini-2.5-flash-lite)
 - **Visualization**: [D3.js](https://d3js.org/) (force-directed graphs)
 - **State**: [Preact Signals](https://preactjs.com/guide/v10/signals/)
 - **Storage**: LocalStorage + IndexedDB
@@ -157,6 +189,7 @@ MIT License - see [LICENSE](./LICENSE) file for details
 ## 🙏 Acknowledgments
 
 Built with:
+
 - [Fresh](https://fresh.deno.dev/) - The next-gen web framework
 - [Google Gemini](https://ai.google.dev/) - Multimodal AI API
 - [D3.js](https://d3js.org/) - Data visualization

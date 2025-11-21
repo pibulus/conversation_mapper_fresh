@@ -6,12 +6,18 @@
  */
 
 import { FreshContext } from "$fresh/server.ts";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { guardRequest } from "@services/requestGuard.ts";
+import { getGeminiModel } from "@services/ai.ts";
 
 export const handler = async (req: Request, _ctx: FreshContext) => {
   // Only allow POST
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
+  }
+
+  const guardResponse = guardRequest(req);
+  if (guardResponse) {
+    return guardResponse;
   }
 
   try {
@@ -20,27 +26,15 @@ export const handler = async (req: Request, _ctx: FreshContext) => {
     if (!prompt || !text) {
       return new Response(
         JSON.stringify({ error: "Missing prompt or text" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
-    // Get API key from server environment (never exposed to client)
-    const apiKey = Deno.env.get("GEMINI_API_KEY");
-
-    if (!apiKey) {
-      console.error("❌ GEMINI_API_KEY not found in environment");
-      return new Response(
-        JSON.stringify({ error: "Gemini API not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    // Initialize Gemini
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = getGeminiModel();
 
     // Generate markdown
-    const fullPrompt = `Transform the following conversation text according to these instructions:
+    const fullPrompt =
+      `Transform the following conversation text according to these instructions:
 
 ${prompt}
 
@@ -51,30 +45,29 @@ Use proper markdown syntax including headers, lists, code blocks, etc as appropr
 CONVERSATION TEXT:
 ${text}`;
 
-    console.log('📝 Generating markdown with Gemini');
+    console.log("📝 Generating markdown with Gemini");
 
     const result = await model.generateContent(fullPrompt);
     const response = await result.response;
     const markdown = response.text().trim();
 
-    console.log('✅ Markdown generation complete');
+    console.log("✅ Markdown generation complete");
 
     return new Response(
       JSON.stringify({ markdown }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json" }
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
-
   } catch (error) {
-    console.error('❌ Error in Gemini API:', error);
+    console.error("❌ Error in Gemini API:", error);
     return new Response(
       JSON.stringify({
         error: "Failed to generate markdown",
-        details: error instanceof Error ? error.message : "Unknown error"
+        details: error instanceof Error ? error.message : "Unknown error",
       }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
 };

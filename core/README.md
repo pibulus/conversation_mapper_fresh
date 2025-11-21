@@ -59,7 +59,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createGeminiService } from './core';
 
 const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
 const aiService = createGeminiService(model);
 ```
 

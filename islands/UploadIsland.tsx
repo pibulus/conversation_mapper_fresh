@@ -1,16 +1,18 @@
-import { useSignal, useComputed } from "@preact/signals";
+import { useComputed, useSignal } from "@preact/signals";
 import { useEffect, useRef } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
+import { ensureApiSession } from "../utils/apiAuth.ts";
+import { enqueueApiRequest } from "../utils/requestQueue.ts";
 import LoadingModal from "../components/LoadingModal.tsx";
 import AudioVisualizer from "./AudioVisualizer.tsx";
 
 export default function UploadIsland() {
-  const textInput = useSignal('');
+  const textInput = useSignal("");
   const isProcessing = useSignal(false);
   const isRecording = useSignal(false);
   const recordingTime = useSignal(0);
   const showTimeWarning = useSignal(false);
-  const lastUploadName = useSignal('');
+  const lastUploadName = useSignal("");
   const selectedFile = useSignal<File | null>(null);
   const isDragActive = useSignal(false);
 
@@ -26,20 +28,24 @@ export default function UploadIsland() {
   const MAX_RECORDING_TIME = 10 * 60;
   const WARNING_TIME = 30;
 
-  const timeRemaining = useComputed(() => MAX_RECORDING_TIME - recordingTime.value);
+  const timeRemaining = useComputed(() =>
+    MAX_RECORDING_TIME - recordingTime.value
+  );
   const hasText = useComputed(() => textInput.value.trim().length > 0);
   const primaryLabel = useComputed(() => {
-    if (isRecording.value) return 'Stop Recording';
-    if (hasText.value) return 'Analyze Text';
-    if (selectedFile.value) return 'Map Audio';
-    return 'Start Recording';
+    if (isRecording.value) return "Stop Recording";
+    if (hasText.value) return "Analyze Text";
+    if (selectedFile.value) return "Map Audio";
+    return "Start Recording";
   });
-  const primaryDisabled = useComputed(() => isProcessing.value && !isRecording.value);
+  const primaryDisabled = useComputed(() =>
+    isProcessing.value && !isRecording.value
+  );
 
   function formatTime(seconds: number): string {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   }
 
   async function startRecording() {
@@ -48,11 +54,11 @@ export default function UploadIsland() {
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true
-        }
+          autoGainControl: true,
+        },
       });
 
-      const mimeTypes = ['audio/webm', 'audio/ogg', 'audio/mp4', ''];
+      const mimeTypes = ["audio/webm", "audio/ogg", "audio/mp4", ""];
       let mediaRecorderOptions: MediaRecorderOptions | undefined;
 
       for (const mimeType of mimeTypes) {
@@ -72,7 +78,8 @@ export default function UploadIsland() {
       };
 
       try {
-        const AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
+        const AudioContext = (window as any).AudioContext ||
+          (window as any).webkitAudioContext;
         const audioContext = new AudioContext();
         const source = audioContext.createMediaStreamSource(stream);
         const analyser = audioContext.createAnalyser();
@@ -82,7 +89,7 @@ export default function UploadIsland() {
         audioContextRef.current = audioContext;
         analyserRef.current = analyser;
       } catch (error) {
-        console.warn('Failed to initialize Web Audio API:', error);
+        console.warn("Failed to initialize Web Audio API:", error);
       }
 
       mediaRecorder.start(1000);
@@ -104,8 +111,10 @@ export default function UploadIsland() {
         }
       }, 1000) as unknown as number;
     } catch (error) {
-      console.error('Error starting recording:', error);
-      alert('Could not access microphone. Please grant permission and try again.');
+      console.error("Error starting recording:", error);
+      alert(
+        "Could not access microphone. Please grant permission and try again.",
+      );
     }
   }
 
@@ -116,13 +125,15 @@ export default function UploadIsland() {
       const mediaRecorder = mediaRecorderRef.current!;
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType || 'audio/webm' });
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: mediaRecorder.mimeType || "audio/webm",
+        });
         await processRecordedAudio(audioBlob);
         resolve();
       };
 
       mediaRecorder.stop();
-      streamRef.current?.getTracks().forEach(track => track.stop());
+      streamRef.current?.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
 
       if (recordingTimerRef.current) {
@@ -136,14 +147,14 @@ export default function UploadIsland() {
 
   function cleanup() {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     if (recordingTimerRef.current) {
       clearInterval(recordingTimerRef.current);
       recordingTimerRef.current = null;
     }
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
       audioContextRef.current.close();
       audioContextRef.current = null;
     }
@@ -151,35 +162,50 @@ export default function UploadIsland() {
   }
 
   async function processRecordedAudio(audioBlob: Blob) {
-    console.log('🎤 Starting audio processing...', { size: audioBlob.size, type: audioBlob.type });
+    console.log("🎤 Starting audio processing...", {
+      size: audioBlob.size,
+      type: audioBlob.type,
+    });
     isProcessing.value = true;
 
     try {
       const formData = new FormData();
-      formData.append('audio', audioBlob, 'recording.webm');
+      formData.append("audio", audioBlob, "recording.webm");
 
-      console.log('📤 Sending audio to API...');
-      const response = await fetch('/api/process', {
-        method: 'POST',
-        body: formData
+      console.log("📤 Sending audio to API...");
+      await ensureApiSession();
+      const result = await enqueueApiRequest(async ({ signal }) => {
+        const response = await fetch("/api/process", {
+          method: "POST",
+          body: formData,
+          signal,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          console.error("❌ API error:", error);
+          throw new Error(error.error || "Processing failed");
+        }
+
+        console.log("📥 Received response from API");
+        return response.json();
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        console.error('❌ API error:', error);
-        throw new Error(error.error || 'Processing failed');
-      }
-
-      console.log('📥 Received response from API');
-      const result = await response.json();
-      console.log('✅ Processing complete:', { actionItems: result.actionItems.length, topics: result.nodes.length });
+      console.log("✅ Processing complete:", {
+        actionItems: result.actionItems.length,
+        topics: result.nodes.length,
+      });
       conversationData.value = result;
-      alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
+      alert(
+        `✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`,
+      );
     } catch (error) {
-      console.error('❌ Error processing audio:', error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("❌ Error processing audio:", error);
+      alert(
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
-      console.log('🏁 Processing complete, hiding modal');
+      console.log("🏁 Processing complete, hiding modal");
       isProcessing.value = false;
     }
   }
@@ -187,41 +213,54 @@ export default function UploadIsland() {
   async function handleTextSubmit() {
     if (!hasText.value) return;
 
-    console.log('📝 Starting text processing...', { length: textInput.value.length });
+    console.log("📝 Starting text processing...", {
+      length: textInput.value.length,
+    });
     isProcessing.value = true;
 
     try {
-      console.log('📤 Sending text to API...');
-      const response = await fetch('/api/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: textInput.value })
+      console.log("📤 Sending text to API...");
+      await ensureApiSession();
+      const result = await enqueueApiRequest(async ({ signal }) => {
+        const response = await fetch("/api/process", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: textInput.value }),
+          signal,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          console.error("❌ API error:", error);
+          throw new Error(error.error || "Processing failed");
+        }
+
+        console.log("📥 Received response from API");
+        return response.json();
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        console.error('❌ API error:', error);
-        throw new Error(error.error || 'Processing failed');
-      }
-
-      console.log('📥 Received response from API');
-      const result = await response.json();
-      console.log('✅ Processing complete:', { actionItems: result.actionItems.length, topics: result.nodes.length });
+      console.log("✅ Processing complete:", {
+        actionItems: result.actionItems.length,
+        topics: result.nodes.length,
+      });
       conversationData.value = result;
-      textInput.value = '';
-      alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
+      textInput.value = "";
+      alert(
+        `✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`,
+      );
     } catch (error) {
-      console.error('❌ Error processing text:', error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("❌ Error processing text:", error);
+      alert(
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
-      console.log('🏁 Processing complete, hiding modal');
+      console.log("🏁 Processing complete, hiding modal");
       isProcessing.value = false;
     }
   }
 
   const stageFile = (file: File) => {
     selectedFile.value = file;
-    textInput.value = '';
+    textInput.value = "";
     isDragActive.value = false;
   };
 
@@ -230,7 +269,7 @@ export default function UploadIsland() {
     const file = input.files?.[0];
     if (!file) return;
     stageFile(file);
-    input.value = '';
+    input.value = "";
   };
 
   async function processAudioFile(file: File) {
@@ -238,25 +277,33 @@ export default function UploadIsland() {
 
     try {
       const formData = new FormData();
-      formData.append('audio', file);
+      formData.append("audio", file);
 
-      const response = await fetch('/api/process', {
-        method: 'POST',
-        body: formData
+      await ensureApiSession();
+      const result = await enqueueApiRequest(async ({ signal }) => {
+        const response = await fetch("/api/process", {
+          method: "POST",
+          body: formData,
+          signal,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Processing failed");
+        }
+
+        return response.json();
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Processing failed');
-      }
-
-      const result = await response.json();
       conversationData.value = result;
       lastUploadName.value = file.name;
-      alert(`✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`);
+      alert(
+        `✅ Processed! Found ${result.actionItems.length} action items, ${result.nodes.length} topics`,
+      );
     } catch (error) {
-      console.error('❌ Error processing audio:', error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("❌ Error processing audio:", error);
+      alert(
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       isProcessing.value = false;
       selectedFile.value = null;
@@ -291,7 +338,11 @@ export default function UploadIsland() {
 
   const handleDragLeave = (event: DragEvent) => {
     event.preventDefault();
-    if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node)) {
+    if (
+      !(event.currentTarget as HTMLElement).contains(
+        event.relatedTarget as Node,
+      )
+    ) {
       isDragActive.value = false;
     }
   };
@@ -308,7 +359,7 @@ export default function UploadIsland() {
   const clearSelectedFile = () => {
     selectedFile.value = null;
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -316,91 +367,108 @@ export default function UploadIsland() {
 
   return (
     <div class="mapper-input-lab">
-      <section class="mapper-capture-block mapper-capture-unified" aria-label="Conversation input">
+      <section
+        class="mapper-capture-block mapper-capture-unified"
+        aria-label="Conversation input"
+      >
         <div
-          class={`mapper-unified-input${isDragActive.value ? ' is-drop' : ''}${selectedFile.value ? ' has-file' : ''}${isRecording.value ? ' is-recording' : ''}`}
+          class={`mapper-unified-input${isDragActive.value ? " is-drop" : ""}${
+            selectedFile.value ? " has-file" : ""
+          }${isRecording.value ? " is-recording" : ""}`}
           onDragOver={isRecording.value ? undefined : handleDragOver}
           onDragEnter={isRecording.value ? undefined : handleDragOver}
           onDragLeave={isRecording.value ? undefined : handleDragLeave}
           onDrop={isRecording.value ? undefined : handleDrop}
           onClick={() => !isRecording.value && textAreaRef.current?.focus()}
         >
-          {isRecording.value ? (
-            <div class="mapper-record-visual">
-              <div class="mapper-record-visual__top">
-                <div class="mapper-record-label">Recording</div>
-                <div class="mapper-record-time">{formatTime(recordingTime.value)}</div>
-              </div>
-              <div class="mapper-record-bar">
-                <div
-                  style={{
-                    width: `${(recordingTime.value / MAX_RECORDING_TIME) * 100}%`,
-                    background: showTimeWarning.value ? '#EF4444' : 'var(--accent-electric)'
-                  }}
-                ></div>
-              </div>
-              {showTimeWarning.value && (
-                <p class="mapper-record-warning">
-                  Auto-stop in {formatTime(timeRemaining.value)} — wrap it up.
-                </p>
-              )}
-              <div class="mapper-record-visualizer">
-                <AudioVisualizer analyser={analyserRef.current} />
-              </div>
-            </div>
-          ) : (
-            <>
-              <textarea
-                ref={textAreaRef}
-                class="mapper-textarea w-full resize-none"
-                rows={6}
-                placeholder="Talk it out, paste a rant, or drop a recording here."
-                value={textInput.value}
-                onInput={(e) => {
-                  textInput.value = (e.target as HTMLTextAreaElement).value;
-                  if (selectedFile.value) {
-                    selectedFile.value = null;
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && hasText.value) {
-                    e.preventDefault();
-                    handleTextSubmit();
-                  }
-                }}
-                onFocus={() => isDragActive.value = false}
-              />
-
-              {selectedFile.value && (
-                <div class="mapper-input-hint" aria-hidden="true">
-                  <div class="mapper-file-chip">
-                    <span>{selectedFile.value.name}</span>
-                    <button
-                      type="button"
-                      aria-label="Remove file"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        clearSelectedFile();
-                      }}
-                    >
-                      ×
-                    </button>
+          {isRecording.value
+            ? (
+              <div class="mapper-record-visual">
+                <div class="mapper-record-visual__top">
+                  <div class="mapper-record-label">Recording</div>
+                  <div class="mapper-record-time">
+                    {formatTime(recordingTime.value)}
                   </div>
                 </div>
-              )}
-              <button
-                type="button"
-                class="mapper-clip-btn"
-                aria-label="Browse file"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  fileInputRef.current?.click();
-                }}
-              >
-                <i class="fa fa-paperclip" aria-hidden="true"></i>
-              </button>
-            </>
-          )}
+                <div class="mapper-record-bar">
+                  <div
+                    style={{
+                      width: `${
+                        (recordingTime.value / MAX_RECORDING_TIME) * 100
+                      }%`,
+                      background: showTimeWarning.value
+                        ? "#EF4444"
+                        : "var(--accent-electric)",
+                    }}
+                  >
+                  </div>
+                </div>
+                {showTimeWarning.value && (
+                  <p class="mapper-record-warning">
+                    Auto-stop in {formatTime(timeRemaining.value)} — wrap it up.
+                  </p>
+                )}
+                <div class="mapper-record-visualizer">
+                  <AudioVisualizer analyser={analyserRef.current} />
+                </div>
+              </div>
+            )
+            : (
+              <>
+                <textarea
+                  ref={textAreaRef}
+                  class="mapper-textarea w-full resize-none"
+                  rows={6}
+                  placeholder="Talk it out, paste a rant, or drop a recording here."
+                  value={textInput.value}
+                  onInput={(e) => {
+                    textInput.value = (e.target as HTMLTextAreaElement).value;
+                    if (selectedFile.value) {
+                      selectedFile.value = null;
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (
+                      (e.ctrlKey || e.metaKey) && e.key === "Enter" &&
+                      hasText.value
+                    ) {
+                      e.preventDefault();
+                      handleTextSubmit();
+                    }
+                  }}
+                  onFocus={() => isDragActive.value = false}
+                />
+
+                {selectedFile.value && (
+                  <div class="mapper-input-hint" aria-hidden="true">
+                    <div class="mapper-file-chip">
+                      <span>{selectedFile.value.name}</span>
+                      <button
+                        type="button"
+                        aria-label="Remove file"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          clearSelectedFile();
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  class="mapper-clip-btn"
+                  aria-label="Browse file"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                >
+                  <i class="fa fa-paperclip" aria-hidden="true"></i>
+                </button>
+              </>
+            )}
         </div>
 
         <div class="mapper-capture-actions">
@@ -411,7 +479,8 @@ export default function UploadIsland() {
           >
             {primaryLabel.value}
           </button>
-          {lastUploadName.value && !selectedFile.value && !isRecording.value && !hasText.value && (
+          {lastUploadName.value && !selectedFile.value && !isRecording.value &&
+            !hasText.value && (
             <span class="mapper-block-meta">Last: {lastUploadName.value}</span>
           )}
         </div>
@@ -422,7 +491,7 @@ export default function UploadIsland() {
         accept="audio/*"
         ref={fileInputRef}
         onChange={handleAudioUpload}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
 
       {isProcessing.value && <LoadingModal isOpen={isProcessing.value} />}

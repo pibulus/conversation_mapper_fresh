@@ -5,6 +5,7 @@
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $api_append from "./routes/api/append.ts";
+import * as $api_auth from "./routes/api/auth.ts";
 import * as $api_gemini from "./routes/api/gemini.ts";
 import * as $api_joke from "./routes/api/joke.ts";
 import * as $api_process from "./routes/api/process.ts";
@@ -33,6 +34,7 @@ const manifest = {
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
     "./routes/api/append.ts": $api_append,
+    "./routes/api/auth.ts": $api_auth,
     "./routes/api/gemini.ts": $api_gemini,
     "./routes/api/joke.ts": $api_joke,
     "./routes/api/process.ts": $api_process,

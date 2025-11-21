@@ -5,13 +5,14 @@
  * Framework-agnostic, reusable across any implementation
  */
 
-import type { ActionItem, NodeInput } from '../types/index.ts';
+import type { ActionItem, NodeInput } from "../types/index.ts";
 
 // ===================================================================
 // TRANSCRIPTION
 // ===================================================================
 
-export const TRANSCRIPTION_PROMPT = `Transcribe this audio file accurately and completely,
+export const TRANSCRIPTION_PROMPT =
+  `Transcribe this audio file accurately and completely,
 removing any redundant 'ums,' 'likes, 'uhs', and similar filler words.
 Return only the cleaned-up transcription, with no additional text.
 
@@ -36,41 +37,45 @@ Return only a JSON array like this:
 ]`;
 
 export const buildActionItemsPrompt = (
-	input: string | Blob,
-	speakers: string[] = [],
-	existingActionItems: ActionItem[] = []
+  input: string | unknown,
+  speakers: string[] = [],
+  existingActionItems: ActionItem[] = [],
 ): string => {
-	// Build existing items context to avoid duplicates
-	const existingItemsContext = existingActionItems.length > 0
-		? `\n\nEXISTING ACTION ITEMS (do not duplicate these):\n${existingActionItems.map(item => `- ${item.description}`).join('\n')}\n\nIMPORTANT: Only extract NEW action items that are NOT already in the existing list above. If a new item is semantically the same as an existing one (even if worded differently), DO NOT include it.`
-		: '';
+  // Build existing items context to avoid duplicates
+  const existingItemsContext = existingActionItems.length > 0
+    ? `\n\nEXISTING ACTION ITEMS (do not duplicate these):\n${
+      existingActionItems.map((item) => `- ${item.description}`).join("\n")
+    }\n\nIMPORTANT: Only extract NEW action items that are NOT already in the existing list above. If a new item is semantically the same as an existing one (even if worded differently), DO NOT include it.`
+    : "";
 
-	if (input instanceof Blob) {
-		return `Listen to this audio and ${ACTION_ITEMS_BASE_PROMPT}${existingItemsContext}`;
-	}
+  if (typeof input !== "string") {
+    return `Listen to this audio and ${ACTION_ITEMS_BASE_PROMPT}${existingItemsContext}`;
+  }
 
-	const speakerPrompt = speakers && speakers.length
-		? `\nAvailable speakers for assignment: ${speakers.join(', ')}`
-		: '';
+  const speakerPrompt = speakers && speakers.length
+    ? `\nAvailable speakers for assignment: ${speakers.join(", ")}`
+    : "";
 
-	return `Analyze this text and ${ACTION_ITEMS_BASE_PROMPT}${speakerPrompt}${existingItemsContext}\n\nText: ${input}`;
+  return `Analyze this text and ${ACTION_ITEMS_BASE_PROMPT}${speakerPrompt}${existingItemsContext}\n\nText: ${input}`;
 };
 
 // ===================================================================
 // AI SELF-CHECKOFF (The Magic!)
 // ===================================================================
 
-export const buildActionItemStatusPrompt = (existingActionItems: ActionItem[]): string => {
-	const actionItemsJSON = JSON.stringify(
-		existingActionItems.map((item) => ({
-			id: item.id,
-			description: item.description,
-			assignee: item.assignee,
-			status: item.status
-		}))
-	);
+export const buildActionItemStatusPrompt = (
+  existingActionItems: ActionItem[],
+): string => {
+  const actionItemsJSON = JSON.stringify(
+    existingActionItems.map((item) => ({
+      id: item.id,
+      description: item.description,
+      assignee: item.assignee,
+      status: item.status,
+    })),
+  );
 
-	return `Based on the following audio, determine if any of these action items have been completed or need to be uncompleted.
+  return `Based on the following audio, determine if any of these action items have been completed or need to be uncompleted.
 
 Existing Action Items:
 ${actionItemsJSON}
@@ -94,7 +99,7 @@ If no action items need to be updated, return an empty array: []
 // ===================================================================
 
 export const buildTitlePrompt = (transcript: string): string => {
-	return `Generate a concise and descriptive title (3-4 words maximum) for this conversation transcript.
+  return `Generate a concise and descriptive title (3-4 words maximum) for this conversation transcript.
 Return only the title text, no quotes or additional text.
 
 TRANSCRIPT: ${transcript}`;
@@ -104,13 +109,20 @@ TRANSCRIPT: ${transcript}`;
 // TOPIC/NODE EXTRACTION (Conversation Graph)
 // ===================================================================
 
-export const buildTopicExtractionPrompt = (text: string, existingNodes: NodeInput[] = []): string => {
-	// Build existing nodes context to reuse them
-	const existingNodesContext = existingNodes.length > 0
-		? `\n\nEXISTING TOPICS (reuse these if applicable):\n${existingNodes.map(node => `- ID: "${node.id}" | ${node.emoji} ${node.label}`).join('\n')}\n\nIMPORTANT: If you identify a topic that is the same as or very similar to an existing topic above, REUSE the existing node ID instead of creating a new one. Only create NEW node IDs for genuinely new topics that don't match any existing ones.`
-		: '';
+export const buildTopicExtractionPrompt = (
+  text: string,
+  existingNodes: NodeInput[] = [],
+): string => {
+  // Build existing nodes context to reuse them
+  const existingNodesContext = existingNodes.length > 0
+    ? `\n\nEXISTING TOPICS (reuse these if applicable):\n${
+      existingNodes.map((node) =>
+        `- ID: "${node.id}" | ${node.emoji} ${node.label}`
+      ).join("\n")
+    }\n\nIMPORTANT: If you identify a topic that is the same as or very similar to an existing topic above, REUSE the existing node ID instead of creating a new one. Only create NEW node IDs for genuinely new topics that don't match any existing ones.`
+    : "";
 
-	return `Analyze the following conversation and extract the main topics and their relationships.
+  return `Analyze the following conversation and extract the main topics and their relationships.
 I want a you to break down the conversation into the topics covered and how they are related.
 I'm not interested in a chronoliogical order, but rather the relationships of the topics.
 
@@ -160,7 +172,7 @@ CONVERSATION: ${text}`;
 // ===================================================================
 
 export const buildSummaryPrompt = (text: string): string => {
-	return `Summarize the following conversation text. Focus on the main points and key takeaways. Return the summary in a concise and clear format.
+  return `Summarize the following conversation text. Focus on the main points and key takeaways. Return the summary in a concise and clear format.
 
 CONVERSATION TEXT:
 ${text}`;
@@ -170,8 +182,11 @@ ${text}`;
 // EXPORT TRANSFORMATION
 // ===================================================================
 
-export const buildMarkdownTransformPrompt = (formatPrompt: string, text: string): string => {
-	return `Transform the following conversation text according to these instructions:
+export const buildMarkdownTransformPrompt = (
+  formatPrompt: string,
+  text: string,
+): string => {
+  return `Transform the following conversation text according to these instructions:
 
 ${formatPrompt}
 

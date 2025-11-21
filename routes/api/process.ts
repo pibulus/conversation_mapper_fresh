@@ -6,27 +6,24 @@
  */
 
 import { Handlers } from "$fresh/server.ts";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { createGeminiService } from "@core/ai/gemini.ts";
-import { processText, processAudio } from "@core/orchestration/conversation-flow.ts";
+import {
+  processAudio,
+  processText,
+} from "@core/orchestration/conversation-flow.ts";
+import { guardRequest } from "@services/requestGuard.ts";
+import { getGeminiService } from "@services/ai.ts";
+import { deleteUploadedFile, uploadAudioFile } from "@services/audio.ts";
 
 export const handler: Handlers = {
   async POST(req) {
     try {
-      const contentType = req.headers.get("content-type") || "";
-
-      // Initialize Gemini AI
-      const apiKey = Deno.env.get("GEMINI_API_KEY");
-      if (!apiKey) {
-        return new Response(
-          JSON.stringify({ error: "Missing GEMINI_API_KEY environment variable" }),
-          { status: 500, headers: { "Content-Type": "application/json" } }
-        );
+      const guardResponse = guardRequest(req);
+      if (guardResponse) {
+        return guardResponse;
       }
 
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      const aiService = createGeminiService(model);
+      const contentType = req.headers.get("content-type") || "";
+      const aiService = getGeminiService();
 
       const conversationId = crypto.randomUUID();
 
@@ -41,7 +38,7 @@ export const handler: Handlers = {
         if (!audioFile) {
           return new Response(
             JSON.stringify({ error: "No audio file provided" }),
-            { status: 400, headers: { "Content-Type": "application/json" } }
+            { status: 400, headers: { "Content-Type": "application/json" } },
           );
         }
 
@@ -49,19 +46,25 @@ export const handler: Handlers = {
         const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
         if (audioFile.size > MAX_FILE_SIZE) {
           return new Response(
-            JSON.stringify({ error: `File too large. Maximum size is 50MB (received ${(audioFile.size / 1024 / 1024).toFixed(1)}MB)` }),
-            { status: 413, headers: { "Content-Type": "application/json" } }
+            JSON.stringify({
+              error: `File too large. Maximum size is 50MB (received ${
+                (audioFile.size / 1024 / 1024).toFixed(1)
+              }MB)`,
+            }),
+            { status: 413, headers: { "Content-Type": "application/json" } },
           );
         }
 
-        // Convert File to Blob for nervous system
-        const audioBlob = new Blob([await audioFile.arrayBuffer()], { type: audioFile.type });
-
-        // Process through nervous system
-        const result = await processAudio(aiService, audioBlob, conversationId);
+        const { part: audioPart, fileName } = await uploadAudioFile(audioFile);
+        let result;
+        try {
+          result = await processAudio(aiService, audioPart, conversationId);
+        } finally {
+          await deleteUploadedFile(fileName);
+        }
 
         return new Response(JSON.stringify(result), {
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json" },
         });
       }
 
@@ -75,25 +78,29 @@ export const handler: Handlers = {
       if (!text) {
         return new Response(
           JSON.stringify({ error: "No text provided" }),
-          { status: 400, headers: { "Content-Type": "application/json" } }
+          { status: 400, headers: { "Content-Type": "application/json" } },
         );
       }
 
       // Process through nervous system
-      const result = await processText(aiService, text, conversationId, speakers);
+      const result = await processText(
+        aiService,
+        text,
+        conversationId,
+        speakers,
+      );
 
       return new Response(JSON.stringify(result), {
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       });
-
     } catch (error) {
       console.error("❌ Processing error:", error);
       return new Response(
         JSON.stringify({
-          error: error instanceof Error ? error.message : "Unknown error"
+          error: error instanceof Error ? error.message : "Unknown error",
         }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        { status: 500, headers: { "Content-Type": "application/json" } },
       );
     }
-  }
+  },
 };

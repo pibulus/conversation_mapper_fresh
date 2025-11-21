@@ -1,3 +1,6 @@
+import { ensureApiSession } from "./apiAuth.ts";
+import { enqueueApiRequest } from "./requestQueue.ts";
+
 /**
  * Gemini AI Service
  *
@@ -11,31 +14,33 @@ export const geminiService = {
    */
   async generateMarkdown(prompt: string, text: string): Promise<string> {
     try {
-      console.log('📝 Generating markdown with Gemini');
+      console.log("📝 Generating markdown with Gemini");
 
-      const response = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt, text }),
+      await ensureApiSession();
+      const data = await enqueueApiRequest(async ({ signal }) => {
+        const response = await fetch("/api/gemini", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt, text }),
+          signal,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Failed to generate markdown");
+        }
+
+        return response.json();
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to generate markdown');
-      }
-
-      const data = await response.json();
-      console.log('✅ Markdown generation complete');
+      console.log("✅ Markdown generation complete");
       return data.markdown;
     } catch (error) {
-      console.error('❌ Error generating markdown:', error);
+      console.error("❌ Error generating markdown:", error);
       throw new Error(
         error instanceof Error
           ? error.message
-          : 'Failed to generate markdown with Gemini'
+          : "Failed to generate markdown with Gemini",
       );
     }
-  }
+  },
 };

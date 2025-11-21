@@ -38,9 +38,10 @@
     "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.5.1",
     "$std/": "https://deno.land/std@0.216.0/",
     "tailwindcss": "npm:tailwindcss@^3.4.0",
-    "@google/generative-ai": "npm:@google/generative-ai@^0.21.0",
+    "@google/generative-ai": "npm:@google/generative-ai@0.21.0",
     "d3": "npm:d3@^7.9.0",
-    "@core/": "./core/"
+    "@core/": "./core/",
+    "@services/": "./services/"
   },
   "compilerOptions": {
     "jsx": "react-jsx",
