@@ -6,7 +6,7 @@
  */
 
 import { FreshContext } from "$fresh/server.ts";
-import { GoogleGenerativeAI } from "npm:@google/generative-ai@0.21.0";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const handler = async (req: Request, _ctx: FreshContext) => {
   // Only allow POST
