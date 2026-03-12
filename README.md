@@ -125,7 +125,7 @@ deno task check      # Run linting and type checking
 ### Tech Stack
 
 - **Framework**: [Fresh](https://fresh.deno.dev/) (Deno + Preact)
-- **AI**: [Google Gemini](https://ai.google.dev/) (gemini-2.0-flash-exp)
+- **AI**: [Google Gemini](https://ai.google.dev/) (gemini-2.5-flash)
 - **Visualization**: [D3.js](https://d3js.org/) (force-directed graphs)
 - **State**: [Preact Signals](https://preactjs.com/guide/v10/signals/)
 - **Storage**: LocalStorage + IndexedDB
