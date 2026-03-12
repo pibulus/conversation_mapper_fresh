@@ -22,6 +22,21 @@ interface ActionItemsCardProps {
   onUpdateItems: (items: ActionItem[]) => void;
 }
 
+// Static — no need to recreate on every render
+const COMMON_ASSIGNEES = ['Me', 'Team Lead', 'Developer', 'Designer', 'QA', 'Product Manager', 'Client'];
+
+/**
+ * Parse a YYYY-MM-DD date string at local midnight to avoid UTC offset shifting
+ * the displayed day (e.g. "2025-12-01" showing as "Nov 30" in UTC-5 timezones).
+ */
+function formatFriendlyDate(dateString: string): string {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(year, month - 1, day); // local midnight, no TZ shift
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
+}
+
 export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionItemsCardProps) {
   // State
   const sortMode = useSignal<'manual' | 'assignee' | 'date'>('manual');
@@ -36,22 +51,24 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
   const searchQuery = useSignal('');
   const showAssigneeDropdown = useSignal(false);
   const activeAssigneeDropdown = useSignal<string | null>(null);
+  const confirmDeleteItemId = useSignal<string | null>(null);
 
   // Drag-and-drop state
   const draggedItemId = useSignal<string | null>(null);
   const dragOverItemId = useSignal<string | null>(null);
 
-  // Refs for cleanup
+  // Refs
   const dropdownTimeoutRef = useRef<number | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const dropdownSelectedIndex = useSignal(0);
   const selectedItemIndex = useSignal<number>(-1);
   const listContainerRef = useRef<HTMLDivElement>(null);
 
-  // Common assignee names (can be customized)
-  const commonAssignees = ['Me', 'Team Lead', 'Developer', 'Designer', 'QA', 'Product Manager', 'Client'];
+  // Arrow key handler ref — always points to the current closure so the effect
+  // only registers once but never goes stale.
+  const arrowKeyHandlerRef = useRef<(e: KeyboardEvent) => void>(() => {});
 
-  // Cleanup timeouts on unmount
+  // Cleanup dropdown timeout on unmount
   useEffect(() => {
     return () => {
       if (dropdownTimeoutRef.current !== null) {
@@ -60,7 +77,8 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     };
   }, []);
 
-  // Click outside to close active dropdown
+  // Click outside to close item-level assignee dropdown.
+  // Store the timeout so we can cancel it on cleanup and avoid a listener leak.
   useEffect(() => {
     if (activeAssigneeDropdown.value === null) return;
 
@@ -71,16 +89,17 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
       }
     };
 
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       document.addEventListener('mousedown', handleClickOutside);
     }, 10);
 
     return () => {
+      clearTimeout(timeoutId);
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [activeAssigneeDropdown.value]);
 
-  // Keyboard navigation: ESC to close modal
+  // ESC closes the add modal
   useEffect(() => {
     if (!showAddModal.value) return;
 
@@ -97,7 +116,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     return () => window.removeEventListener('keydown', handleEscape);
   }, [showAddModal.value]);
 
-  // Focus trap: Keep Tab within modal
+  // Focus trap inside add modal
   useEffect(() => {
     if (!showAddModal.value || !modalRef.current) return;
 
@@ -111,7 +130,6 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
 
     function handleTab(e: KeyboardEvent) {
       if (e.key !== 'Tab') return;
-
       if (e.shiftKey) {
         if (document.activeElement === firstElement) {
           e.preventDefault();
@@ -127,15 +145,13 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
 
     modal.addEventListener('keydown', handleTab);
     firstElement?.focus();
-
     return () => modal.removeEventListener('keydown', handleTab);
   }, [showAddModal.value]);
 
-  // Filter and sort action items (memoized for performance)
+  // Filter and sort action items
   const sortedActionItems = useComputed(() => {
     let filteredItems = [...actionItems];
 
-    // Apply search filter
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase();
       filteredItems = filteredItems.filter(item =>
@@ -150,61 +166,67 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
 
     const sortGroup = (items: typeof actionItems) => {
       if (sortMode.value === 'assignee') {
-        return items.sort((a, b) => {
+        return [...items].sort((a, b) => {
           if (!a.assignee && !b.assignee) return 0;
           if (!a.assignee) return 1;
           if (!b.assignee) return -1;
           return a.assignee.localeCompare(b.assignee);
         });
       } else if (sortMode.value === 'date') {
-        return items.sort((a, b) => {
+        return [...items].sort((a, b) => {
           if (!a.due_date && !b.due_date) return 0;
           if (!a.due_date) return 1;
           if (!b.due_date) return -1;
           return a.due_date.localeCompare(b.due_date);
         });
       }
-      return items; // manual order
+      return items;
     };
 
     return [...sortGroup(pending), ...sortGroup(completed)];
   });
 
-  // Arrow key navigation in action items list
+  // Reset keyboard selection when list length changes
   useEffect(() => {
-    if (!listContainerRef.current || sortedActionItems.value.length === 0) return;
-
-    function handleArrowKeys(e: KeyboardEvent) {
-      // Only handle if we're not in an input/textarea
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
-
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        selectedItemIndex.value = Math.min(
-          selectedItemIndex.value + 1,
-          sortedActionItems.value.length - 1
-        );
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        selectedItemIndex.value = Math.max(
-          selectedItemIndex.value - 1,
-          0
-        );
-      } else if (e.key === 'Enter' && selectedItemIndex.value >= 0) {
-        e.preventDefault();
-        const item = sortedActionItems.value[selectedItemIndex.value];
-        toggleActionItem(item.id);
-      }
-    }
-
-    const container = listContainerRef.current;
-    container.addEventListener('keydown', handleArrowKeys);
-
-    return () => container.removeEventListener('keydown', handleArrowKeys);
+    selectedItemIndex.value = -1;
   }, [sortedActionItems.value.length]);
 
-  // Handlers
+  // Keep the arrow key handler ref current on every render — this avoids the
+  // stale closure problem without re-registering the event listener.
+  arrowKeyHandlerRef.current = (e: KeyboardEvent) => {
+    if (sortedActionItems.value.length === 0) return;
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedItemIndex.value = Math.min(
+        selectedItemIndex.value + 1,
+        sortedActionItems.value.length - 1
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedItemIndex.value = Math.max(selectedItemIndex.value - 1, 0);
+    } else if (e.key === 'Enter' && selectedItemIndex.value >= 0) {
+      e.preventDefault();
+      const item = sortedActionItems.value[selectedItemIndex.value];
+      if (item) toggleActionItem(item.id);
+    }
+  };
+
+  // Register the arrow key listener once — the ref keeps the handler current
+  useEffect(() => {
+    const container = listContainerRef.current;
+    if (!container) return;
+    const handler = (e: KeyboardEvent) => arrowKeyHandlerRef.current(e);
+    container.addEventListener('keydown', handler);
+    return () => container.removeEventListener('keydown', handler);
+  }, []);
+
+  // ===================================================================
+  // HANDLERS
+  // ===================================================================
+
   function toggleActionItem(itemId: string) {
     const updatedItems = actionItems.map(item =>
       item.id === itemId
@@ -214,7 +236,16 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     onUpdateItems(updatedItems);
   }
 
-  function startEditing(itemId: string, currentDescription: string, currentAssignee: string | null, currentDueDate: string | null) {
+  function startEditing(
+    itemId: string,
+    currentDescription: string,
+    currentAssignee: string | null,
+    currentDueDate: string | null
+  ) {
+    // Discard any in-progress edit before starting a new one
+    if (editingItemId.value && editingItemId.value !== itemId) {
+      cancelEdit();
+    }
     editingItemId.value = itemId;
     editingDescription.value = currentDescription;
     editingAssignee.value = currentAssignee || '';
@@ -223,13 +254,14 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
 
   function saveEdit() {
     if (!editingItemId.value) return;
+    if (!editingDescription.value.trim()) return; // don't save empty descriptions
 
     const updatedItems = actionItems.map(item =>
       item.id === editingItemId.value
         ? {
             ...item,
-            description: editingDescription.value,
-            assignee: editingAssignee.value || null,
+            description: editingDescription.value.trim(),
+            assignee: editingAssignee.value.trim() || null,
             due_date: editingDueDate.value || null,
             updated_at: new Date().toISOString()
           }
@@ -237,10 +269,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     );
 
     onUpdateItems(updatedItems);
-    editingItemId.value = null;
-    editingDescription.value = '';
-    editingAssignee.value = '';
-    editingDueDate.value = '';
+    cancelEdit();
   }
 
   function cancelEdit() {
@@ -268,16 +297,14 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     onUpdateItems(updatedItems);
   }
 
-  function deleteItem(itemId: string) {
-    if (!confirm('Delete this action item?')) return;
-    onUpdateItems(actionItems.filter(item => item.id !== itemId));
+  function requestDeleteItem(itemId: string) {
+    confirmDeleteItemId.value = itemId;
   }
 
-  function formatFriendlyDate(dateString: string): string {
-    const date = new Date(dateString);
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
+  function confirmDelete() {
+    if (!confirmDeleteItemId.value) return;
+    onUpdateItems(actionItems.filter(item => item.id !== confirmDeleteItemId.value));
+    confirmDeleteItemId.value = null;
   }
 
   function addNewItem() {
@@ -286,8 +313,8 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     const newItem: ActionItem = {
       id: crypto.randomUUID(),
       conversation_id: actionItems[0]?.conversation_id || '',
-      description: newItemDescription.value,
-      assignee: newItemAssignee.value || null,
+      description: newItemDescription.value.trim(),
+      assignee: newItemAssignee.value.trim() || null,
       due_date: newItemDueDate.value || null,
       status: 'pending',
       created_at: new Date().toISOString(),
@@ -295,8 +322,6 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     };
 
     onUpdateItems([...actionItems, newItem]);
-
-    // Reset form
     newItemDescription.value = '';
     newItemAssignee.value = '';
     newItemDueDate.value = '';
@@ -309,12 +334,13 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
     sortMode.value = modes[(currentIndex + 1) % modes.length];
   }
 
-  // Drag-and-drop handlers
+  // ===================================================================
+  // DRAG AND DROP
+  // ===================================================================
+
   function handleDragStart(e: DragEvent, itemId: string) {
     draggedItemId.value = itemId;
-    if (e.dataTransfer) {
-      e.dataTransfer.effectAllowed = 'move';
-    }
+    if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
   }
 
   function handleDragEnd() {
@@ -324,14 +350,17 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
 
   function handleDragOver(e: DragEvent, itemId: string) {
     e.preventDefault();
-    if (e.dataTransfer) {
-      e.dataTransfer.dropEffect = 'move';
-    }
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
     dragOverItemId.value = itemId;
   }
 
-  function handleDragLeave() {
-    dragOverItemId.value = null;
+  function handleDragLeave(e: DragEvent) {
+    // Only clear when truly leaving the item div, not when entering a child element.
+    // Without this check, crossing over the grip icon / checkbox causes a flicker.
+    const relatedTarget = e.relatedTarget as HTMLElement | null;
+    if (!relatedTarget || !(e.currentTarget as HTMLElement).contains(relatedTarget)) {
+      dragOverItemId.value = null;
+    }
   }
 
   function handleDrop(e: DragEvent, dropTargetId: string) {
@@ -345,27 +374,27 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
       return;
     }
 
-    // Only reorder if in manual sort mode and both items are pending
     const draggedItem = actionItems.find(item => item.id === draggedId);
     const dropTargetItem = actionItems.find(item => item.id === dropTargetId);
 
     if (!draggedItem || !dropTargetItem) return;
     if (draggedItem.status === 'completed' || dropTargetItem.status === 'completed') return;
 
-    // Get indices
     const draggedIndex = actionItems.indexOf(draggedItem);
     const dropTargetIndex = actionItems.indexOf(dropTargetItem);
 
-    // Reorder array
     const newItems = [...actionItems];
     newItems.splice(draggedIndex, 1);
     newItems.splice(dropTargetIndex, 0, draggedItem);
 
     onUpdateItems(newItems);
-
     draggedItemId.value = null;
     dragOverItemId.value = null;
   }
+
+  // ===================================================================
+  // RENDER
+  // ===================================================================
 
   return (
     <>
@@ -377,27 +406,28 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
               <button
                 onClick={cycleSortMode}
                 class="bg-white px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"
-                style={{
-                  fontSize: 'var(--tiny-size)',
-                  transition: 'var(--transition-fast)'
-                }}
-                title={sortMode.value === 'manual' ? 'Sort: Manual (drag to reorder)' : sortMode.value === 'assignee' ? 'Sort: By assignee' : 'Sort: By due date'}
+                style={{ fontSize: 'var(--tiny-size)', transition: 'var(--transition-fast)' }}
+                title={
+                  sortMode.value === 'manual'
+                    ? 'Sort: Manual (drag to reorder)'
+                    : sortMode.value === 'assignee'
+                    ? 'Sort: By assignee'
+                    : 'Sort: By due date'
+                }
               >
                 {sortMode.value === 'manual' ? '🤚' : sortMode.value === 'assignee' ? '👤' : '📅'}
               </button>
               <button
                 onClick={() => showAddModal.value = true}
                 class="bg-white px-2 py-1 rounded hover:bg-gray-100 cursor-pointer"
-                style={{
-                  fontSize: 'var(--tiny-size)',
-                  transition: 'var(--transition-fast)'
-                }}
+                style={{ fontSize: 'var(--tiny-size)', transition: 'var(--transition-fast)' }}
                 title="Add new item"
               >
                 ➕
               </button>
             </div>
           </div>
+
           {/* Search bar */}
           <div style={{ padding: '0.75rem 1rem 0.25rem' }}>
             <input
@@ -413,11 +443,11 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
               }}
             />
             {sortMode.value === 'manual' && (
-              <p class="text-xs text-gray-500 mt-1 italic">
-                Drag to reorder
-              </p>
+              <p class="text-xs text-gray-500 mt-1 italic">Drag to reorder</p>
             )}
           </div>
+
+          {/* List */}
           <div
             ref={listContainerRef}
             tabIndex={0}
@@ -444,12 +474,12 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                       onDragStart={(e) => canDrag && handleDragStart(e, item.id)}
                       onDragEnd={handleDragEnd}
                       onDragOver={(e) => canDrag && handleDragOver(e, item.id)}
-                      onDragLeave={handleDragLeave}
+                      onDragLeave={(e) => canDrag && handleDragLeave(e)}
                       onDrop={(e) => canDrag && handleDrop(e, item.id)}
                       onClick={() => selectedItemIndex.value = index}
                       class="relative p-4 rounded-lg bg-white hover:bg-gray-50 transition-all"
                       style={{
-                        border: `2px solid ${isSelected ? 'var(--color-accent)' : isDragOver ? 'var(--color-accent)' : 'var(--color-border)'}`,
+                        border: `2px solid ${isSelected || isDragOver ? 'var(--color-accent)' : 'var(--color-border)'}`,
                         boxShadow: item.status === 'completed' ? 'none' : '2px 2px 0 rgba(0,0,0,0.1)',
                         opacity: isDragging ? '0.5' : '1',
                         cursor: canDrag ? 'move' : 'default',
@@ -457,7 +487,6 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                         outlineOffset: '2px'
                       }}
                     >
-                      {/* Grid layout with drag handle, checkbox and content */}
                       <div class="grid grid-cols-[auto_auto_1fr] gap-3 items-start">
                         {/* Drag Handle */}
                         <div class="flex items-center pt-1">
@@ -465,7 +494,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                             <i
                               class="fa fa-grip-vertical text-gray-400 hover:text-gray-600 cursor-move"
                               title="Drag to reorder"
-                              style={{ fontSize: '16px' }}
+                              style={{ fontSize: 'var(--heading-size)' }}
                             ></i>
                           ) : (
                             <div style={{ width: '16px' }}></div>
@@ -483,134 +512,145 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                           />
                         </div>
 
-                      {/* Content */}
-                      <div class="flex flex-col gap-3">
-                        {/* Description */}
-                        {editingItemId.value === item.id ? (
-                          <div class="space-y-2">
-                            <textarea
-                              value={editingDescription.value}
-                              onInput={(e) => editingDescription.value = (e.target as HTMLTextAreaElement).value}
-                              class="w-full rounded px-2 py-1 text-sm"
-                              style={{ border: '2px solid var(--color-border)', minHeight: '60px' }}
-                              autoFocus
-                            />
-                            <div class="flex gap-2">
+                        {/* Content */}
+                        <div class="flex flex-col gap-3">
+                          {/* Description */}
+                          {editingItemId.value === item.id ? (
+                            <div class="space-y-2">
+                              <textarea
+                                value={editingDescription.value}
+                                onInput={(e) => editingDescription.value = (e.target as HTMLTextAreaElement).value}
+                                onKeyDown={(e) => {
+                                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                                    e.preventDefault();
+                                    saveEdit();
+                                  } else if (e.key === 'Escape') {
+                                    e.preventDefault();
+                                    cancelEdit();
+                                  }
+                                }}
+                                class="w-full rounded px-2 py-1 text-sm"
+                                style={{ border: '2px solid var(--color-border)', minHeight: '60px' }}
+                                autoFocus
+                              />
+                              <p class="text-xs text-gray-400 italic">Ctrl+Enter to save · Esc to cancel</p>
+                              <div class="flex gap-2">
+                                <button
+                                  onClick={saveEdit}
+                                  disabled={!editingDescription.value.trim()}
+                                  class="px-3 py-1 rounded text-xs font-bold text-white disabled:opacity-40"
+                                  style={{ background: 'var(--color-accent)' }}
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={cancelEdit}
+                                  class="px-3 py-1 rounded text-xs font-bold"
+                                  style={{ border: '2px solid var(--color-border)' }}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p
+                              class={`leading-relaxed ${item.status === 'completed' ? 'line-through opacity-60' : ''}`}
+                              style={{ fontSize: 'var(--text-size)', color: 'var(--color-text)' }}
+                              onDblClick={() => startEditing(item.id, item.description, item.assignee, item.due_date)}
+                              title="Double-click to edit"
+                            >
+                              {item.description}
+                            </p>
+                          )}
+
+                          {/* Metadata row - assignee & due date */}
+                          <div class="flex items-center gap-3 flex-wrap">
+                            {/* Assignee selector */}
+                            <div class="relative assignee-dropdown-container">
                               <button
-                                onClick={saveEdit}
-                                class="px-3 py-1 rounded text-xs font-bold text-white"
-                                style={{ background: 'var(--color-accent)' }}
-                              >
-                                Save
-                              </button>
-                              <button
-                                onClick={cancelEdit}
-                                class="px-3 py-1 rounded text-xs font-bold"
+                                onClick={() => activeAssigneeDropdown.value = activeAssigneeDropdown.value === item.id ? null : item.id}
+                                class="flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
                                 style={{ border: '2px solid var(--color-border)' }}
                               >
-                                Cancel
+                                <i class="fa fa-user text-xs"></i>
+                                <span style={{ color: item.assignee ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
+                                  {item.assignee || 'None'}
+                                </span>
                               </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <p
-                            class={`leading-relaxed ${item.status === 'completed' ? 'line-through opacity-60' : ''}`}
-                            style={{ fontSize: 'var(--text-size)', color: 'var(--color-text)' }}
-                            onDblClick={() => startEditing(item.id, item.description, item.assignee, item.due_date)}
-                            title="Double-click to edit"
-                          >
-                            {item.description}
-                          </p>
-                        )}
-
-                        {/* Metadata row - assignee & due date */}
-                        <div class="flex items-center gap-3 flex-wrap">
-                          {/* Assignee selector */}
-                          <div class="relative assignee-dropdown-container">
-                            <button
-                              onClick={() => activeAssigneeDropdown.value = activeAssigneeDropdown.value === item.id ? null : item.id}
-                              class="flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
-                              style={{ border: '2px solid var(--color-border)' }}
-                            >
-                              <i class="fa fa-user text-xs"></i>
-                              <span style={{ color: item.assignee ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
-                                {item.assignee || 'None'}
-                              </span>
-                            </button>
-                            {activeAssigneeDropdown.value === item.id && (
-                              <div
-                                class="absolute z-10 mt-1 bg-white rounded shadow-lg"
-                                style={{ border: '2px solid var(--color-border)', minWidth: '150px' }}
-                              >
-                                <button
-                                  onClick={() => {
-                                    updateAssignee(item.id, null);
-                                    activeAssigneeDropdown.value = null;
-                                  }}
-                                  class="w-full text-left px-3 py-2 text-xs hover:bg-purple-50"
-                                  style={{ borderBottom: '1px solid var(--color-border)' }}
+                              {activeAssigneeDropdown.value === item.id && (
+                                <div
+                                  class="absolute z-10 mt-1 bg-white rounded shadow-lg"
+                                  style={{ border: '2px solid var(--color-border)', minWidth: '150px' }}
                                 >
-                                  None
-                                </button>
-                                {commonAssignees.map((assignee) => (
                                   <button
-                                    key={assignee}
                                     onClick={() => {
-                                      updateAssignee(item.id, assignee);
+                                      updateAssignee(item.id, null);
                                       activeAssigneeDropdown.value = null;
                                     }}
                                     class="w-full text-left px-3 py-2 text-xs hover:bg-purple-50"
-                                    style={{
-                                      borderBottom: '1px solid var(--color-border)',
-                                      background: item.assignee === assignee ? 'var(--color-accent)' : 'transparent',
-                                      color: item.assignee === assignee ? 'white' : 'var(--color-text)'
-                                    }}
+                                    style={{ borderBottom: '1px solid var(--color-border)' }}
                                   >
-                                    {assignee}
+                                    None
                                   </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
+                                  {COMMON_ASSIGNEES.map((assignee) => (
+                                    <button
+                                      key={assignee}
+                                      onClick={() => {
+                                        updateAssignee(item.id, assignee);
+                                        activeAssigneeDropdown.value = null;
+                                      }}
+                                      class="w-full text-left px-3 py-2 text-xs hover:bg-purple-50"
+                                      style={{
+                                        borderBottom: '1px solid var(--color-border)',
+                                        background: item.assignee === assignee ? 'var(--color-accent)' : 'transparent',
+                                        color: item.assignee === assignee ? 'white' : 'var(--color-text)'
+                                      }}
+                                    >
+                                      {assignee}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
 
-                          {/* Due date selector */}
-                          <div class="relative">
-                            <input
-                              type="date"
-                              id={`date-${item.id}`}
-                              value={item.due_date || ''}
-                              onChange={(e) => updateDueDate(item.id, (e.target as HTMLInputElement).value || null)}
-                              class="absolute opacity-0 pointer-events-none"
-                            />
-                            <button
-                              onClick={() => {
-                                const input = document.getElementById(`date-${item.id}`) as HTMLInputElement | null;
-                                if (input && 'showPicker' in input) {
-                                  (input as any).showPicker();
-                                }
-                              }}
-                              class="flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
-                              style={{ border: '2px solid var(--color-border)' }}
-                            >
-                              <i class="fa fa-calendar text-xs"></i>
-                              <span style={{ color: item.due_date ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
-                                {item.due_date ? formatFriendlyDate(item.due_date) : 'None'}
-                              </span>
-                            </button>
+                            {/* Due date selector */}
+                            <div class="relative">
+                              <input
+                                type="date"
+                                id={`date-${item.id}`}
+                                value={item.due_date || ''}
+                                onChange={(e) => updateDueDate(item.id, (e.target as HTMLInputElement).value || null)}
+                                class="absolute opacity-0 pointer-events-none"
+                              />
+                              <button
+                                onClick={() => {
+                                  const input = document.getElementById(`date-${item.id}`) as HTMLInputElement | null;
+                                  if (input && 'showPicker' in input) {
+                                    (input as any).showPicker();
+                                  }
+                                }}
+                                class="flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
+                                style={{ border: '2px solid var(--color-border)' }}
+                              >
+                                <i class="fa fa-calendar text-xs"></i>
+                                <span style={{ color: item.due_date ? 'var(--color-text)' : 'var(--color-text-secondary)' }}>
+                                  {item.due_date ? formatFriendlyDate(item.due_date) : 'None'}
+                                </span>
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Delete button */}
-                    <button
-                      onClick={() => deleteItem(item.id)}
-                      class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 hover:text-red-600 transition-colors"
-                      title="Delete"
-                    >
-                      <i class="fa fa-times text-xs"></i>
-                    </button>
-                  </div>
+                      {/* Delete button */}
+                      <button
+                        onClick={() => requestDeleteItem(item.id)}
+                        class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 hover:text-red-600 transition-colors"
+                        title="Delete"
+                      >
+                        <i class="fa fa-times text-xs"></i>
+                      </button>
+                    </div>
                   );
                 })}
               </div>
@@ -619,12 +659,58 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
         </div>
       </div>
 
+      {/* Delete Confirmation Modal */}
+      {confirmDeleteItemId.value && (
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="dashboard-card max-w-sm w-full mx-4" style={{ padding: 'var(--card-padding)' }}>
+            <h3 style={{
+              fontSize: 'var(--heading-size)',
+              fontWeight: 'var(--heading-weight)',
+              color: 'var(--color-text)',
+              marginBottom: '0.5rem'
+            }}>Delete this item?</h3>
+            <p style={{
+              fontSize: 'var(--small-size)',
+              color: 'var(--color-text-secondary)',
+              marginBottom: '1.25rem',
+              lineHeight: 'var(--line-height)'
+            }}>
+              {actionItems.find(i => i.id === confirmDeleteItemId.value)?.description}
+            </p>
+            <div class="flex gap-2">
+              <button
+                onClick={confirmDelete}
+                class="flex-1 py-2 px-4 rounded font-bold text-white"
+                style={{
+                  background: 'var(--color-danger)',
+                  border: 'none',
+                  fontSize: 'var(--small-size)',
+                  transition: 'var(--transition-fast)'
+                }}
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => confirmDeleteItemId.value = null}
+                class="flex-1 py-2 px-4 rounded"
+                style={{
+                  border: '2px solid var(--color-border)',
+                  fontSize: 'var(--small-size)',
+                  transition: 'var(--transition-fast)',
+                  color: 'var(--color-text)'
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add New Item Modal */}
       {showAddModal.value && (
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div ref={modalRef} class="dashboard-card max-w-md w-full mx-4" style={{
-            padding: 'var(--card-padding)'
-          }}>
+          <div ref={modalRef} class="dashboard-card max-w-md w-full mx-4" style={{ padding: 'var(--card-padding)' }}>
             <h3 style={{
               fontSize: 'calc(var(--heading-size) * 1.2)',
               fontWeight: 'var(--heading-weight)',
@@ -634,11 +720,9 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
 
             <div class="space-y-3">
               <div>
-                <label style={{
-                  fontSize: 'var(--text-size)',
-                  fontWeight: '600',
-                  color: 'var(--color-text)'
-                }}>Description *</label>
+                <label style={{ fontSize: 'var(--text-size)', fontWeight: '600', color: 'var(--color-text)' }}>
+                  Description *
+                </label>
                 <input
                   type="text"
                   value={newItemDescription.value}
@@ -651,20 +735,15 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                   }}
                   placeholder="What's the move?"
                   class="w-full rounded px-3 py-2"
-                  style={{
-                    fontSize: 'var(--text-size)',
-                    border: '2px solid var(--color-border)'
-                  }}
+                  style={{ fontSize: 'var(--text-size)', border: '2px solid var(--color-border)' }}
                   autoFocus
                 />
               </div>
 
               <div class="relative">
-                <label style={{
-                  fontSize: 'var(--text-size)',
-                  fontWeight: '600',
-                  color: 'var(--color-text)'
-                }}>Assignee</label>
+                <label style={{ fontSize: 'var(--text-size)', fontWeight: '600', color: 'var(--color-text)' }}>
+                  Assignee
+                </label>
                 <div class="relative">
                   <input
                     type="text"
@@ -675,9 +754,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                       dropdownSelectedIndex.value = 0;
                     }}
                     onBlur={() => {
-                      if (dropdownTimeoutRef.current !== null) {
-                        clearTimeout(dropdownTimeoutRef.current);
-                      }
+                      if (dropdownTimeoutRef.current !== null) clearTimeout(dropdownTimeoutRef.current);
                       dropdownTimeoutRef.current = setTimeout(() => {
                         showAssigneeDropdown.value = false;
                         dropdownTimeoutRef.current = null;
@@ -685,31 +762,21 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                     }}
                     onKeyDown={(e) => {
                       if (!showAssigneeDropdown.value) return;
-
                       if (e.key === 'ArrowDown') {
                         e.preventDefault();
-                        dropdownSelectedIndex.value = Math.min(
-                          dropdownSelectedIndex.value + 1,
-                          commonAssignees.length - 1
-                        );
+                        dropdownSelectedIndex.value = Math.min(dropdownSelectedIndex.value + 1, COMMON_ASSIGNEES.length - 1);
                       } else if (e.key === 'ArrowUp') {
                         e.preventDefault();
-                        dropdownSelectedIndex.value = Math.max(
-                          dropdownSelectedIndex.value - 1,
-                          0
-                        );
-                      } else if (e.key === 'Enter' && showAssigneeDropdown.value) {
+                        dropdownSelectedIndex.value = Math.max(dropdownSelectedIndex.value - 1, 0);
+                      } else if (e.key === 'Enter') {
                         e.preventDefault();
-                        newItemAssignee.value = commonAssignees[dropdownSelectedIndex.value];
+                        newItemAssignee.value = COMMON_ASSIGNEES[dropdownSelectedIndex.value];
                         showAssigneeDropdown.value = false;
                       }
                     }}
                     placeholder="Who's on it?"
                     class="w-full rounded px-3 py-2 pr-8"
-                    style={{
-                      fontSize: 'var(--text-size)',
-                      border: '2px solid var(--color-border)'
-                    }}
+                    style={{ fontSize: 'var(--text-size)', border: '2px solid var(--color-border)' }}
                   />
                   <button
                     type="button"
@@ -721,7 +788,7 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
                 </div>
                 {showAssigneeDropdown.value && (
                   <div class="absolute z-10 w-full mt-1 bg-white border-2 border-gray-300 rounded shadow-lg max-h-40 overflow-y-auto">
-                    {commonAssignees.map((assignee, index) => (
+                    {COMMON_ASSIGNEES.map((assignee, index) => (
                       <button
                         type="button"
                         key={assignee}
@@ -743,20 +810,15 @@ export default function ActionItemsCard({ actionItems, onUpdateItems }: ActionIt
               </div>
 
               <div>
-                <label style={{
-                  fontSize: 'var(--text-size)',
-                  fontWeight: '600',
-                  color: 'var(--color-text)'
-                }}>Due Date</label>
+                <label style={{ fontSize: 'var(--text-size)', fontWeight: '600', color: 'var(--color-text)' }}>
+                  Due Date
+                </label>
                 <input
                   type="date"
                   value={newItemDueDate.value}
                   onInput={(e) => newItemDueDate.value = (e.target as HTMLInputElement).value}
                   class="w-full rounded px-3 py-2"
-                  style={{
-                    fontSize: 'var(--text-size)',
-                    border: '2px solid var(--color-border)'
-                  }}
+                  style={{ fontSize: 'var(--text-size)', border: '2px solid var(--color-border)' }}
                 />
               </div>
             </div>

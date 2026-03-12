@@ -1,0 +1,161 @@
+/**
+ * Tests for core/orchestration/parallel-analysis.ts
+ *
+ * Verifies parallel orchestration with mock AIService.
+ */
+
+import { assertEquals } from "./_assert.ts";
+
+import { analyzeText, analyzeAudio } from "../orchestration/parallel-analysis.ts";
+import type { AIService } from "../ai/gemini.ts";
+import type { ActionItem } from "../types/index.ts";
+
+// ===================================================================
+// MOCK AI SERVICE
+// ===================================================================
+
+function createMockAIService(overrides: Partial<AIService> = {}): AIService & { calls: string[] } {
+	const calls: string[] = [];
+
+	return {
+		calls,
+		async transcribeAudio(_blob: Blob) {
+			calls.push("transcribeAudio");
+			return { text: "Speaker1: hello world", speakers: ["Speaker1"] };
+		},
+		async generateTitle(_transcript: string) {
+			calls.push("generateTitle");
+			return "Test Title";
+		},
+		async extractActionItems(_input, _speakers, _existing) {
+			calls.push("extractActionItems");
+			return [{ description: "Do the thing", assignee: null, due_date: null }];
+		},
+		async checkActionItemStatus(_input, _existing) {
+			calls.push("checkActionItemStatus");
+			return [];
+		},
+		async extractTopics(_text, _existing) {
+			calls.push("extractTopics");
+			return { nodes: [], edges: [] };
+		},
+		async generateSummary(_text) {
+			calls.push("generateSummary");
+			return "A brief summary.";
+		},
+		async generateMarkdown(_formatPrompt, _text) {
+			calls.push("generateMarkdown");
+			return "# Markdown";
+		},
+		...overrides,
+	};
+}
+
+// ===================================================================
+// analyzeText
+// ===================================================================
+
+Deno.test("analyzeText calls extractTopics, extractActionItems, generateSummary", async () => {
+	const service = createMockAIService();
+	await analyzeText(service, "Some meeting text");
+
+	assertEquals(service.calls.includes("extractTopics"), true);
+	assertEquals(service.calls.includes("extractActionItems"), true);
+	assertEquals(service.calls.includes("generateSummary"), true);
+});
+
+Deno.test("analyzeText skips checkActionItemStatus when no existing items", async () => {
+	const service = createMockAIService();
+	await analyzeText(service, "Some text", [], []);
+
+	assertEquals(service.calls.includes("checkActionItemStatus"), false);
+});
+
+Deno.test("analyzeText calls checkActionItemStatus when existing items present", async () => {
+	const service = createMockAIService();
+	const existing: ActionItem[] = [
+		{
+			id: "1",
+			conversation_id: "c1",
+			description: "task",
+			assignee: null,
+			due_date: null,
+			status: "pending",
+			created_at: "",
+			updated_at: "",
+		},
+	];
+	await analyzeText(service, "text mentioning task done", [], existing);
+
+	assertEquals(service.calls.includes("checkActionItemStatus"), true);
+});
+
+Deno.test("analyzeText returns AnalysisResult with all four fields", async () => {
+	const service = createMockAIService();
+	const result = await analyzeText(service, "text");
+
+	assertEquals(typeof result.summary, "string");
+	assertEquals(Array.isArray(result.topics.nodes), true);
+	assertEquals(Array.isArray(result.actionItems), true);
+	assertEquals(Array.isArray(result.statusUpdates), true);
+});
+
+Deno.test("analyzeText returns empty statusUpdates when no existing items", async () => {
+	const service = createMockAIService();
+	const result = await analyzeText(service, "text");
+
+	assertEquals(result.statusUpdates, []);
+});
+
+// ===================================================================
+// analyzeAudio
+// ===================================================================
+
+Deno.test("analyzeAudio calls transcribeAudio first", async () => {
+	const service = createMockAIService();
+	const blob = new Blob(["audio"], { type: "audio/webm" });
+	await analyzeAudio(service, blob);
+
+	// transcribeAudio must be in calls
+	assertEquals(service.calls.includes("transcribeAudio"), true);
+});
+
+Deno.test("analyzeAudio returns transcription alongside analysis", async () => {
+	const service = createMockAIService();
+	const blob = new Blob(["audio"], { type: "audio/webm" });
+	const result = await analyzeAudio(service, blob);
+
+	assertEquals(result.transcription.text, "Speaker1: hello world");
+	assertEquals(result.transcription.speakers, ["Speaker1"]);
+	assertEquals(Array.isArray(result.actionItems), true);
+	assertEquals(Array.isArray(result.topics.nodes), true);
+	assertEquals(typeof result.summary, "string");
+});
+
+Deno.test("analyzeAudio skips status check with no existing items", async () => {
+	const service = createMockAIService();
+	const blob = new Blob(["audio"], { type: "audio/webm" });
+	await analyzeAudio(service, blob, []);
+
+	assertEquals(service.calls.includes("checkActionItemStatus"), false);
+});
+
+Deno.test("analyzeAudio calls status check with existing items", async () => {
+	const service = createMockAIService();
+	const blob = new Blob(["audio"], { type: "audio/webm" });
+	const existing: ActionItem[] = [
+		{
+			id: "1",
+			conversation_id: "c1",
+			description: "task",
+			assignee: null,
+			due_date: null,
+			status: "pending",
+			created_at: "",
+			updated_at: "",
+		},
+	];
+	await analyzeAudio(service, blob, existing);
+
+	assertEquals(service.calls.includes("checkActionItemStatus"), true);
+});

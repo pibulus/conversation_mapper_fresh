@@ -105,13 +105,13 @@ export default function MobileHistoryMenu() {
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
           border: '2px solid rgba(0, 0, 0, 0.15)',
-          borderRadius: '16px',
+          borderRadius: 'var(--border-radius)',
           padding: '14px 18px',
           boxShadow: '4px 4px 0 0 rgba(0, 0, 0, 0.1)',
           cursor: 'pointer',
           fontWeight: '700',
-          fontSize: '15px',
-          color: '#2C2C2C',
+          fontSize: 'var(--text-size)',
+          color: 'var(--color-text)',
           gap: '8px'
         }}
         onMouseEnter={(e) => {
@@ -169,8 +169,8 @@ export default function MobileHistoryMenu() {
         }}>
           <h2 style={{
             fontWeight: '700',
-            fontSize: '1.25rem',
-            color: '#2C2C2C',
+            fontSize: 'var(--font-size-lg)',
+            color: 'var(--color-text)',
             letterSpacing: '-0.01em'
           }}>Your Conversations</h2>
           <button
@@ -178,16 +178,16 @@ export default function MobileHistoryMenu() {
             style={{
               background: 'rgba(0, 0, 0, 0.05)',
               border: '2px solid rgba(0, 0, 0, 0.1)',
-              borderRadius: '8px',
+              borderRadius: 'var(--border-radius-sm)',
               width: '36px',
               height: '36px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              color: '#2C2C2C',
-              fontSize: '18px',
+              transition: 'all var(--transition-medium)',
+              color: 'var(--color-text)',
+              fontSize: 'var(--heading-size)',
               fontWeight: '600'
             }}
             onMouseEnter={(e) => {
@@ -210,7 +210,7 @@ export default function MobileHistoryMenu() {
             style={{
               width: '100%',
               padding: '14px 20px',
-              fontSize: '16px',
+              fontSize: 'var(--heading-size)',
               fontWeight: '700',
               border: '2px solid #1A1A1A',
               borderRadius: '12px',
@@ -255,13 +255,13 @@ export default function MobileHistoryMenu() {
             <div style={{
               textAlign: 'center',
               padding: '3rem 1rem',
-              color: '#6B6B6B'
+              color: 'var(--color-text-secondary)'
             }}>
               <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.4 }}>✨</div>
               <p style={{
-                fontSize: '15px',
+                fontSize: 'var(--text-size)',
                 fontWeight: '500',
-                lineHeight: '1.6'
+                lineHeight: 'var(--line-height)'
               }}>
                 No conversations yet.<br/>
                 Start creating some magic!
@@ -293,8 +293,8 @@ export default function MobileHistoryMenu() {
                     >
                       <h3 style={{
                         fontWeight: '700',
-                        color: '#2C2C2C',
-                        fontSize: '15px',
+                        color: 'var(--color-text)',
+                        fontSize: 'var(--text-size)',
                         marginBottom: '0.5rem',
                         lineHeight: '1.3'
                       }}>
@@ -306,7 +306,7 @@ export default function MobileHistoryMenu() {
                         alignItems: 'center',
                         gap: '0.5rem',
                         marginTop: '0.5rem',
-                        fontSize: '12px'
+                        fontSize: 'var(--tiny-size)'
                       }}>
                         <span style={{
                           background: 'rgba(59, 130, 246, 0.12)',
@@ -328,7 +328,7 @@ export default function MobileHistoryMenu() {
                         </span>
                       </div>
                       <p style={{
-                        fontSize: '12px',
+                        fontSize: 'var(--tiny-size)',
                         color: '#8B7F77',
                         marginTop: '0.5rem',
                         fontWeight: '500'
@@ -344,12 +344,12 @@ export default function MobileHistoryMenu() {
                       }}
                       style={{
                         background: 'rgba(239, 68, 68, 0.1)',
-                        border: '2px solid rgba(239, 68, 68, 0.2)',
-                        borderRadius: '8px',
+                        border: `2px solid rgba(239, 68, 68, 0.2)`,
+                        borderRadius: 'var(--border-radius-sm)',
                         padding: '8px',
                         cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        fontSize: '16px',
+                        transition: 'all var(--transition-medium)',
+                        fontSize: 'var(--heading-size)',
                         width: '36px',
                         height: '36px',
                         display: 'flex',
@@ -382,7 +382,7 @@ export default function MobileHistoryMenu() {
           background: 'rgba(0, 0, 0, 0.02)'
         }}>
           <p style={{
-            fontSize: '13px',
+            fontSize: 'var(--small-size)',
             color: '#8B7F77',
             textAlign: 'center',
             fontWeight: '500'
@@ -403,25 +403,25 @@ export default function MobileHistoryMenu() {
             background: 'rgba(255, 255, 255, 0.98)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
-            borderRadius: '20px',
-            border: '3px solid rgba(239, 68, 68, 0.3)',
-            boxShadow: '0 12px 48px rgba(0, 0, 0, 0.2)',
+            borderRadius: 'var(--border-radius-xl)',
+            border: `3px solid var(--color-danger-border)`,
+            boxShadow: 'var(--shadow-xl)',
             padding: '2rem',
             maxWidth: '400px',
             width: '100%'
           }}>
             <h3 style={{
-              fontSize: '1.5rem',
+              fontSize: 'var(--font-size-lg)',
               fontWeight: '700',
               marginBottom: '0.75rem',
-              color: '#2C2C2C',
+              color: 'var(--color-text)',
               lineHeight: '1.2'
             }}>Delete this conversation?</h3>
             <p style={{
-              fontSize: '15px',
-              color: '#6B6B6B',
+              fontSize: 'var(--text-size)',
+              color: 'var(--color-text-secondary)',
               marginBottom: '1.5rem',
-              lineHeight: '1.6'
+              lineHeight: 'var(--line-height)'
             }}>
               This will permanently delete this conversation and all its data. This action cannot be undone.
             </p>
@@ -431,14 +431,14 @@ export default function MobileHistoryMenu() {
                 style={{
                   flex: 1,
                   padding: '14px 20px',
-                  fontSize: '16px',
+                  fontSize: 'var(--heading-size)',
                   fontWeight: '700',
-                  border: '3px solid #DC2626',
+                  border: `3px solid var(--color-danger-dark)`,
                   borderRadius: '12px',
-                  background: '#EF4444',
+                  background: 'var(--color-danger)',
                   color: 'white',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease',
+                  transition: 'all var(--transition-medium)',
                   boxShadow: '0 4px 0 0 rgba(220, 38, 38, 0.3)'
                 }}
                 onMouseEnter={(e) => {
@@ -457,14 +457,14 @@ export default function MobileHistoryMenu() {
                 style={{
                   flex: 1,
                   padding: '14px 20px',
-                  fontSize: '16px',
+                  fontSize: 'var(--heading-size)',
                   fontWeight: '700',
                   border: '3px solid rgba(0, 0, 0, 0.15)',
                   borderRadius: '12px',
                   background: 'rgba(0, 0, 0, 0.05)',
-                  color: '#2C2C2C',
+                  color: 'var(--color-text)',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease',
+                  transition: 'all var(--transition-medium)',
                   boxShadow: '0 4px 0 0 rgba(0, 0, 0, 0.08)'
                 }}
                 onMouseEnter={(e) => {

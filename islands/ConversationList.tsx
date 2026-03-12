@@ -19,12 +19,10 @@ export default function ConversationList() {
   const conversations = useSignal<StoredConversation[]>([]);
   const showConfirmDelete = useSignal<string | null>(null);
 
-  // Load conversations on mount
   useEffect(() => {
     refreshList();
   }, []);
 
-  // Refresh list when conversationData changes
   useEffect(() => {
     if (conversationData.value) {
       refreshList();
@@ -49,12 +47,9 @@ export default function ConversationList() {
   function confirmDelete() {
     if (showConfirmDelete.value) {
       deleteConversation(showConfirmDelete.value);
-
-      // Clear active conversation if it was deleted
       if (conversationData.value?.conversation.id === showConfirmDelete.value) {
         conversationData.value = null;
       }
-
       refreshList();
       showConfirmDelete.value = null;
     }
@@ -83,9 +78,9 @@ export default function ConversationList() {
         borderBottom: '1px solid rgba(0, 0, 0, 0.06)'
       }}>
         <h2 style={{
-          fontSize: '16px',
-          fontWeight: '600',
-          color: '#111'
+          fontSize: 'var(--heading-size)',
+          fontWeight: 'var(--heading-weight)',
+          color: 'var(--color-text)'
         }}>Conversations</h2>
       </div>
 
@@ -100,9 +95,9 @@ export default function ConversationList() {
             background: '#111',
             color: 'white',
             border: 'none',
-            fontSize: '14px',
+            fontSize: 'var(--small-size)',
             fontWeight: '500',
-            transition: 'all 0.15s ease'
+            transition: 'all var(--transition-fast)'
           }}
           onMouseEnter={(e) => e.currentTarget.style.background = '#333'}
           onMouseLeave={(e) => e.currentTarget.style.background = '#111'}
@@ -115,9 +110,9 @@ export default function ConversationList() {
       <div class="flex-1 overflow-y-auto p-3 space-y-2">
         {conversations.value.length === 0 ? (
           <p class="text-center py-8" style={{
-            fontSize: '14px',
-            color: '#666',
-            lineHeight: '1.5'
+            fontSize: 'var(--small-size)',
+            color: 'var(--color-text-secondary)',
+            lineHeight: 'var(--line-height)'
           }}>
             No saved conversations yet.<br/>
             Upload audio or text to begin.
@@ -134,7 +129,7 @@ export default function ConversationList() {
                 style={{
                   border: `1px solid ${isActive ? '#111' : 'rgba(0, 0, 0, 0.08)'}`,
                   background: isActive ? 'rgba(0, 0, 0, 0.03)' : 'rgba(255, 255, 255, 0.6)',
-                  transition: 'all 0.15s ease',
+                  transition: 'all var(--transition-fast)',
                   cursor: 'pointer'
                 }}
                 onMouseEnter={(e) => {
@@ -156,7 +151,7 @@ export default function ConversationList() {
                     class="flex-1 text-left"
                   >
                     <h3 class="truncate" style={{
-                      fontSize: '14px',
+                      fontSize: 'var(--small-size)',
                       fontWeight: '600',
                       color: '#111',
                       marginBottom: '4px'
@@ -164,15 +159,15 @@ export default function ConversationList() {
                       {truncatedTitle}
                     </h3>
                     <div class="flex items-center gap-2" style={{
-                      fontSize: '12px',
-                      color: '#666'
+                      fontSize: 'var(--tiny-size)',
+                      color: 'var(--color-text-secondary)'
                     }}>
                       <span>{conv.nodes.length} topics</span>
                       <span>•</span>
                       <span>{conv.actionItems.length} items</span>
                     </div>
                     <p style={{
-                      fontSize: '11px',
+                      fontSize: 'var(--font-size-xs)',
                       color: '#999',
                       marginTop: '4px'
                     }}>
@@ -184,9 +179,9 @@ export default function ConversationList() {
                     onClick={() => handleDelete(conv.id)}
                     class="p-1"
                     style={{
-                      color: '#EF4444',
-                      fontSize: '14px',
-                      transition: 'opacity 0.15s ease',
+                      color: 'var(--color-danger)',
+                      fontSize: 'var(--small-size)',
+                      transition: 'opacity var(--transition-fast)',
                       opacity: 0.5
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
@@ -210,19 +205,19 @@ export default function ConversationList() {
             style={{
               background: 'white',
               border: '1px solid rgba(0, 0, 0, 0.1)',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)'
+              boxShadow: 'var(--shadow-xl)'
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <h3 class="mb-3" style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#111'
+              fontSize: 'var(--heading-size)',
+              fontWeight: 'var(--heading-weight)',
+              color: 'var(--color-text)'
             }}>Delete Conversation?</h3>
             <p class="mb-6" style={{
-              fontSize: '14px',
-              color: '#666',
-              lineHeight: '1.5'
+              fontSize: 'var(--small-size)',
+              color: 'var(--color-text-secondary)',
+              lineHeight: 'var(--line-height)'
             }}>
               This will permanently delete this conversation and all its data.
               This action cannot be undone.
@@ -232,15 +227,15 @@ export default function ConversationList() {
                 onClick={confirmDelete}
                 class="flex-1 py-2 px-4 rounded-lg"
                 style={{
-                  background: '#EF4444',
+                  background: 'var(--color-danger)',
                   color: 'white',
                   border: 'none',
-                  fontSize: '14px',
+                  fontSize: 'var(--small-size)',
                   fontWeight: '500',
-                  transition: 'all 0.15s ease'
+                  transition: 'all var(--transition-fast)'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#DC2626'}
-                onMouseLeave={(e) => e.currentTarget.style.background = '#EF4444'}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-danger-dark)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'var(--color-danger)'}
               >
                 Delete
               </button>
@@ -249,11 +244,11 @@ export default function ConversationList() {
                 class="flex-1 py-2 px-4 rounded-lg"
                 style={{
                   background: 'rgba(0, 0, 0, 0.05)',
-                  color: '#111',
+                  color: 'var(--color-text)',
                   border: '1px solid rgba(0, 0, 0, 0.1)',
-                  fontSize: '14px',
+                  fontSize: 'var(--small-size)',
                   fontWeight: '500',
-                  transition: 'all 0.15s ease'
+                  transition: 'all var(--transition-fast)'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0, 0, 0, 0.08)'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(0, 0, 0, 0.05)'}

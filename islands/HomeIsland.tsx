@@ -47,12 +47,12 @@ export default function HomeIsland() {
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '2px solid rgba(0, 0, 0, 0.08)',
         boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)',
-        height: '80px',
+        height: 'var(--header-height)',
         display: 'flex',
         alignItems: 'center',
         position: 'sticky',
         top: 0,
-        zIndex: 50
+        zIndex: 'var(--z-header)'
       }}>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 w-full" style={{
           display: 'flex',
@@ -74,14 +74,14 @@ export default function HomeIsland() {
                   }}
                   title="Back to home"
                 >
-                  <i class="fa fa-arrow-left" style={{ fontSize: '14px', color: '#2C2C2C' }}></i>
+                  <i class="fa fa-arrow-left" style={{ fontSize: 'var(--small-size)', color: 'var(--color-text)' }}></i>
                 </button>
                 <h1
                   class="truncate"
                   style={{
-                    fontSize: '22px',
+                    fontSize: 'var(--font-size-xl)',
                     fontWeight: '800',
-                    color: 'var(--soft-black)', /* use unified soft-black */
+                    color: 'var(--color-text)',
                     letterSpacing: '-0.03em'
                   }}
                 >
@@ -101,7 +101,7 @@ export default function HomeIsland() {
                   style={{
                     background: '#1A1A1A',
                     color: 'white',
-                    fontSize: '14px',
+                    fontSize: 'var(--small-size)',
                     fontWeight: '600',
                     border: 'none'
                   }}
@@ -129,15 +129,15 @@ export default function HomeIsland() {
               <a
                 href="/"
                 style={{
-                  fontSize: '22px',
+                  fontSize: 'var(--font-size-xl)',
                   fontWeight: '800',
-                  color: 'var(--soft-black)', /* use unified soft-black */
+                  color: 'var(--color-text)',
                   letterSpacing: '-0.03em',
                   flex: 1,
                   textDecoration: 'none',
                   padding: '8px 12px',
-                  borderRadius: '8px',
-                  transition: 'all 0.2s ease',
+                  borderRadius: 'var(--border-radius-sm)',
+                  transition: 'all var(--transition-medium)',
                   display: 'inline-block',
                   cursor: 'pointer'
                 }}
@@ -168,7 +168,7 @@ export default function HomeIsland() {
       )}
 
       {/* Main Layout - No sidebar, centered content */}
-      <div class="flex" style={{ minHeight: 'calc(100vh - 80px)' }}>
+      <div class="flex" style={{ minHeight: 'calc(100vh - var(--header-height))' }}>
         {/* Mobile History Menu - Only show when NO data */}
         {!conversationData.value && <MobileHistoryMenu />}
 
