@@ -121,8 +121,6 @@ export default function HomeIsland() {
                 {/* Share button */}
                 <ShareButton />
 
-                {/* Theme shuffler */}
-                <ThemeShuffler />
               </div>
             </>
           ) : (
@@ -154,7 +152,6 @@ export default function HomeIsland() {
               >
                 Conversation Mapper
               </a>
-              <ThemeShuffler />
             </>
           )}
         </div>

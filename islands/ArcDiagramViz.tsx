@@ -327,7 +327,7 @@ export default function ArcDiagramViz() {
   }, [conversationData.value]);
 
   // Check if we have data
-  const hasData = conversationData.value?.nodes.length || 0;
+  const hasData = (conversationData.value?.nodes?.length ?? 0) > 0;
 
   if (!hasData) {
     return (
