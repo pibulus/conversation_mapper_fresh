@@ -7,7 +7,10 @@
 
 import { useEffect } from "preact/hooks";
 import { loadSharedConversation } from "../core/storage/shareService.ts";
-import { conversationData, isViewingShared } from "../signals/conversationStore.ts";
+import {
+  conversationData,
+  isViewingShared,
+} from "../signals/conversationStore.ts";
 import DashboardIsland from "./DashboardIsland.tsx";
 
 interface Props {

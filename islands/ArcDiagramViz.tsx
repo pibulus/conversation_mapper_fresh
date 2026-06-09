@@ -24,7 +24,7 @@ export default function ArcDiagramViz() {
       // Remove fullscreen
       if (fullscreenPortalRef.current?.parentNode) {
         fullscreenPortalRef.current.parentNode.removeChild(
-          fullscreenPortalRef.current
+          fullscreenPortalRef.current,
         );
       }
       fullscreenPortalRef.current = null;
@@ -59,7 +59,8 @@ export default function ArcDiagramViz() {
 
     // Create modal container
     const modalContainer = document.createElement("div");
-    modalContainer.className = "bg-white rounded-lg border-4 border-purple-400 shadow-brutal";
+    modalContainer.className =
+      "bg-white rounded-lg border-4 border-purple-400 shadow-brutal";
     modalContainer.style.width = "90%";
     modalContainer.style.height = "85%";
     modalContainer.style.padding = "1.5rem";
@@ -168,7 +169,7 @@ export default function ArcDiagramViz() {
     // Calculate max nodes to show
     const maxNodesToShow = Math.min(
       nodes.length,
-      Math.floor(height.value / 30)
+      Math.floor(height.value / 30),
     );
     const nodesToShow = nodes.slice(0, maxNodesToShow);
 
@@ -192,7 +193,7 @@ export default function ArcDiagramViz() {
     const visibleEdges = edges.filter(
       (edge) =>
         nodeIndex.has(edge.source_topic_id) &&
-        nodeIndex.has(edge.target_topic_id)
+        nodeIndex.has(edge.target_topic_id),
     );
 
     // Background for text area
@@ -230,7 +231,7 @@ export default function ArcDiagramViz() {
           "d",
           `M ${width.value / 2},${top} A ${r},${r} 0 0,${y1 < y2 ? 1 : 0} ${
             width.value / 2
-          },${bottom}`
+          },${bottom}`,
         )
         .attr("fill", "none")
         .attr("stroke", edge.color || colorScale(sourceIndex % 10))
@@ -239,7 +240,7 @@ export default function ArcDiagramViz() {
         .attr("class", "transition-opacity hover:opacity-100")
         .append("title")
         .text(
-          `${nodes[sourceIndex].label} → ${nodes[targetIndex].label}`
+          `${nodes[sourceIndex].label} → ${nodes[targetIndex].label}`,
         );
     });
 
@@ -313,7 +314,7 @@ export default function ArcDiagramViz() {
       // Remove fullscreen portal
       if (fullscreenPortalRef.current?.parentNode) {
         fullscreenPortalRef.current.parentNode.removeChild(
-          fullscreenPortalRef.current
+          fullscreenPortalRef.current,
         );
       }
     };

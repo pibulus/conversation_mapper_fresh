@@ -8,10 +8,12 @@
 import { signal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { conversationData } from "../signals/conversationStore.ts";
-import { getActiveConversationId, loadConversation } from "../core/storage/localStorage.ts";
+import {
+  getActiveConversationId,
+  loadConversation,
+} from "../core/storage/localStorage.ts";
 import UploadIsland from "./UploadIsland.tsx";
 import DashboardIsland from "./DashboardIsland.tsx";
-import ConversationList from "./ConversationList.tsx";
 import MobileHistoryMenu from "./MobileHistoryMenu.tsx";
 import ShareButton from "./ShareButton.tsx";
 import MarkdownMakerDrawer from "./MarkdownMakerDrawer.tsx";
@@ -28,132 +30,150 @@ export default function HomeIsland() {
       const stored = loadConversation(activeId);
       if (stored) {
         conversationData.value = stored;
-        console.log('✅ Restored conversation from localStorage:', stored.conversation.title || activeId);
+        console.log(
+          "✅ Restored conversation from localStorage:",
+          stored.conversation.title || activeId,
+        );
       }
     }
   }, []);
 
   // Get transcript for MarkdownMaker
-  const transcript = conversationData.value?.transcript?.text || '';
+  const transcript = conversationData.value?.transcript?.text || "";
 
-  const heroLines = ["See what you're", 'really saying'];
+  const heroLines = ["See what you're", "really saying"];
 
   return (
     <div class="mapper-scene min-h-screen">
       {/* Top Bar - Brand presence */}
-      <header style={{
-        background: 'rgba(255, 250, 245, 0.92)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '2px solid rgba(0, 0, 0, 0.08)',
-        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.04)',
-        height: 'var(--header-height)',
-        display: 'flex',
-        alignItems: 'center',
-        position: 'sticky',
-        top: 0,
-        zIndex: 'var(--z-header)'
-      }}>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 w-full" style={{
-          display: 'flex',
-          alignItems: 'center',
-          height: '100%'
-        }}>
-          {conversationData.value ? (
-            // Conversation header - clean and slim
-            <>
-              <div class="flex items-center gap-3 flex-1 min-w-0">
-                <button
-                  onClick={() => {
-                    conversationData.value = null;
-                    window.history.pushState({}, '', '/');
-                  }}
-                  class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg hover:bg-black/5 transition-all"
-                  style={{
-                    border: '1px solid rgba(0, 0, 0, 0.1)'
-                  }}
-                  title="Back to home"
-                >
-                  <i class="fa fa-arrow-left" style={{ fontSize: 'var(--small-size)', color: 'var(--color-text)' }}></i>
-                </button>
-                <h1
-                  class="truncate"
-                  style={{
-                    fontSize: 'var(--font-size-xl)',
-                    fontWeight: '800',
-                    color: 'var(--color-text)',
-                    letterSpacing: '-0.03em'
-                  }}
-                >
-                  {conversationData.value.conversation.title}
-                </h1>
-              </div>
-              <div class="flex items-center gap-2">
-                {/* Audio Recorder - NEW! */}
-                <AudioRecorder
-                  conversationId={conversationData.value.conversation.id || ''}
-                />
+      <header
+        style={{
+          background: "rgba(255, 250, 245, 0.92)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderBottom: "2px solid rgba(0, 0, 0, 0.08)",
+          boxShadow: "0 2px 12px rgba(0, 0, 0, 0.04)",
+          height: "var(--header-height)",
+          display: "flex",
+          alignItems: "center",
+          position: "sticky",
+          top: 0,
+          zIndex: "var(--z-header)",
+        }}
+      >
+        <div
+          class="max-w-7xl mx-auto px-4 sm:px-6 w-full"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            height: "100%",
+          }}
+        >
+          {conversationData.value
+            ? (
+              // Conversation header - clean and slim
+              <>
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                  <button
+                    onClick={() => {
+                      conversationData.value = null;
+                      window.history.pushState({}, "", "/");
+                    }}
+                    class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg hover:bg-black/5 transition-all"
+                    style={{
+                      border: "1px solid rgba(0, 0, 0, 0.1)",
+                    }}
+                    title="Back to home"
+                  >
+                    <i
+                      class="fa fa-arrow-left"
+                      style={{
+                        fontSize: "var(--small-size)",
+                        color: "var(--color-text)",
+                      }}
+                    >
+                    </i>
+                  </button>
+                  <h1
+                    class="truncate"
+                    style={{
+                      fontSize: "var(--font-size-xl)",
+                      fontWeight: "800",
+                      color: "var(--color-text)",
+                      letterSpacing: "-0.03em",
+                    }}
+                  >
+                    {conversationData.value.conversation.title}
+                  </h1>
+                </div>
+                <div class="flex items-center gap-2">
+                  {/* Audio Recorder - NEW! */}
+                  <AudioRecorder
+                    conversationId={conversationData.value.conversation.id ||
+                      ""}
+                  />
 
-                {/* Export button */}
-                <button
-                  onClick={() => drawerOpen.value = !drawerOpen.value}
-                  class="px-3 py-1.5 rounded-lg transition-all hidden sm:block"
+                  {/* Export button */}
+                  <button
+                    onClick={() => drawerOpen.value = !drawerOpen.value}
+                    class="px-3 py-1.5 rounded-lg transition-all hidden sm:block"
+                    style={{
+                      background: "#1A1A1A",
+                      color: "white",
+                      fontSize: "var(--small-size)",
+                      fontWeight: "600",
+                      border: "none",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#2C2C2C";
+                      e.currentTarget.style.transform = "scale(1.02)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "#1A1A1A";
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
+                    title="Export"
+                  >
+                    Export
+                  </button>
+
+                  {/* Share button */}
+                  <ShareButton />
+                </div>
+              </>
+            )
+            : (
+              // Default header - app name and theme shuffler
+              <>
+                <a
+                  href="/"
                   style={{
-                    background: '#1A1A1A',
-                    color: 'white',
-                    fontSize: 'var(--small-size)',
-                    fontWeight: '600',
-                    border: 'none'
+                    fontSize: "var(--font-size-xl)",
+                    fontWeight: "800",
+                    color: "var(--color-text)",
+                    letterSpacing: "-0.03em",
+                    flex: 1,
+                    textDecoration: "none",
+                    padding: "8px 12px",
+                    borderRadius: "var(--border-radius-sm)",
+                    transition: "all var(--transition-medium)",
+                    display: "inline-block",
+                    cursor: "pointer",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#2C2C2C';
-                    e.currentTarget.style.transform = 'scale(1.02)';
+                    e.currentTarget.style.background =
+                      "rgba(var(--color-accent), 0.08)";
+                    e.currentTarget.style.transform = "translateX(2px)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = '#1A1A1A';
-                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.transform = "translateX(0)";
                   }}
-                  title="Export"
                 >
-                  Export
-                </button>
-
-                {/* Share button */}
-                <ShareButton />
-
-              </div>
-            </>
-          ) : (
-            // Default header - app name and theme shuffler
-            <>
-              <a
-                href="/"
-                style={{
-                  fontSize: 'var(--font-size-xl)',
-                  fontWeight: '800',
-                  color: 'var(--color-text)',
-                  letterSpacing: '-0.03em',
-                  flex: 1,
-                  textDecoration: 'none',
-                  padding: '8px 12px',
-                  borderRadius: 'var(--border-radius-sm)',
-                  transition: 'all var(--transition-medium)',
-                  display: 'inline-block',
-                  cursor: 'pointer'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(var(--color-accent), 0.08)';
-                  e.currentTarget.style.transform = 'translateX(2px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.transform = 'translateX(0)';
-                }}
-              >
-                Conversation Mapper
-              </a>
-            </>
-          )}
+                  Conversation Mapper
+                </a>
+              </>
+            )}
         </div>
       </header>
 
@@ -168,7 +188,10 @@ export default function HomeIsland() {
       )}
 
       {/* Main Layout - No sidebar, centered content */}
-      <div class="flex" style={{ minHeight: 'calc(100vh - var(--header-height))' }}>
+      <div
+        class="flex"
+        style={{ minHeight: "calc(100vh - var(--header-height))" }}
+      >
         {/* Mobile History Menu - Only show when NO data */}
         {!conversationData.value && <MobileHistoryMenu />}
 
@@ -182,7 +205,9 @@ export default function HomeIsland() {
                   <div class="mapper-card__inner">
                     <div class="mapper-hero-copy">
                       <div>
-                        <div class="mapper-eyebrow">Welcome to Conversation Mapper</div>
+                        <div class="mapper-eyebrow">
+                          Welcome to Conversation Mapper
+                        </div>
                         <h1 class="mapper-hero-title">
                           {heroLines.map((line, lineIndex) => (
                             <span
@@ -196,8 +221,9 @@ export default function HomeIsland() {
                         </h1>
                       </div>
                       <p class="mapper-hero-desc">
-                        Build a confident map for every conversation—stable layout, playful controls,
-                        no resizing jump scares when you switch modes.
+                        Build a confident map for every conversation—stable
+                        layout, playful controls, no resizing jump scares when
+                        you switch modes.
                       </p>
                       <p class="mapper-hero-caption">
                         Record / Paste / Upload — same module, same rhythm.
@@ -213,7 +239,7 @@ export default function HomeIsland() {
 
             {/* Dashboard - Always rendered, shows its own empty state */}
             {conversationData.value && (
-              <section style={{ paddingTop: 'clamp(1rem, 3vh, 2rem)' }}>
+              <section style={{ paddingTop: "clamp(1rem, 3vh, 2rem)" }}>
                 <DashboardIsland />
               </section>
             )}

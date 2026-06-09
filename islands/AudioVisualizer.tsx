@@ -15,33 +15,36 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameIdRef = useRef<number | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
-  const accentColorRef = useRef<string>('rgba(232, 131, 156, 0.8)');
+  const accentColorRef = useRef<string>("rgba(232, 131, 156, 0.8)");
 
   useEffect(() => {
     if (!analyser || !canvasRef.current) {
-      console.warn('AudioVisualizer: No analyser or canvas available');
+      console.warn("AudioVisualizer: No analyser or canvas available");
       return;
     }
 
-    console.log('🎵 Initializing audio visualizer');
+    console.log("🎵 Initializing audio visualizer");
     const canvas = canvasRef.current;
-    const canvasCtx = canvas.getContext('2d');
+    const canvasCtx = canvas.getContext("2d");
 
     if (!canvasCtx) {
-      console.error('Failed to get canvas context');
+      console.error("Failed to get canvas context");
       return;
     }
 
     // Read accent color from CSS variables
-    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
+    const accentColor = getComputedStyle(document.documentElement)
+      .getPropertyValue("--color-accent").trim();
     if (accentColor) {
       accentColorRef.current = accentColor;
-      console.log('🎨 Using theme accent color:', accentColor);
+      console.log("🎨 Using theme accent color:", accentColor);
     }
 
     // Initialize data array for frequency data
     dataArrayRef.current = new Uint8Array(analyser.frequencyBinCount);
-    console.log(`🎵 Audio visualizer initialized (${analyser.frequencyBinCount} frequency bins)`);
+    console.log(
+      `🎵 Audio visualizer initialized (${analyser.frequencyBinCount} frequency bins)`,
+    );
 
     // Animation draw function - ELEGANT BARS
     function draw() {
@@ -56,7 +59,7 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
       analyser.getByteFrequencyData(dataArrayRef.current);
 
       // Clear canvas with subtle bg
-      canvasCtx.fillStyle = 'rgba(0, 0, 0, 0.02)';
+      canvasCtx.fillStyle = "rgba(0, 0, 0, 0.02)";
       canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
       // Sample fewer bars for cleaner look (every 4th bar)
@@ -76,7 +79,7 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
         const gradient = canvasCtx.createLinearGradient(x, y, x, HEIGHT);
         gradient.addColorStop(0, accentColorRef.current);
         gradient.addColorStop(0.6, accentColorRef.current);
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.1)');
+        gradient.addColorStop(1, "rgba(0, 0, 0, 0.1)");
 
         canvasCtx.fillStyle = gradient;
 
@@ -97,7 +100,7 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
         cancelAnimationFrame(animationFrameIdRef.current);
         animationFrameIdRef.current = null;
       }
-      console.log('🎵 Audio visualizer cleaned up');
+      console.log("🎵 Audio visualizer cleaned up");
     };
   }, [analyser]);
 
@@ -105,11 +108,11 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
     <div
       class="w-full"
       style={{
-        background: 'rgba(0, 0, 0, 0.03)',
-        border: '1.5px solid rgba(0, 0, 0, 0.1)',
-        borderRadius: '12px',
-        padding: '16px',
-        boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.06)'
+        background: "rgba(0, 0, 0, 0.03)",
+        border: "1.5px solid rgba(0, 0, 0, 0.1)",
+        borderRadius: "12px",
+        padding: "16px",
+        boxShadow: "inset 0 1px 3px rgba(0, 0, 0, 0.06)",
       }}
     >
       <canvas
@@ -118,9 +121,9 @@ export default function AudioVisualizer({ analyser }: AudioVisualizerProps) {
         width="1024"
         height="120"
         style={{
-          display: 'block',
-          height: '60px',
-          borderRadius: '6px'
+          display: "block",
+          height: "60px",
+          borderRadius: "6px",
         }}
       />
     </div>

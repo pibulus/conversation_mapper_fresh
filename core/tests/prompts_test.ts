@@ -4,20 +4,17 @@
  * Pure functions - no mocks needed.
  */
 
-import {
-	assertEquals,
-	assertStringIncludes,
-} from "./_assert.ts";
+import { assertEquals, assertStringIncludes } from "./_assert.ts";
 
 import {
-	TRANSCRIPTION_PROMPT,
-	ACTION_ITEMS_BASE_PROMPT,
-	buildActionItemsPrompt,
-	buildActionItemStatusPrompt,
-	buildTitlePrompt,
-	buildTopicExtractionPrompt,
-	buildSummaryPrompt,
-	buildMarkdownTransformPrompt,
+  ACTION_ITEMS_BASE_PROMPT,
+  buildActionItemsPrompt,
+  buildActionItemStatusPrompt,
+  buildMarkdownTransformPrompt,
+  buildSummaryPrompt,
+  buildTitlePrompt,
+  buildTopicExtractionPrompt,
+  TRANSCRIPTION_PROMPT,
 } from "../ai/prompts.ts";
 
 import type { ActionItem } from "../types/index.ts";
@@ -27,12 +24,12 @@ import type { ActionItem } from "../types/index.ts";
 // ===================================================================
 
 Deno.test("TRANSCRIPTION_PROMPT is a non-empty string", () => {
-	assertEquals(typeof TRANSCRIPTION_PROMPT, "string");
-	assertEquals(TRANSCRIPTION_PROMPT.length > 0, true);
+  assertEquals(typeof TRANSCRIPTION_PROMPT, "string");
+  assertEquals(TRANSCRIPTION_PROMPT.length > 0, true);
 });
 
 Deno.test("TRANSCRIPTION_PROMPT mentions speakers", () => {
-	assertStringIncludes(TRANSCRIPTION_PROMPT.toLowerCase(), "speaker");
+  assertStringIncludes(TRANSCRIPTION_PROMPT.toLowerCase(), "speaker");
 });
 
 // ===================================================================
@@ -40,14 +37,14 @@ Deno.test("TRANSCRIPTION_PROMPT mentions speakers", () => {
 // ===================================================================
 
 Deno.test("buildTitlePrompt includes transcript text", () => {
-	const transcript = "This is a meeting about project planning.";
-	const prompt = buildTitlePrompt(transcript);
-	assertStringIncludes(prompt, transcript);
+  const transcript = "This is a meeting about project planning.";
+  const prompt = buildTitlePrompt(transcript);
+  assertStringIncludes(prompt, transcript);
 });
 
 Deno.test("buildTitlePrompt asks for concise title", () => {
-	const prompt = buildTitlePrompt("test");
-	assertStringIncludes(prompt.toLowerCase(), "title");
+  const prompt = buildTitlePrompt("test");
+  assertStringIncludes(prompt.toLowerCase(), "title");
 });
 
 // ===================================================================
@@ -55,46 +52,46 @@ Deno.test("buildTitlePrompt asks for concise title", () => {
 // ===================================================================
 
 Deno.test("buildActionItemsPrompt with text input includes text", () => {
-	const text = "Alice will write the report by Friday.";
-	const prompt = buildActionItemsPrompt(text);
-	assertStringIncludes(prompt, text);
-	assertStringIncludes(prompt, "Analyze this text");
+  const text = "Alice will write the report by Friday.";
+  const prompt = buildActionItemsPrompt(text);
+  assertStringIncludes(prompt, text);
+  assertStringIncludes(prompt, "Analyze this text");
 });
 
 Deno.test("buildActionItemsPrompt with Blob input uses audio prefix", () => {
-	const blob = new Blob(["audio data"], { type: "audio/webm" });
-	const prompt = buildActionItemsPrompt(blob);
-	assertStringIncludes(prompt, "Listen to this audio");
+  const blob = new Blob(["audio data"], { type: "audio/webm" });
+  const prompt = buildActionItemsPrompt(blob);
+  assertStringIncludes(prompt, "Listen to this audio");
 });
 
 Deno.test("buildActionItemsPrompt with speakers includes them", () => {
-	const prompt = buildActionItemsPrompt("some text", ["Alice", "Bob"]);
-	assertStringIncludes(prompt, "Alice");
-	assertStringIncludes(prompt, "Bob");
+  const prompt = buildActionItemsPrompt("some text", ["Alice", "Bob"]);
+  assertStringIncludes(prompt, "Alice");
+  assertStringIncludes(prompt, "Bob");
 });
 
 Deno.test("buildActionItemsPrompt with existing items includes dedup context", () => {
-	const existing: ActionItem[] = [
-		{
-			id: "1",
-			conversation_id: "c1",
-			description: "Write the report",
-			assignee: "Alice",
-			due_date: null,
-			status: "pending",
-			created_at: "",
-			updated_at: "",
-		},
-	];
-	const prompt = buildActionItemsPrompt("new text", [], existing);
-	assertStringIncludes(prompt, "EXISTING ACTION ITEMS");
-	assertStringIncludes(prompt, "Write the report");
-	assertStringIncludes(prompt, "do not duplicate");
+  const existing: ActionItem[] = [
+    {
+      id: "1",
+      conversation_id: "c1",
+      description: "Write the report",
+      assignee: "Alice",
+      due_date: null,
+      status: "pending",
+      created_at: "",
+      updated_at: "",
+    },
+  ];
+  const prompt = buildActionItemsPrompt("new text", [], existing);
+  assertStringIncludes(prompt, "EXISTING ACTION ITEMS");
+  assertStringIncludes(prompt, "Write the report");
+  assertStringIncludes(prompt, "do not duplicate");
 });
 
 Deno.test("buildActionItemsPrompt without existing items has no dedup context", () => {
-	const prompt = buildActionItemsPrompt("some text");
-	assertEquals(prompt.includes("EXISTING ACTION ITEMS"), false);
+  const prompt = buildActionItemsPrompt("some text");
+  assertEquals(prompt.includes("EXISTING ACTION ITEMS"), false);
 });
 
 // ===================================================================
@@ -102,26 +99,26 @@ Deno.test("buildActionItemsPrompt without existing items has no dedup context", 
 // ===================================================================
 
 Deno.test("buildActionItemStatusPrompt includes action item IDs and descriptions", () => {
-	const items: ActionItem[] = [
-		{
-			id: "item-abc",
-			conversation_id: "c1",
-			description: "Finish the slides",
-			assignee: "Bob",
-			due_date: "2025-12-01",
-			status: "pending",
-			created_at: "",
-			updated_at: "",
-		},
-	];
-	const prompt = buildActionItemStatusPrompt(items);
-	assertStringIncludes(prompt, "item-abc");
-	assertStringIncludes(prompt, "Finish the slides");
+  const items: ActionItem[] = [
+    {
+      id: "item-abc",
+      conversation_id: "c1",
+      description: "Finish the slides",
+      assignee: "Bob",
+      due_date: "2025-12-01",
+      status: "pending",
+      created_at: "",
+      updated_at: "",
+    },
+  ];
+  const prompt = buildActionItemStatusPrompt(items);
+  assertStringIncludes(prompt, "item-abc");
+  assertStringIncludes(prompt, "Finish the slides");
 });
 
 Deno.test("buildActionItemStatusPrompt requests JSON array response", () => {
-	const prompt = buildActionItemStatusPrompt([]);
-	assertStringIncludes(prompt, "JSON array");
+  const prompt = buildActionItemStatusPrompt([]);
+  assertStringIncludes(prompt, "JSON array");
 });
 
 // ===================================================================
@@ -129,28 +126,28 @@ Deno.test("buildActionItemStatusPrompt requests JSON array response", () => {
 // ===================================================================
 
 Deno.test("buildTopicExtractionPrompt includes conversation text", () => {
-	const text = "We discussed the budget and timeline.";
-	const prompt = buildTopicExtractionPrompt(text);
-	assertStringIncludes(prompt, text);
+  const text = "We discussed the budget and timeline.";
+  const prompt = buildTopicExtractionPrompt(text);
+  assertStringIncludes(prompt, text);
 });
 
 Deno.test("buildTopicExtractionPrompt requests nodes and edges JSON", () => {
-	const prompt = buildTopicExtractionPrompt("text");
-	assertStringIncludes(prompt, '"nodes"');
-	assertStringIncludes(prompt, '"edges"');
+  const prompt = buildTopicExtractionPrompt("text");
+  assertStringIncludes(prompt, '"nodes"');
+  assertStringIncludes(prompt, '"edges"');
 });
 
 Deno.test("buildTopicExtractionPrompt with existing nodes includes reuse context", () => {
-	const nodes = [{ id: "n1", label: "Budget", color: "#aaa", emoji: "💰" }];
-	const prompt = buildTopicExtractionPrompt("some text", nodes);
-	assertStringIncludes(prompt, "EXISTING TOPICS");
-	assertStringIncludes(prompt, "n1");
-	assertStringIncludes(prompt, "Budget");
+  const nodes = [{ id: "n1", label: "Budget", color: "#aaa", emoji: "💰" }];
+  const prompt = buildTopicExtractionPrompt("some text", nodes);
+  assertStringIncludes(prompt, "EXISTING TOPICS");
+  assertStringIncludes(prompt, "n1");
+  assertStringIncludes(prompt, "Budget");
 });
 
 Deno.test("buildTopicExtractionPrompt without existing nodes has no reuse context", () => {
-	const prompt = buildTopicExtractionPrompt("some text");
-	assertEquals(prompt.includes("EXISTING TOPICS"), false);
+  const prompt = buildTopicExtractionPrompt("some text");
+  assertEquals(prompt.includes("EXISTING TOPICS"), false);
 });
 
 // ===================================================================
@@ -158,9 +155,9 @@ Deno.test("buildTopicExtractionPrompt without existing nodes has no reuse contex
 // ===================================================================
 
 Deno.test("buildSummaryPrompt includes conversation text", () => {
-	const text = "Long discussion about Q4 goals.";
-	const prompt = buildSummaryPrompt(text);
-	assertStringIncludes(prompt, text);
+  const text = "Long discussion about Q4 goals.";
+  const prompt = buildSummaryPrompt(text);
+  assertStringIncludes(prompt, text);
 });
 
 // ===================================================================
@@ -168,16 +165,16 @@ Deno.test("buildSummaryPrompt includes conversation text", () => {
 // ===================================================================
 
 Deno.test("buildMarkdownTransformPrompt includes both formatPrompt and text", () => {
-	const formatPrompt = "Convert to bullet points";
-	const text = "Alice will do X. Bob will do Y.";
-	const prompt = buildMarkdownTransformPrompt(formatPrompt, text);
-	assertStringIncludes(prompt, formatPrompt);
-	assertStringIncludes(prompt, text);
+  const formatPrompt = "Convert to bullet points";
+  const text = "Alice will do X. Bob will do Y.";
+  const prompt = buildMarkdownTransformPrompt(formatPrompt, text);
+  assertStringIncludes(prompt, formatPrompt);
+  assertStringIncludes(prompt, text);
 });
 
 Deno.test("buildMarkdownTransformPrompt requests markdown output", () => {
-	const prompt = buildMarkdownTransformPrompt("format", "text");
-	assertStringIncludes(prompt.toLowerCase(), "markdown");
+  const prompt = buildMarkdownTransformPrompt("format", "text");
+  assertStringIncludes(prompt.toLowerCase(), "markdown");
 });
 
 // ===================================================================
@@ -185,7 +182,7 @@ Deno.test("buildMarkdownTransformPrompt requests markdown output", () => {
 // ===================================================================
 
 Deno.test("ACTION_ITEMS_BASE_PROMPT contains JSON schema example", () => {
-	assertStringIncludes(ACTION_ITEMS_BASE_PROMPT, '"description"');
-	assertStringIncludes(ACTION_ITEMS_BASE_PROMPT, '"assignee"');
-	assertStringIncludes(ACTION_ITEMS_BASE_PROMPT, '"due_date"');
+  assertStringIncludes(ACTION_ITEMS_BASE_PROMPT, '"description"');
+  assertStringIncludes(ACTION_ITEMS_BASE_PROMPT, '"assignee"');
+  assertStringIncludes(ACTION_ITEMS_BASE_PROMPT, '"due_date"');
 });

@@ -37,7 +37,8 @@ export function saveConversation(data: ConversationData): void {
   const stored: StoredConversation = {
     ...data,
     id: conversationId,
-    createdAt: conversations[conversationId]?.createdAt || new Date().toISOString(),
+    createdAt: conversations[conversationId]?.createdAt ||
+      new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
 
@@ -78,7 +79,7 @@ export function getAllConversations(): Record<string, StoredConversation> {
 export function getConversationList(): StoredConversation[] {
   const conversations = getAllConversations();
   return Object.values(conversations).sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
   );
 }
 

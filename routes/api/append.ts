@@ -16,7 +16,6 @@ import type { ActionItem } from "@core/types/index.ts";
 import { guardRequest } from "@services/requestGuard.ts";
 import { getGeminiService } from "@services/ai.ts";
 import { deleteUploadedFile, uploadAudioFile } from "@services/audio.ts";
-import { fileToAudioPart } from "@services/audio.ts";
 
 export const handler: Handlers = {
   async POST(req) {

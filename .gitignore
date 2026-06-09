@@ -41,5 +41,6 @@ coverage/
 
 # Others
 scratchpad.txt
+.launch-hints.yaml
 .aider*
 key.json

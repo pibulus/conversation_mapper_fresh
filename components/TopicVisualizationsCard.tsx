@@ -24,9 +24,9 @@ export default function TopicVisualizationsCard() {
         }
       },
       {
-        rootMargin: '100px', // Load slightly before it comes into view
-        threshold: 0.1
-      }
+        rootMargin: "100px", // Load slightly before it comes into view
+        threshold: 0.1,
+      },
     );
 
     observer.observe(cardRef.current);
@@ -40,18 +40,21 @@ export default function TopicVisualizationsCard() {
         <div class="dashboard-card-header">
           <h3>Topic Visualizations</h3>
         </div>
-        <div style={{ padding: 'var(--card-padding)', minHeight: '500px' }}>
-          {isVisible.value ? (
-            <VisualizationSelector />
-          ) : (
+        <div style={{ padding: "var(--card-padding)", minHeight: "500px" }}>
+          {isVisible.value ? <VisualizationSelector /> : (
             // Loading placeholder
-            <div class="flex items-center justify-center" style={{ minHeight: '500px' }}>
-              <div style={{
-                textAlign: 'center',
-                color: 'var(--color-text-secondary)',
-                fontSize: 'var(--text-size)'
-              }}>
-                <div class="mb-2" style={{ fontSize: '2rem' }}>📊</div>
+            <div
+              class="flex items-center justify-center"
+              style={{ minHeight: "500px" }}
+            >
+              <div
+                style={{
+                  textAlign: "center",
+                  color: "var(--color-text-secondary)",
+                  fontSize: "var(--text-size)",
+                }}
+              >
+                <div class="mb-2" style={{ fontSize: "2rem" }}>📊</div>
                 <div>Loading visualization...</div>
               </div>
             </div>

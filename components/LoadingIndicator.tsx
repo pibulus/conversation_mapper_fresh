@@ -16,7 +16,7 @@ function getRandomLoadingMessage() {
     "assembling your dashboard...",
     "connecting the dots...",
     "setting the mood...",
-    "capturing conversations..."
+    "capturing conversations...",
   ];
   return messages[Math.floor(Math.random() * messages.length)];
 }
@@ -32,7 +32,7 @@ export default function LoadingIndicator() {
   const [loadingEmoji] = useState(getLoadingEmoji());
 
   useEffect(() => {
-    console.log('LoadingIndicator mounted');
+    console.log("LoadingIndicator mounted");
   }, []);
 
   return (
@@ -43,7 +43,7 @@ export default function LoadingIndicator() {
             <span class="emoji pulse">{loadingEmoji}</span>
           </div>
           <div class="loading-text">
-            {loadingMessage.split('').map((letter, i) => (
+            {loadingMessage.split("").map((letter, i) => (
               <span
                 key={i}
                 class="bounce-letter"
@@ -56,7 +56,8 @@ export default function LoadingIndicator() {
         </div>
       </div>
 
-      <style>{`
+      <style>
+        {`
         /* Cute loading indicator */
         .loading-indicator {
           display: flex;
@@ -212,7 +213,8 @@ export default function LoadingIndicator() {
             font-size: 1.8rem;
           }
         }
-      `}</style>
+      `}
+      </style>
     </div>
   );
 }

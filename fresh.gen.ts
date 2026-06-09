@@ -7,7 +7,6 @@ import * as $_app from "./routes/_app.tsx";
 import * as $api_append from "./routes/api/append.ts";
 import * as $api_auth from "./routes/api/auth.ts";
 import * as $api_gemini from "./routes/api/gemini.ts";
-import * as $api_joke from "./routes/api/joke.ts";
 import * as $api_process from "./routes/api/process.ts";
 import * as $index from "./routes/index.tsx";
 import * as $shared_shareId_ from "./routes/shared/[shareId].tsx";
@@ -36,7 +35,6 @@ const manifest = {
     "./routes/api/append.ts": $api_append,
     "./routes/api/auth.ts": $api_auth,
     "./routes/api/gemini.ts": $api_gemini,
-    "./routes/api/joke.ts": $api_joke,
     "./routes/api/process.ts": $api_process,
     "./routes/index.tsx": $index,
     "./routes/shared/[shareId].tsx": $shared_shareId_,

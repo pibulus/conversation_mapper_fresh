@@ -27,7 +27,7 @@ const LOADING_MESSAGES = [
   "capturing conversations...",
   "mapping the topics...",
   "finding the insights...",
-  "organizing your thoughts..."
+  "organizing your thoughts...",
 ];
 
 // Modern, chill vibes emoji sets
@@ -46,7 +46,7 @@ export default function LoadingModal({ isOpen }: LoadingModalProps) {
   useEffect(() => {
     if (isOpen) {
       const previousOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
       return () => {
         document.body.style.overflow = previousOverflow;
       };
@@ -59,22 +59,22 @@ export default function LoadingModal({ isOpen }: LoadingModalProps) {
     <div
       class="fixed inset-0 z-50 flex items-center justify-center"
       style={{
-        background: 'rgba(0, 0, 0, 0.8)',
-        backdropFilter: 'blur(4px)'
+        background: "rgba(0, 0, 0, 0.8)",
+        backdropFilter: "blur(4px)",
       }}
     >
       <div class="loading-container">
         <div class="loading-box">
           {/* Emoji Row */}
-          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-            <span class="emoji-pulse" style={{ fontSize: '2.2rem' }}>
+          <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+            <span class="emoji-pulse" style={{ fontSize: "2.2rem" }}>
               {loadingEmoji}
             </span>
           </div>
 
           {/* Loading Text with Bounce Animation */}
           <div class="loading-text">
-            {loadingMessage.split('').map((letter, i) => (
+            {loadingMessage.split("").map((letter, i) => (
               <span
                 key={i}
                 class="bounce-letter"
@@ -87,7 +87,8 @@ export default function LoadingModal({ isOpen }: LoadingModalProps) {
         </div>
       </div>
 
-      <style>{`
+      <style>
+        {`
         /* Container with animated border */
         .loading-container {
           position: relative;
@@ -211,7 +212,8 @@ export default function LoadingModal({ isOpen }: LoadingModalProps) {
             background-position: 300% 300%;
           }
         }
-      `}</style>
+      `}
+      </style>
     </div>
   );
 }

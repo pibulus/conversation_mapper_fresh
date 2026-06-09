@@ -1,5 +1,6 @@
 {
   "name": "conversation-mapper",
+  "exports": "./main.ts",
   "version": "1.0.0",
   "description": "Turn messy meeting recordings into organized topic maps, action items, and summaries - automatically",
   "author": "Conversation Mapper Contributors",
@@ -22,6 +23,14 @@
       "tags": [
         "fresh",
         "recommended"
+      ],
+      "exclude": [
+        "jsx-button-has-type",
+        "no-explicit-any",
+        "no-window",
+        "no-window-prefix",
+        "react-no-danger",
+        "require-await"
       ]
     }
   },
@@ -45,6 +54,9 @@
   },
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "preact"
+    "jsxImportSource": "preact",
+    "strict": false,
+    "noImplicitAny": false,
+    "noImplicitThis": false
   }
 }

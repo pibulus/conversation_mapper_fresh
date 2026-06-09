@@ -89,7 +89,10 @@ export function decompressData(compressed: string): any {
  * Create a shareable link for a conversation
  * Attempts URL-based sharing first, falls back to localStorage for large data
  */
-export function createShare(data: ConversationData, expiresInDays?: number): string {
+export function createShare(
+  data: ConversationData,
+  expiresInDays?: number,
+): string {
   if (typeof window === "undefined") return "";
 
   // Create minimal shareable data (exclude large audio blobs)
@@ -150,7 +153,9 @@ export function getShareUrl(shareId: string): string {
 /**
  * Load a shared conversation by ID or from URL data
  */
-export function loadSharedConversation(shareId: string): SharedConversation | null {
+export function loadSharedConversation(
+  shareId: string,
+): SharedConversation | null {
   if (typeof window === "undefined") return null;
 
   // Check if it's URL-based data
@@ -165,8 +170,8 @@ export function loadSharedConversation(shareId: string): SharedConversation | nu
         sharedAt: new Date().toISOString(),
         conversation: {
           id: `shared_${Date.now()}`,
-          ...data
-        }
+          ...data,
+        },
       } as SharedConversation;
     }
   }
@@ -244,18 +249,22 @@ export function cleanupExpiredShares(): number {
 /**
  * Get list of all shares for current user's conversations
  */
-export function getSharesForConversation(conversationId: string): SharedConversation[] {
+export function getSharesForConversation(
+  conversationId: string,
+): SharedConversation[] {
   const shares = getAllShares();
 
   return Object.values(shares).filter(
-    (share) => share.conversation.id === conversationId
+    (share) => share.conversation.id === conversationId,
   );
 }
 
 /**
  * Copy share URL to clipboard
  */
-export async function copyShareUrlToClipboard(shareId: string): Promise<boolean> {
+export async function copyShareUrlToClipboard(
+  shareId: string,
+): Promise<boolean> {
   if (typeof window === "undefined") return false;
 
   try {

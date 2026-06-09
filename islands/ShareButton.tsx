@@ -4,12 +4,12 @@
  * Creates share links for conversations with copy-to-clipboard
  */
 
-import { useSignal, useComputed } from "@preact/signals";
+import { useComputed, useSignal } from "@preact/signals";
 import { conversationData } from "../signals/conversationStore.ts";
 import {
+  copyShareUrlToClipboard,
   createShare,
   getShareUrl,
-  copyShareUrlToClipboard,
 } from "../core/storage/shareService.ts";
 
 export default function ShareButton() {

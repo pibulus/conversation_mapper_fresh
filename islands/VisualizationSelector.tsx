@@ -46,7 +46,7 @@ export default function VisualizationSelector() {
           <button
             key={viz.id}
             onClick={() => (activeViz.value = viz.id)}
-            class={`mode-tab ${activeViz.value === viz.id ? 'active' : ''}`}
+            class={`mode-tab ${activeViz.value === viz.id ? "active" : ""}`}
             aria-pressed={activeViz.value === viz.id}
           >
             {viz.name}

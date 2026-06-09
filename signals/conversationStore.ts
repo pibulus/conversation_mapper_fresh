@@ -5,7 +5,7 @@
  * Auto-saves to localStorage on updates (unless viewing shared)
  */
 
-import { signal, effect } from "@preact/signals";
+import { effect, signal } from "@preact/signals";
 import { debouncedSave } from "../core/storage/localStorage.ts";
 
 export interface ConversationData {
@@ -14,6 +14,7 @@ export interface ConversationData {
     title?: string;
     source: string;
     transcript: string;
+    created_at?: string;
   };
   transcript: {
     text: string;
@@ -26,16 +27,20 @@ export interface ConversationData {
     color: string;
   }>;
   edges: Array<{
+    id?: string;
     source_topic_id: string;
     target_topic_id: string;
     color: string;
   }>;
   actionItems: Array<{
     id: string;
+    conversation_id: string;
     description: string;
     assignee: string | null;
     due_date: string | null;
-    status: 'pending' | 'completed';
+    status: "pending" | "completed";
+    created_at: string;
+    updated_at: string;
   }>;
   statusUpdates: Array<any>;
   summary?: string;

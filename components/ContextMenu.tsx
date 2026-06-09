@@ -18,27 +18,29 @@ interface ContextMenuProps {
   onClose: () => void;
 }
 
-export default function ContextMenu({ visible, x, y, items, onClose }: ContextMenuProps) {
+export default function ContextMenu(
+  { visible, x, y, items, onClose }: ContextMenuProps,
+) {
   // Close on click outside or escape
   useEffect(() => {
     if (!visible) return;
 
     const handleClickOutside = () => onClose();
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
 
     // Small delay to prevent immediate close from the right-click event
     setTimeout(() => {
-      document.addEventListener('click', handleClickOutside);
-      document.addEventListener('contextmenu', handleClickOutside);
-      document.addEventListener('keydown', handleEscape);
+      document.addEventListener("click", handleClickOutside);
+      document.addEventListener("contextmenu", handleClickOutside);
+      document.addEventListener("keydown", handleEscape);
     }, 10);
 
     return () => {
-      document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('contextmenu', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener("contextmenu", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, [visible, onClose]);
 
@@ -50,7 +52,7 @@ export default function ContextMenu({ visible, x, y, items, onClose }: ContextMe
       style={{
         left: `${x}px`,
         top: `${y}px`,
-        minWidth: '180px'
+        minWidth: "180px",
       }}
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => e.preventDefault()}

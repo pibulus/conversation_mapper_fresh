@@ -33,14 +33,9 @@ const loading = signal(false);
 const error = signal<string | null>(null);
 const savedOutputs = signal<SavedOutput[]>([]);
 
-// Bounce easing function - EXACT copy from Svelte version
-function bounceEasing(t: number): number {
-  const b = 3; // Bounce frequency
-  const d = 0.7; // Damping
-  return 1 - Math.pow(1 - t, 2) * (1 + d * Math.sin(b * Math.PI * t));
-}
-
-export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conversationId }: MarkdownMakerDrawerProps) {
+export default function MarkdownMakerDrawer(
+  { isOpen, onClose, transcript, conversationId }: MarkdownMakerDrawerProps,
+) {
   const drawerRef = useRef<HTMLDivElement>(null);
   const [shouldRender, setShouldRender] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -71,19 +66,21 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
     if (!isOpen) return;
 
     function handleClickOutside(event: MouseEvent) {
-      if (drawerRef.current && !drawerRef.current.contains(event.target as Node)) {
+      if (
+        drawerRef.current && !drawerRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     }
 
     // Add small delay to prevent immediate close
     const timeout = setTimeout(() => {
-      document.addEventListener('click', handleClickOutside);
+      document.addEventListener("click", handleClickOutside);
     }, 100);
 
     return () => {
       clearTimeout(timeout);
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [isOpen, onClose]);
 
@@ -92,25 +89,27 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
     if (!isOpen) return;
 
     function handleEscape(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         onClose();
       }
     }
 
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
   // Load saved outputs from localStorage
   function loadSavedOutputs() {
     try {
-      const stored = localStorage.getItem('markdown_outputs');
+      const stored = localStorage.getItem("markdown_outputs");
       if (stored) {
         const allOutputs: SavedOutput[] = JSON.parse(stored);
-        savedOutputs.value = allOutputs.filter(o => o.conversation_id === conversationId);
+        savedOutputs.value = allOutputs.filter((o) =>
+          o.conversation_id === conversationId
+        );
       }
     } catch (err) {
-      console.error('Error loading saved outputs:', err);
+      console.error("Error loading saved outputs:", err);
     }
   }
 
@@ -124,49 +123,54 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
         conversation_id: conversationId,
         content: markdown.value,
         prompt: selectedPromptId.value
-          ? markdownPrompts.find(p => p.id === selectedPromptId.value)?.label || 'Custom'
-          : 'Custom',
-        created_at: new Date().toISOString()
+          ? markdownPrompts.find((p) => p.id === selectedPromptId.value)
+            ?.label || "Custom"
+          : "Custom",
+        created_at: new Date().toISOString(),
       };
 
       // Get all outputs, add new one, save back
-      const stored = localStorage.getItem('markdown_outputs');
+      const stored = localStorage.getItem("markdown_outputs");
       const allOutputs: SavedOutput[] = stored ? JSON.parse(stored) : [];
       allOutputs.push(newOutput);
-      localStorage.setItem('markdown_outputs', JSON.stringify(allOutputs));
+      localStorage.setItem("markdown_outputs", JSON.stringify(allOutputs));
 
       // Update signal
-      savedOutputs.value = allOutputs.filter(o => o.conversation_id === conversationId);
-      showToast('Output saved!', 'success');
+      savedOutputs.value = allOutputs.filter((o) =>
+        o.conversation_id === conversationId
+      );
+      showToast("Output saved!", "success");
     } catch (err) {
-      console.error('Error saving output:', err);
-      showToast('Failed to save output', 'error');
+      console.error("Error saving output:", err);
+      showToast("Failed to save output", "error");
     }
   }
 
   // Delete saved output
   function deleteOutput(id: string) {
     try {
-      const stored = localStorage.getItem('markdown_outputs');
+      const stored = localStorage.getItem("markdown_outputs");
       if (stored) {
         const allOutputs: SavedOutput[] = JSON.parse(stored);
-        const filtered = allOutputs.filter(o => o.id !== id);
-        localStorage.setItem('markdown_outputs', JSON.stringify(filtered));
-        savedOutputs.value = filtered.filter(o => o.conversation_id === conversationId);
-        showToast('Output deleted', 'success');
+        const filtered = allOutputs.filter((o) => o.id !== id);
+        localStorage.setItem("markdown_outputs", JSON.stringify(filtered));
+        savedOutputs.value = filtered.filter((o) =>
+          o.conversation_id === conversationId
+        );
+        showToast("Output deleted", "success");
       }
     } catch (err) {
-      console.error('Error deleting output:', err);
-      showToast('Failed to delete output', 'error');
+      console.error("Error deleting output:", err);
+      showToast("Failed to delete output", "error");
     }
   }
 
   // Generate markdown from preset prompt
   async function generateFromPreset(promptId: string) {
-    const promptOption = markdownPrompts.find(p => p.id === promptId);
+    const promptOption = markdownPrompts.find((p) => p.id === promptId);
     if (!promptOption || !transcript.trim()) {
-      error.value = 'No transcript content available';
-      showToast('No transcript content available', 'error');
+      error.value = "No transcript content available";
+      showToast("No transcript content available", "error");
       return;
     }
 
@@ -175,13 +179,19 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
     selectedPromptId.value = promptId;
 
     try {
-      const result = await geminiService.generateMarkdown(promptOption.prompt, transcript);
+      const result = await geminiService.generateMarkdown(
+        promptOption.prompt,
+        transcript,
+      );
       markdown.value = result;
-      showToast('Markdown generated!', 'success');
+      showToast("Markdown generated!", "success");
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Generation failed';
-      showToast(err instanceof Error ? err.message : 'Failed to generate markdown', 'error');
-      markdown.value = '';
+      error.value = err instanceof Error ? err.message : "Generation failed";
+      showToast(
+        err instanceof Error ? err.message : "Failed to generate markdown",
+        "error",
+      );
+      markdown.value = "";
     } finally {
       loading.value = false;
     }
@@ -190,8 +200,8 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
   // Generate markdown from custom prompt
   async function generateFromCustom() {
     if (!customPrompt.value.trim() || !transcript.trim()) {
-      error.value = 'Please provide both a prompt and transcript';
-      showToast('Please provide both a prompt and transcript', 'warning');
+      error.value = "Please provide both a prompt and transcript";
+      showToast("Please provide both a prompt and transcript", "warning");
       return;
     }
 
@@ -200,13 +210,19 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
     selectedPromptId.value = null;
 
     try {
-      const result = await geminiService.generateMarkdown(customPrompt.value, transcript);
+      const result = await geminiService.generateMarkdown(
+        customPrompt.value,
+        transcript,
+      );
       markdown.value = result;
-      showToast('Markdown generated!', 'success');
+      showToast("Markdown generated!", "success");
     } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Generation failed';
-      showToast(err instanceof Error ? err.message : 'Failed to generate markdown', 'error');
-      markdown.value = '';
+      error.value = err instanceof Error ? err.message : "Generation failed";
+      showToast(
+        err instanceof Error ? err.message : "Failed to generate markdown",
+        "error",
+      );
+      markdown.value = "";
     } finally {
       loading.value = false;
     }
@@ -216,9 +232,9 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
   async function copyToClipboard() {
     try {
       await navigator.clipboard.writeText(markdown.value);
-      showToast('Copied to clipboard!', 'success');
-    } catch (err) {
-      showToast('Failed to copy', 'error');
+      showToast("Copied to clipboard!", "success");
+    } catch (_err) {
+      showToast("Failed to copy", "error");
     }
   }
 
@@ -226,9 +242,9 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
   async function copySavedOutput(content: string) {
     try {
       await navigator.clipboard.writeText(content);
-      showToast('Copied to clipboard!', 'success');
-    } catch (err) {
-      showToast('Failed to copy', 'error');
+      showToast("Copied to clipboard!", "success");
+    } catch (_err) {
+      showToast("Failed to copy", "error");
     }
   }
 
@@ -237,16 +253,17 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
     if (!markdown.value) return;
 
     try {
-      const blob = new Blob([markdown.value], { type: 'text/markdown' });
+      const blob = new Blob([markdown.value], { type: "text/markdown" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
 
       // Generate filename from prompt type and timestamp
       const promptLabel = selectedPromptId.value
-        ? markdownPrompts.find(p => p.id === selectedPromptId.value)?.label || 'Export'
-        : 'CustomExport';
-      const timestamp = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        ? markdownPrompts.find((p) => p.id === selectedPromptId.value)?.label ||
+          "Export"
+        : "CustomExport";
+      const timestamp = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
       a.download = `${promptLabel}-${timestamp}.md`;
 
       document.body.appendChild(a);
@@ -254,9 +271,9 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showToast('Downloaded as markdown!', 'success');
-    } catch (err) {
-      showToast('Failed to download', 'error');
+      showToast("Downloaded as markdown!", "success");
+    } catch (_err) {
+      showToast("Failed to download", "error");
     }
   }
 
@@ -266,21 +283,22 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
 
     try {
       // Create a hidden print window with styled content
-      const printWindow = window.open('', '_blank');
+      const printWindow = window.open("", "_blank");
       if (!printWindow) {
-        showToast('Please allow popups to download PDF', 'warning');
+        showToast("Please allow popups to download PDF", "warning");
         return;
       }
 
       const promptLabel = selectedPromptId.value
-        ? markdownPrompts.find(p => p.id === selectedPromptId.value)?.label || 'Export'
-        : 'Custom Export';
+        ? markdownPrompts.find((p) => p.id === selectedPromptId.value)?.label ||
+          "Export"
+        : "Custom Export";
 
       // Convert markdown line breaks to HTML
       const htmlContent = markdown.value
-        .split('\n\n')
-        .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`)
-        .join('');
+        .split("\n\n")
+        .map((para) => `<p>${para.replace(/\n/g, "<br>")}</p>`)
+        .join("");
 
       printWindow.document.write(`
         <!DOCTYPE html>
@@ -349,9 +367,11 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
           <body>
             <div class="header">
               <h1>${promptLabel}</h1>
-              <p style="color: #6b7280; font-size: 11pt;">Generated on ${new Date().toLocaleDateString()}</p>
+              <p style="color: #6b7280; font-size: 11pt;">Generated on ${
+        new Date().toLocaleDateString()
+      }</p>
             </div>
-            <div style="white-space: pre-wrap; font-family: monospace;">${markdown.value}</div>
+            <div>${htmlContent}</div>
             <div class="footer">
               Generated by Conversation Mapper
             </div>
@@ -365,10 +385,10 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
       setTimeout(() => {
         printWindow.print();
         // Don't close immediately - let user save PDF first
-        showToast('Opening print dialog for PDF...', 'success');
+        showToast("Opening print dialog for PDF...", "success");
       }, 250);
-    } catch (err) {
-      showToast('Failed to generate PDF', 'error');
+    } catch (_err) {
+      showToast("Failed to generate PDF", "error");
     }
   }
 
@@ -380,15 +400,15 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
       <div
         ref={drawerRef}
         class={`fixed bottom-0 right-0 top-0 z-50 flex w-96 flex-col overflow-hidden transition-transform duration-[400ms] ${
-          isAnimating ? 'translate-x-0' : 'translate-x-full'
+          isAnimating ? "translate-x-0" : "translate-x-full"
         }`}
         style={{
           borderLeft: `var(--border-width) solid var(--color-border)`,
-          background: 'var(--color-secondary)',
-          boxShadow: 'var(--shadow-lifted)',
+          background: "var(--color-secondary)",
+          boxShadow: "var(--shadow-lifted)",
           transitionTimingFunction: isAnimating
-            ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' // bounce in
-            : 'cubic-bezier(0.4, 0, 1, 1)' // slide out
+            ? "cubic-bezier(0.34, 1.56, 0.64, 1)" // bounce in
+            : "cubic-bezier(0.4, 0, 1, 1)", // slide out
         }}
       >
         {/* Header */}
@@ -426,8 +446,8 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
                 key={promptOption.id}
                 class={`btn btn-sm flex-1 min-w-[calc(50%-0.25rem)] ${
                   selectedPromptId.value === promptOption.id
-                    ? 'bg-soft-purple text-white border-purple-600'
-                    : 'bg-white border-2 border-gray-300 hover:border-soft-purple'
+                    ? "bg-soft-purple text-white border-purple-600"
+                    : "bg-white border-2 border-gray-300 hover:border-soft-purple"
                 }`}
                 onClick={() => generateFromPreset(promptOption.id)}
                 disabled={loading.value}
@@ -439,12 +459,15 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
 
           {/* Custom Prompt Input */}
           <div class="mb-4">
-            <label class="block text-sm font-semibold mb-2">Custom Prompt</label>
+            <label class="block text-sm font-semibold mb-2">
+              Custom Prompt
+            </label>
             <textarea
               class="w-full h-24 border-2 border-gray-300 rounded px-3 py-2 text-sm focus:border-soft-purple focus:outline-none"
               placeholder="Type your own custom prompt here..."
               value={customPrompt.value}
-              onInput={(e) => customPrompt.value = (e.target as HTMLTextAreaElement).value}
+              onInput={(e) =>
+                customPrompt.value = (e.target as HTMLTextAreaElement).value}
             />
           </div>
 
@@ -452,18 +475,20 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
           <button
             class="btn w-full bg-soft-purple text-white border-purple-600 hover:bg-purple-500 mb-4"
             onClick={generateFromCustom}
-            disabled={loading.value || !customPrompt.value.trim() || !transcript.trim()}
+            disabled={loading.value || !customPrompt.value.trim() ||
+              !transcript.trim()}
           >
-            {loading.value && selectedPromptId.value === null ? (
-              <span class="loading loading-spinner loading-sm"></span>
-            ) : null}
+            {loading.value && selectedPromptId.value === null
+              ? <span class="loading loading-spinner loading-sm"></span>
+              : null}
             Generate Custom
           </button>
 
           {/* Loading Indicator for Preset Buttons */}
           {loading.value && selectedPromptId.value !== null && (
             <div class="flex justify-center mb-4">
-              <span class="loading loading-spinner loading-lg text-soft-purple"></span>
+              <span class="loading loading-spinner loading-lg text-soft-purple">
+              </span>
             </div>
           )}
 
@@ -522,11 +547,18 @@ export default function MarkdownMakerDrawer({ isOpen, onClose, transcript, conve
               <h4 class="font-bold text-sm mb-3">💾 Saved Outputs</h4>
               <div class="space-y-2">
                 {savedOutputs.value.map((output) => (
-                  <div key={output.id} class="border-2 border-gray-300 rounded-lg p-3 bg-white">
+                  <div
+                    key={output.id}
+                    class="border-2 border-gray-300 rounded-lg p-3 bg-white"
+                  >
                     <div class="flex justify-between items-start mb-2">
                       <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-sm text-purple-600">{output.prompt}</p>
-                        <p class="text-xs text-gray-500">{new Date(output.created_at).toLocaleString()}</p>
+                        <p class="font-semibold text-sm text-purple-600">
+                          {output.prompt}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          {new Date(output.created_at).toLocaleString()}
+                        </p>
                       </div>
                       <div class="flex gap-1 ml-2">
                         <button

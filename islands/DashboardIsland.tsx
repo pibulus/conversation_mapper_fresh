@@ -15,7 +15,10 @@ export default function DashboardIsland() {
     return (
       <div class="dashboard-skeleton-grid">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div class="skeleton dashboard-skeleton-card skeleton-pulse" key={index}>
+          <div
+            class="skeleton dashboard-skeleton-card skeleton-pulse"
+            key={index}
+          >
             <div class="skeleton-line skeleton-lg"></div>
             <div class="skeleton-line" style="width: 70%"></div>
             <div class="skeleton-line" style="width: 85%"></div>
@@ -26,13 +29,14 @@ export default function DashboardIsland() {
     );
   }
 
-  const { conversation, transcript, actionItems, nodes, summary } = conversationData.value;
+  const { conversation, transcript, actionItems, nodes, summary } =
+    conversationData.value;
 
   // Handler to update action items
   function handleUpdateActionItems(updatedItems: typeof actionItems) {
     conversationData.value = {
       ...conversationData.value!,
-      actionItems: updatedItems
+      actionItems: updatedItems,
     };
   }
 
@@ -40,13 +44,12 @@ export default function DashboardIsland() {
     <div>
       {/* Grid Container - Simple CSS Grid */}
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-
         {/* Card 1: Transcript */}
         <TranscriptCard transcript={transcript} />
 
         {/* Card 2: Summary */}
         <SummaryCard
-          summary={summary}
+          summary={summary ?? null}
           nodes={nodes}
           conversationSource={conversation.source}
         />
@@ -59,7 +62,6 @@ export default function DashboardIsland() {
 
         {/* Card 4: Topic Visualizations - FULL WIDTH (spans all columns) */}
         <TopicVisualizationsCard />
-
       </div>
     </div>
   );

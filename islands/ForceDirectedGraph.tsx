@@ -6,9 +6,12 @@
  */
 
 import { useEffect, useRef } from "preact/hooks";
-import { useSignal, useComputed } from "@preact/signals";
+import { useComputed, useSignal } from "@preact/signals";
 import { conversationData } from "../signals/conversationStore.ts";
-import { forceDirectedEmojimap, EmojimapHandle } from "../utils/forceDirectedEmojimap.ts";
+import {
+  EmojimapHandle,
+  forceDirectedEmojimap,
+} from "../utils/forceDirectedEmojimap.ts";
 import * as htmlToImage from "html-to-image";
 import ContextMenu from "../components/ContextMenu.tsx";
 
@@ -16,7 +19,9 @@ interface ForceDirectedGraphProps {
   loading?: boolean;
 }
 
-export default function ForceDirectedGraph({ loading = false }: ForceDirectedGraphProps) {
+export default function ForceDirectedGraph(
+  { loading = false }: ForceDirectedGraphProps,
+) {
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
   const fullscreenPortalRef = useRef<HTMLDivElement | null>(null);
@@ -50,17 +55,22 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
     if (isFullscreen.value) {
       // Remove event listeners before removing portal
       if (fullscreenPortalRef.current && portalClickListenerRef.current) {
-        fullscreenPortalRef.current.removeEventListener('click', portalClickListenerRef.current);
+        fullscreenPortalRef.current.removeEventListener(
+          "click",
+          portalClickListenerRef.current,
+        );
         portalClickListenerRef.current = null;
       }
       if (escapeListenerRef.current) {
-        document.removeEventListener('keydown', escapeListenerRef.current);
+        document.removeEventListener("keydown", escapeListenerRef.current);
         escapeListenerRef.current = null;
       }
 
       // Remove fullscreen
       if (fullscreenPortalRef.current?.parentNode) {
-        fullscreenPortalRef.current.parentNode.removeChild(fullscreenPortalRef.current);
+        fullscreenPortalRef.current.parentNode.removeChild(
+          fullscreenPortalRef.current,
+        );
       }
       fullscreenPortalRef.current = null;
       isFullscreen.value = false;
@@ -76,50 +86,51 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
 
   function createFullscreenPortal() {
     // Create portal element
-    const portal = document.createElement('div');
-    portal.className = 'fullscreen-network-viz-portal';
-    portal.style.position = 'fixed';
-    portal.style.top = '0';
-    portal.style.left = '0';
-    portal.style.width = '100%';
-    portal.style.height = '100%';
-    portal.style.zIndex = '9999';
-    portal.style.display = 'flex';
-    portal.style.alignItems = 'center';
-    portal.style.justifyContent = 'center';
-    portal.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+    const portal = document.createElement("div");
+    portal.className = "fullscreen-network-viz-portal";
+    portal.style.position = "fixed";
+    portal.style.top = "0";
+    portal.style.left = "0";
+    portal.style.width = "100%";
+    portal.style.height = "100%";
+    portal.style.zIndex = "9999";
+    portal.style.display = "flex";
+    portal.style.alignItems = "center";
+    portal.style.justifyContent = "center";
+    portal.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
 
     // Create modal container
-    const modalContainer = document.createElement('div');
-    modalContainer.className = 'bg-white rounded-lg';
-    modalContainer.style.width = '90%';
-    modalContainer.style.height = '85%';
-    modalContainer.style.padding = '1.5rem';
-    modalContainer.style.border = '4px solid var(--color-accent)';
-    modalContainer.style.boxShadow = 'var(--shadow-xl)';
+    const modalContainer = document.createElement("div");
+    modalContainer.className = "bg-white rounded-lg";
+    modalContainer.style.width = "90%";
+    modalContainer.style.height = "85%";
+    modalContainer.style.padding = "1.5rem";
+    modalContainer.style.border = "4px solid var(--color-accent)";
+    modalContainer.style.boxShadow = "var(--shadow-xl)";
 
     // Create header
-    const header = document.createElement('div');
-    header.className = 'flex justify-between items-center mb-4';
+    const header = document.createElement("div");
+    header.className = "flex justify-between items-center mb-4";
 
-    const title = document.createElement('h2');
-    title.className = 'text-2xl font-bold';
-    title.textContent = 'Topic Network Visualization';
+    const title = document.createElement("h2");
+    title.className = "text-2xl font-bold";
+    title.textContent = "Topic Network Visualization";
 
-    const closeButton = document.createElement('button');
-    closeButton.className = 'text-2xl font-bold hover:text-gray-600 cursor-pointer';
-    closeButton.innerHTML = '✕';
-    closeButton.title = 'Close Fullscreen';
+    const closeButton = document.createElement("button");
+    closeButton.className =
+      "text-2xl font-bold hover:text-gray-600 cursor-pointer";
+    closeButton.innerHTML = "✕";
+    closeButton.title = "Close Fullscreen";
     closeButton.onclick = toggleFullscreen;
 
     header.appendChild(title);
     header.appendChild(closeButton);
 
     // Create container for visualization
-    const vizContainer = document.createElement('div');
-    vizContainer.className = 'bg-gray-100 rounded-lg';
-    vizContainer.style.width = '100%';
-    vizContainer.style.height = 'calc(100% - 4rem)';
+    const vizContainer = document.createElement("div");
+    vizContainer.className = "bg-gray-100 rounded-lg";
+    vizContainer.style.width = "100%";
+    vizContainer.style.height = "calc(100% - 4rem)";
     fullscreenContainerRef.current = vizContainer;
 
     // Assemble
@@ -131,16 +142,16 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
     const clickListener = (e: MouseEvent) => {
       if (e.target === portal) toggleFullscreen();
     };
-    portal.addEventListener('click', clickListener);
+    portal.addEventListener("click", clickListener);
     portalClickListenerRef.current = clickListener;
 
     // Escape key to close (store listener for cleanup)
     const escListener = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         toggleFullscreen();
       }
     };
-    document.addEventListener('keydown', escListener);
+    document.addEventListener("keydown", escListener);
     escapeListenerRef.current = escListener;
 
     document.body.appendChild(portal);
@@ -155,7 +166,9 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
   // ===================================================================
 
   function initializeVisualization() {
-    const container = isFullscreen.value ? fullscreenContainerRef.current : svgContainerRef.current;
+    const container = isFullscreen.value
+      ? fullscreenContainerRef.current
+      : svgContainerRef.current;
     if (!container || topics.value.length === 0) return;
 
     // Destroy existing visualization
@@ -168,11 +181,12 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
     const height = rect.height || Math.min(800, window.innerHeight * 0.6);
 
     // Map edges to correct format
-    const edges = relationships.value.map(rel => ({
-      id: rel.id,
+    const edges = relationships.value.map((rel, index) => ({
+      id: rel.id ||
+        `${rel.source_topic_id}-${rel.target_topic_id}-${index}`,
       source: rel.source_topic_id,
       target: rel.target_topic_id,
-      color: rel.color || '#999'
+      color: rel.color || "#999",
     }));
 
     // Initialize emojimap
@@ -182,7 +196,7 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
       config: {
         width,
         height,
-        backgroundColor: 'rgba(255,255,255,0.65)',
+        backgroundColor: "rgba(255,255,255,0.65)",
         linkDistance: linkDistance.value,
         chargeStrength: chargeStrength.value,
         collisionRadius: collisionRadius.value,
@@ -193,8 +207,8 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
           contextMenuX.value = event.clientX;
           contextMenuY.value = event.clientY;
           contextMenuVisible.value = true;
-        }
-      }
+        },
+      },
     });
   }
 
@@ -211,56 +225,62 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
   }
 
   async function exportAsPng() {
-    const container = isFullscreen.value ? fullscreenContainerRef.current : svgContainerRef.current;
+    const container = isFullscreen.value
+      ? fullscreenContainerRef.current
+      : svgContainerRef.current;
     if (!container) return;
 
     try {
       // Create header overlay
-      const header = document.createElement('div');
-      header.style.position = 'absolute';
-      header.style.top = '20px';
-      header.style.left = '20px';
-      header.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-      header.style.padding = '8px 20px';
-      header.style.borderRadius = '12px';
-      header.style.fontSize = '18px';
-      header.style.fontWeight = 'bold';
-      header.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+      const header = document.createElement("div");
+      header.style.position = "absolute";
+      header.style.top = "20px";
+      header.style.left = "20px";
+      header.style.backgroundColor = "rgba(255, 255, 255, 0.9)";
+      header.style.padding = "8px 20px";
+      header.style.borderRadius = "12px";
+      header.style.fontSize = "18px";
+      header.style.fontWeight = "bold";
+      header.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
 
-      const title = conversationData.value?.title || 'Conversation Map';
-      const timestamp = new Date().toLocaleString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit'
+      const title = conversationData.value?.conversation.title ||
+        "Conversation Map";
+      const timestamp = new Date().toLocaleString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
       });
 
-      header.innerHTML = `<div>${title}</div><div style="font-size: 12px; font-weight: normal; color: #666;">${timestamp}</div>`;
+      header.innerHTML =
+        `<div>${title}</div><div style="font-size: 12px; font-weight: normal; color: #666;">${timestamp}</div>`;
       container.appendChild(header);
 
       // Hide control buttons during export
-      const buttons = container.querySelectorAll('button');
-      buttons.forEach((btn) => (btn.style.display = 'none'));
+      const buttons = container.querySelectorAll("button");
+      buttons.forEach((btn) => (btn.style.display = "none"));
 
       // Generate PNG
       const dataUrl = await htmlToImage.toPng(container, {
-        backgroundColor: '#ffffff'
+        backgroundColor: "#ffffff",
       });
 
       // Restore UI
-      buttons.forEach((btn) => (btn.style.display = ''));
+      buttons.forEach((btn) => (btn.style.display = ""));
       container.removeChild(header);
 
       // Download
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = dataUrl;
-      const filename = `${title.replace(/\s+/g, '_')}_${timestamp.replace(/[\s,:]+/g, '_')}.png`;
+      const filename = `${title.replace(/\s+/g, "_")}_${
+        timestamp.replace(/[\s,:]+/g, "_")
+      }.png`;
       link.download = filename;
       link.click();
     } catch (error) {
-      console.error('Error exporting as PNG:', error);
-      alert('Failed to export PNG. Please try again.');
+      console.error("Error exporting as PNG:", error);
+      alert("Failed to export PNG. Please try again.");
     }
   }
 
@@ -281,7 +301,9 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
       }
       // Cleanup fullscreen portal
       if (fullscreenPortalRef.current?.parentNode) {
-        fullscreenPortalRef.current.parentNode.removeChild(fullscreenPortalRef.current);
+        fullscreenPortalRef.current.parentNode.removeChild(
+          fullscreenPortalRef.current,
+        );
       }
     };
   }, []);
@@ -289,11 +311,12 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
   // Update when data or params change
   useEffect(() => {
     if (topics.value.length > 0 && emojimapHandleRef.current) {
-      const edges = relationships.value.map(rel => ({
-        id: rel.id,
+      const edges = relationships.value.map((rel, index) => ({
+        id: rel.id ||
+          `${rel.source_topic_id}-${rel.target_topic_id}-${index}`,
         source: rel.source_topic_id,
         target: rel.target_topic_id,
-        color: rel.color || '#999'
+        color: rel.color || "#999",
       }));
 
       emojimapHandleRef.current.update({
@@ -302,11 +325,17 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
         config: {
           linkDistance: linkDistance.value,
           chargeStrength: chargeStrength.value,
-          collisionRadius: collisionRadius.value
-        }
+          collisionRadius: collisionRadius.value,
+        },
       });
     }
-  }, [topics.value, relationships.value, linkDistance.value, chargeStrength.value, collisionRadius.value]);
+  }, [
+    topics.value,
+    relationships.value,
+    linkDistance.value,
+    chargeStrength.value,
+    collisionRadius.value,
+  ]);
 
   // ===================================================================
   // RENDER
@@ -332,20 +361,20 @@ export default function ForceDirectedGraph({ loading = false }: ForceDirectedGra
   // Context menu items
   const contextMenuItems = [
     {
-      label: 'Reset Positions',
-      icon: '🔄',
-      onClick: resetVisualization
+      label: "Reset Positions",
+      icon: "🔄",
+      onClick: resetVisualization,
     },
     {
-      label: 'Fit to View',
-      icon: '📐',
-      onClick: fitToView
+      label: "Fit to View",
+      icon: "📐",
+      onClick: fitToView,
     },
     {
-      label: 'Export as PNG',
-      icon: '📸',
-      onClick: exportAsPng
-    }
+      label: "Export as PNG",
+      icon: "📸",
+      onClick: exportAsPng,
+    },
   ];
 
   return (
