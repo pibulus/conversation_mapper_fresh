@@ -1,53 +1,119 @@
 /**
- * Shared Gemini helpers to keep server routes consistent.
+ * Shared AI helpers to keep server routes consistent.
  */
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createGeminiService } from "@core/ai/gemini.ts";
-import type { AIService } from "@core/ai/gemini.ts";
+import { createOpenRouterService } from "@core/ai/openrouter.ts";
+import type { AIService } from "@core/ai/types.ts";
 
-const DEFAULT_MODEL = "gemini-2.5-flash-lite";
-const modelName = Deno.env.get("GEMINI_MODEL") ?? DEFAULT_MODEL;
+const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite";
+const DEFAULT_OPENROUTER_MODEL = "google/gemini-2.5-flash-lite";
+const DEFAULT_OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
-let cachedKey: string | null = null;
+export type AIProvider = "gemini" | "openrouter";
+
+let cachedGeminiKey: string | null = null;
+let cachedGeminiModelName: string | null = null;
 let cachedModel: ReturnType<GoogleGenerativeAI["getGenerativeModel"]> | null =
   null;
-let cachedService: AIService | null = null;
+let cachedGeminiService: AIService | null = null;
+let cachedOpenRouterConfig: string | null = null;
+let cachedOpenRouterService: AIService | null = null;
 
-function requireApiKey(): string {
-  const apiKey = Deno.env.get("GEMINI_API_KEY");
+function requireEnv(name: string): string {
+  const apiKey = Deno.env.get(name);
   if (!apiKey) {
-    throw new Error("Missing GEMINI_API_KEY environment variable");
+    throw new Error(`Missing ${name} environment variable`);
   }
   return apiKey;
 }
 
-function buildModel(apiKey: string) {
+function buildModel(apiKey: string, modelName: string) {
   const genAI = new GoogleGenerativeAI(apiKey);
   return genAI.getGenerativeModel({ model: modelName });
 }
 
+export function getAIProvider(): AIProvider {
+  const provider = (Deno.env.get("AI_PROVIDER") ?? "gemini").toLowerCase();
+
+  if (provider === "gemini" || provider === "openrouter") {
+    return provider;
+  }
+
+  throw new Error(`Unsupported AI_PROVIDER: ${provider}`);
+}
+
+export function getAIService(): AIService {
+  return getAIProvider() === "openrouter"
+    ? getOpenRouterService()
+    : getGeminiService();
+}
+
 export function getGeminiModel() {
-  const apiKey = requireApiKey();
-  if (!cachedModel || cachedKey !== apiKey) {
-    cachedModel = buildModel(apiKey);
-    cachedKey = apiKey;
-    cachedService = null;
+  const apiKey = getGeminiApiKey();
+  const modelName = getGeminiModelName();
+  if (
+    !cachedModel || cachedGeminiKey !== apiKey ||
+    cachedGeminiModelName !== modelName
+  ) {
+    cachedModel = buildModel(apiKey, modelName);
+    cachedGeminiKey = apiKey;
+    cachedGeminiModelName = modelName;
+    cachedGeminiService = null;
   }
   return cachedModel;
 }
 
 export function getGeminiService(): AIService {
-  if (!cachedService) {
-    cachedService = createGeminiService(getGeminiModel());
+  if (!cachedGeminiService) {
+    cachedGeminiService = createGeminiService(getGeminiModel());
   }
-  return cachedService;
+  return cachedGeminiService;
 }
 
 export function getGeminiModelName() {
-  return modelName;
+  return Deno.env.get("GEMINI_MODEL") ?? DEFAULT_GEMINI_MODEL;
 }
 
 export function getGeminiApiKey() {
-  return requireApiKey();
+  return requireEnv("GEMINI_API_KEY");
+}
+
+export function getOpenRouterService(): AIService {
+  const apiKey = getOpenRouterApiKey();
+  const model = getOpenRouterModelName();
+  const baseUrl = Deno.env.get("OPENROUTER_BASE_URL") ??
+    DEFAULT_OPENROUTER_BASE_URL;
+  const siteUrl = Deno.env.get("OPENROUTER_SITE_URL") ?? undefined;
+  const siteName = Deno.env.get("OPENROUTER_SITE_NAME") ??
+    "Conversation Mapper";
+  const configKey = JSON.stringify({
+    apiKey,
+    model,
+    baseUrl,
+    siteUrl,
+    siteName,
+  });
+
+  if (!cachedOpenRouterService || cachedOpenRouterConfig !== configKey) {
+    cachedOpenRouterService = createOpenRouterService({
+      apiKey,
+      model,
+      baseUrl,
+      siteUrl,
+      siteName,
+    });
+    cachedOpenRouterConfig = configKey;
+  }
+
+  return cachedOpenRouterService;
+}
+
+export function getOpenRouterModelName() {
+  return Deno.env.get("OPENROUTER_MODEL") ?? DEFAULT_OPENROUTER_MODEL;
+}
+
+export function getOpenRouterApiKey() {
+  return requireEnv("OPENROUTER_API_KEY");
 }

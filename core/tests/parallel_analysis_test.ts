@@ -10,7 +10,7 @@ import {
   analyzeAudio,
   analyzeText,
 } from "../orchestration/parallel-analysis.ts";
-import type { AIService, GeminiAudioPart } from "../ai/gemini.ts";
+import type { AIService, AudioPart } from "../ai/types.ts";
 import type { ActionItem } from "../types/index.ts";
 
 // ===================================================================
@@ -56,7 +56,7 @@ function createMockAIService(
   };
 }
 
-const mockAudioPart: GeminiAudioPart = {
+const mockAudioPart: AudioPart = {
   inlineData: {
     data: "YXVkaW8=",
     mimeType: "audio/webm",

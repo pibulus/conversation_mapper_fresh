@@ -56,8 +56,8 @@ Transform the same conversation into multiple formats:
 
 - **Deno** (v1.40+):
   [Install Deno](https://deno.land/manual/getting_started/installation)
-- **Google Gemini API Key**:
-  [Get API key](https://aistudio.google.com/app/apikey)
+- **AI API Key**: [Get API key](https://aistudio.google.com/app/apikey) or
+  [OpenRouter key](https://openrouter.ai/keys)
 
 ### Setup
 
@@ -72,8 +72,9 @@ Transform the same conversation into multiple formats:
    cp .env.example .env
    ```
 
-   Edit `.env` and add your Gemini API key:
+   Edit `.env` and add your AI API key:
    ```bash
+   AI_PROVIDER=gemini
    GEMINI_API_KEY=your_api_key_here
    API_AUTH_TOKEN=choose_a_secret_value
    # Optional: harden server routes & sessions
@@ -86,6 +87,10 @@ Transform the same conversation into multiple formats:
    GEMINI_DELETE_RETRY_DELAY_MS=2000
    # Override the default Gemini model if needed
    # GEMINI_MODEL=gemini-2.5-flash-lite
+   # Or use OpenRouter
+   # AI_PROVIDER=openrouter
+   # OPENROUTER_API_KEY=your_openrouter_api_key_here
+   # OPENROUTER_MODEL=google/gemini-2.5-flash-lite
    ```
 
 3. **Start the development server**
@@ -130,7 +135,7 @@ Transform the same conversation into multiple formats:
 
 ```
 /core/                  # Framework-agnostic AI logic
-  ├── ai/              # Gemini API wrapper & prompts
+  ├── ai/              # AI provider wrappers & prompts
   ├── orchestration/   # Parallel processing flows
   ├── types/           # TypeScript type definitions
   ├── storage/         # localStorage & share services
@@ -162,7 +167,7 @@ deno task check      # Run linting and type checking
 ### Tech Stack
 
 - **Framework**: [Fresh](https://fresh.deno.dev/) (Deno + Preact)
-- **AI**: [Google Gemini](https://ai.google.dev/) (gemini-2.5-flash-lite)
+- **AI**: Google Gemini by default, OpenRouter optional
 - **Visualization**: [D3.js](https://d3js.org/) (force-directed graphs)
 - **State**: [Preact Signals](https://preactjs.com/guide/v10/signals/)
 - **Storage**: LocalStorage + IndexedDB
@@ -178,7 +183,7 @@ deno task check      # Run linting and type checking
 
 ## 🔐 Privacy
 
-- All processing happens through Google Gemini API
+- All processing happens through the configured AI provider
 - Conversations stored locally in browser (localStorage)
 - Shareable links use compressed data in URL (no server storage)
 - No analytics or tracking
@@ -197,6 +202,7 @@ Built with:
 
 - [Fresh](https://fresh.deno.dev/) - The next-gen web framework
 - [Google Gemini](https://ai.google.dev/) - Multimodal AI API
+- [OpenRouter](https://openrouter.ai/) - Optional OpenAI-compatible AI gateway
 - [D3.js](https://d3js.org/) - Data visualization
 
 ---

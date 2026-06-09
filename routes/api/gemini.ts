@@ -1,13 +1,13 @@
 /**
- * Gemini API Route
+ * AI API Route
  *
- * Server-side endpoint for Gemini API calls
+ * Server-side endpoint for AI calls
  * Keeps API key secure, never exposed to client
  */
 
 import { FreshContext } from "$fresh/server.ts";
 import { guardRequest } from "@services/requestGuard.ts";
-import { getGeminiModel } from "@services/ai.ts";
+import { getAIProvider, getAIService } from "@services/ai.ts";
 
 export const handler = async (req: Request, _ctx: FreshContext) => {
   // Only allow POST
@@ -30,26 +30,12 @@ export const handler = async (req: Request, _ctx: FreshContext) => {
       );
     }
 
-    const model = getGeminiModel();
+    const aiService = getAIService();
+    const provider = getAIProvider();
 
-    // Generate markdown
-    const fullPrompt =
-      `Transform the following conversation text according to these instructions:
+    console.log(`📝 Generating markdown with ${provider}`);
 
-${prompt}
-
-Return the result in markdown format, properly formatted and structured.
-Only return the markdown content, no additional text or explanations.
-Use proper markdown syntax including headers, lists, code blocks, etc as appropriate.
-
-CONVERSATION TEXT:
-${text}`;
-
-    console.log("📝 Generating markdown with Gemini");
-
-    const result = await model.generateContent(fullPrompt);
-    const response = await result.response;
-    const markdown = response.text().trim();
+    const markdown = await aiService.generateMarkdown(prompt, text);
 
     console.log("✅ Markdown generation complete");
 
@@ -61,7 +47,7 @@ ${text}`;
       },
     );
   } catch (error) {
-    console.error("❌ Error in Gemini API:", error);
+    console.error("❌ Error in AI API:", error);
     return new Response(
       JSON.stringify({
         error: "Failed to generate markdown",

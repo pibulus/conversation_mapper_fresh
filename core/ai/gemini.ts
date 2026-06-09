@@ -15,6 +15,12 @@ import type {
 } from "../types/index.ts";
 
 import {
+  cleanJsonResponse,
+  extractSpeakers,
+  parseActionItemsResponse,
+  parseGraphResponse,
+} from "./helpers.ts";
+import {
   buildActionItemsPrompt,
   buildActionItemStatusPrompt,
   buildMarkdownTransformPrompt,
@@ -23,16 +29,7 @@ import {
   buildTopicExtractionPrompt,
   TRANSCRIPTION_PROMPT,
 } from "./prompts.ts";
-
-export type GeminiAudioPart =
-  | {
-    inlineData: { data: string; mimeType: string };
-  }
-  | {
-    fileData: { fileUri: string; mimeType: string };
-  };
-
-type AudioInput = Blob | GeminiAudioPart;
+import type { AIService, AudioInput, GeminiAudioPart } from "./types.ts";
 
 // ===================================================================
 // UTILITIES
@@ -51,6 +48,12 @@ async function toAudioPart(input: AudioInput): Promise<GeminiAudioPart> {
     return input;
   }
 
+  if (!(input instanceof Blob)) {
+    throw new Error(
+      "Gemini audio requests require a Blob or Gemini audio part",
+    );
+  }
+
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -64,55 +67,6 @@ async function toAudioPart(input: AudioInput): Promise<GeminiAudioPart> {
     };
     reader.readAsDataURL(input);
   });
-}
-
-/**
- * Extract speaker names from transcript
- */
-function extractSpeakers(text: string): string[] {
-  const speakerSet = new Set<string>();
-  const lines = text.split("\n");
-  lines.forEach((line) => {
-    const match = line.match(/^([\w\s]+):/);
-    if (match) {
-      speakerSet.add(match[1].trim());
-    }
-  });
-  return Array.from(speakerSet);
-}
-
-/**
- * Clean JSON response (removes markdown code blocks)
- */
-function cleanJsonResponse(text: string): string {
-  return text
-    .trim()
-    .replace(/^```(json)?\s*/, "")
-    .replace(/\s*```$/, "");
-}
-
-// ===================================================================
-// AI SERVICE
-// ===================================================================
-
-export interface AIService {
-  transcribeAudio(audioInput: AudioInput): Promise<TranscriptionResult>;
-  generateTitle(transcript: string): Promise<string>;
-  extractActionItems(
-    input: string | AudioInput,
-    speakers?: string[],
-    existingActionItems?: ActionItem[],
-  ): Promise<ActionItemInput[]>;
-  checkActionItemStatus(
-    input: string | AudioInput,
-    existingActionItems: ActionItem[],
-  ): Promise<ActionItemStatusUpdate[]>;
-  extractTopics(
-    text: string,
-    existingNodes?: NodeInput[],
-  ): Promise<ConversationGraph>;
-  generateSummary(text: string): Promise<string>;
-  generateMarkdown(formatPrompt: string, text: string): Promise<string>;
 }
 
 /**
@@ -182,22 +136,7 @@ export function createGeminiService(model: any): AIService {
           result = await model.generateContent(prompt);
         }
 
-        const text = result.response.text();
-        const cleanedText = cleanJsonResponse(text);
-
-        try {
-          const actionItems = JSON.parse(cleanedText);
-          return actionItems.map((item: any) => ({
-            description: item.description.charAt(0).toUpperCase() +
-              item.description.slice(1),
-            assignee: item.assignee === "null" ? null : item.assignee,
-            due_date: item.due_date === "null" ? null : item.due_date,
-          }));
-        } catch (e) {
-          console.error("Error parsing action items JSON:", e);
-          console.error("Raw text was:", text);
-          return [];
-        }
+        return parseActionItemsResponse(result.response.text());
       } catch (error) {
         console.error("Error extracting action items:", error);
         return [];
@@ -261,21 +200,7 @@ export function createGeminiService(model: any): AIService {
         const prompt = buildTopicExtractionPrompt(text, existingNodes);
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        let jsonString = response.text();
-
-        jsonString = cleanJsonResponse(jsonString);
-        jsonString = jsonString.replace(/^.*?({.*}).*?$/, "$1");
-
-        try {
-          const data = JSON.parse(jsonString);
-          return {
-            nodes: data.nodes || [],
-            edges: data.edges || [],
-          };
-        } catch (e) {
-          console.error("Error parsing JSON response", e, jsonString);
-          return { nodes: [], edges: [] };
-        }
+        return parseGraphResponse(response.text());
       } catch (error) {
         console.error("Error extracting topics:", error);
         return { nodes: [], edges: [] };

@@ -5,7 +5,7 @@
  * This is the nervous system in action
  */
 
-import type { AIService, GeminiAudioPart } from "../ai/gemini.ts";
+import type { AIService, AudioPart } from "../ai/types.ts";
 import { analyzeAudio, analyzeText } from "./parallel-analysis.ts";
 import type {
   ActionItem,
@@ -35,7 +35,7 @@ export interface ConversationFlowResult {
  */
 export async function processAudio(
   aiService: AIService,
-  audioInput: GeminiAudioPart,
+  audioInput: AudioPart,
   conversationId: string,
   existingActionItems: ActionItem[] = [],
   existingNodes: NodeInput[] = [],

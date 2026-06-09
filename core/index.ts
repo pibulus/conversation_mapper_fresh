@@ -9,7 +9,9 @@
 // AI SERVICES
 // ===================================================================
 export * from "./ai/prompts.ts";
+export * from "./ai/types.ts";
 export * from "./ai/gemini.ts";
+export * from "./ai/openrouter.ts";
 
 // ===================================================================
 // TYPES

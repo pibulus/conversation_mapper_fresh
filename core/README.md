@@ -42,8 +42,10 @@ summaries, etc.
 /core/
 ├── ai/
 │   ├── prompts.ts              # All AI prompts as constants
+│   ├── types.ts                # Provider-neutral AI service types
+│   ├── helpers.ts              # Shared response parsing helpers
 │   ├── gemini.ts               # Gemini API wrapper
-│   └── index.ts
+│   └── openrouter.ts           # OpenRouter API wrapper
 ├── types/
 │   ├── action-item.ts          # Action item with AI checkoff
 │   ├── conversation.ts         # Conversation data structure
@@ -68,11 +70,16 @@ summaries, etc.
 
 ```typescript
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { createGeminiService } from "./core";
+import { createGeminiService, createOpenRouterService } from "./core";
 
 const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 const aiService = createGeminiService(model);
+
+const openRouterService = createOpenRouterService({
+  apiKey: openRouterApiKey,
+  model: "google/gemini-2.5-flash-lite",
+});
 ```
 
 ### 2. Process Audio Input

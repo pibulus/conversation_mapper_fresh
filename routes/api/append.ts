@@ -14,7 +14,7 @@ import { processAudio } from "@core/orchestration/conversation-flow.ts";
 import type { ConversationFlowResult } from "@core/orchestration/conversation-flow.ts";
 import type { ActionItem } from "@core/types/index.ts";
 import { guardRequest } from "@services/requestGuard.ts";
-import { getGeminiService } from "@services/ai.ts";
+import { getAIService } from "@services/ai.ts";
 import { deleteUploadedFile, uploadAudioFile } from "@services/audio.ts";
 
 export const handler: Handlers = {
@@ -34,7 +34,7 @@ export const handler: Handlers = {
         );
       }
 
-      const aiService = getGeminiService();
+      const aiService = getAIService();
 
       // Parse form data
       const formData = await req.formData();

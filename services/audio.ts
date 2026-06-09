@@ -1,13 +1,17 @@
 import { encodeBase64 } from "$std/encoding/base64.ts";
-import type { GeminiAudioPart } from "@core/ai/gemini.ts";
-import { getGeminiApiKey } from "@services/ai.ts";
+import type {
+  AudioPart,
+  OpenRouterAudioFormat,
+  OpenRouterAudioPart,
+} from "@core/ai/types.ts";
+import { getAIProvider, getGeminiApiKey } from "@services/ai.ts";
 
 const UPLOAD_ENDPOINT =
   "https://generativelanguage.googleapis.com/upload/v1beta/files";
 const FILES_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
 export interface UploadedAudioFile {
-  part: GeminiAudioPart;
+  part: AudioPart;
   fileName: string | null;
 }
 
@@ -19,6 +23,10 @@ const DELETE_RETRY_DELAY_MS = Number(
 );
 
 export async function uploadAudioFile(file: File): Promise<UploadedAudioFile> {
+  if (getAIProvider() === "openrouter") {
+    return createOpenRouterAudioPart(file);
+  }
+
   const apiKey = getGeminiApiKey();
   const mimeType = file.type || "application/octet-stream";
   const displayName = file.name || "conversation-audio";
@@ -82,6 +90,62 @@ export async function uploadAudioFile(file: File): Promise<UploadedAudioFile> {
     },
     fileName: null,
   };
+}
+
+async function createOpenRouterAudioPart(
+  file: File,
+): Promise<UploadedAudioFile> {
+  const mimeType = file.type || "audio/webm";
+  const part: OpenRouterAudioPart = {
+    inputAudio: {
+      data: encodeBase64(new Uint8Array(await file.arrayBuffer())),
+      format: inferOpenRouterAudioFormat(mimeType, file.name),
+      mimeType,
+    },
+  };
+
+  return { part, fileName: null };
+}
+
+function inferOpenRouterAudioFormat(
+  mimeType: string,
+  fileName = "",
+): OpenRouterAudioFormat {
+  const normalizedMime = mimeType.toLowerCase().split(";")[0].trim();
+  const byMime: Record<string, OpenRouterAudioFormat> = {
+    "audio/wav": "wav",
+    "audio/wave": "wav",
+    "audio/x-wav": "wav",
+    "audio/mpeg": "mp3",
+    "audio/mp3": "mp3",
+    "audio/aiff": "aiff",
+    "audio/x-aiff": "aiff",
+    "audio/aac": "aac",
+    "audio/ogg": "ogg",
+    "audio/flac": "flac",
+    "audio/x-flac": "flac",
+    "audio/mp4": "m4a",
+    "audio/x-m4a": "m4a",
+    "audio/webm": "webm",
+  };
+
+  if (byMime[normalizedMime]) {
+    return byMime[normalizedMime];
+  }
+
+  const extension = fileName.toLowerCase().split(".").pop();
+  const byExtension: Record<string, OpenRouterAudioFormat> = {
+    wav: "wav",
+    mp3: "mp3",
+    aiff: "aiff",
+    aac: "aac",
+    ogg: "ogg",
+    flac: "flac",
+    m4a: "m4a",
+    webm: "webm",
+  };
+
+  return extension && byExtension[extension] ? byExtension[extension] : "webm";
 }
 
 export async function deleteUploadedFile(

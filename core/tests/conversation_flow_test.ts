@@ -12,7 +12,7 @@ import {
   processAudio,
   processText,
 } from "../orchestration/conversation-flow.ts";
-import type { AIService, GeminiAudioPart } from "../ai/gemini.ts";
+import type { AIService, AudioPart } from "../ai/types.ts";
 
 // ===================================================================
 // MOCK AI SERVICE
@@ -51,7 +51,7 @@ function createMockAIService(): AIService {
   };
 }
 
-const mockAudioPart: GeminiAudioPart = {
+const mockAudioPart: AudioPart = {
   inlineData: {
     data: "YXVkaW8=",
     mimeType: "audio/webm",

@@ -7,7 +7,7 @@
  * - Fast user experience
  */
 
-import type { AIService, GeminiAudioPart } from "../ai/gemini.ts";
+import type { AIService, AudioPart } from "../ai/types.ts";
 import type {
   ActionItem,
   ActionItemInput,
@@ -56,7 +56,7 @@ export async function analyzeText(
  */
 export async function analyzeAudio(
   aiService: AIService,
-  audioInput: GeminiAudioPart,
+  audioInput: AudioPart,
   existingActionItems: ActionItem[] = [],
   existingNodes: NodeInput[] = [],
 ): Promise<

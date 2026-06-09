@@ -11,7 +11,7 @@ import {
   processText,
 } from "@core/orchestration/conversation-flow.ts";
 import { guardRequest } from "@services/requestGuard.ts";
-import { getGeminiService } from "@services/ai.ts";
+import { getAIService } from "@services/ai.ts";
 import { deleteUploadedFile, uploadAudioFile } from "@services/audio.ts";
 
 export const handler: Handlers = {
@@ -23,7 +23,7 @@ export const handler: Handlers = {
       }
 
       const contentType = req.headers.get("content-type") || "";
-      const aiService = getGeminiService();
+      const aiService = getAIService();
 
       const conversationId = crypto.randomUUID();
 
