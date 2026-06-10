@@ -23,7 +23,7 @@ export interface SharedConversation extends ConversationData {
 export interface ShareCreationResult {
   shareId: string;
   url: string;
-  mode: "public-url" | "local-only";
+  mode: "public-url" | "server-share" | "local-only";
   expiresAt?: string;
   warning?: string;
 }
@@ -227,6 +227,68 @@ export function createShareLink(
     warning:
       "This conversation is too large for a portable URL, so it was saved on this browser only.",
   };
+}
+
+export async function createBestShareLink(
+  data: ConversationData,
+  expiresInDays?: number,
+): Promise<ShareCreationResult> {
+  if (typeof window === "undefined") {
+    return createShareLink(data, expiresInDays);
+  }
+
+  const compressed = encodeShareDataForUrl(data);
+  if (compressed && compressed.length < 2000) {
+    const shareId = `url:${compressed}`;
+    return {
+      shareId,
+      url: getShareUrl(shareId),
+      mode: "public-url",
+    };
+  }
+
+  try {
+    const response = await fetch("/api/share/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        data: createShareableData(data),
+        ttlDays: expiresInDays,
+      }),
+    });
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        typeof payload.error === "string"
+          ? payload.error
+          : "Server share failed.",
+      );
+    }
+
+    const shareId = typeof payload.shareId === "string" ? payload.shareId : "";
+    if (!shareId) {
+      throw new Error("Server share response did not include a share ID.");
+    }
+
+    return {
+      shareId,
+      url: getShareUrl(shareId),
+      mode: "server-share",
+      expiresAt: typeof payload.expiresAt === "string"
+        ? payload.expiresAt
+        : undefined,
+    };
+  } catch (error) {
+    console.warn("Falling back to local-only share:", error);
+    const localResult = createShareLink(data, expiresInDays);
+    return {
+      ...localResult,
+      warning: error instanceof Error
+        ? `${localResult.warning} Server share failed: ${error.message}`
+        : localResult.warning,
+    };
+  }
 }
 
 /**

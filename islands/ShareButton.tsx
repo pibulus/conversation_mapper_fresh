@@ -7,7 +7,7 @@
 import { useComputed, useSignal } from "@preact/signals";
 import { conversationData } from "../signals/conversationStore.ts";
 import {
-  createShareLink,
+  createBestShareLink,
   type ShareCreationResult,
 } from "../core/storage/shareService.ts";
 
@@ -25,10 +25,10 @@ export default function ShareButton() {
     isGenerating.value = true;
 
     try {
-      const result = createShareLink(conversationData.value, 30);
+      const result = await createBestShareLink(conversationData.value, 30);
       share.value = result;
 
-      const copied = result.mode === "public-url"
+      const copied = result.mode !== "local-only"
         ? await copyToClipboard(result.url)
         : false;
 
@@ -91,20 +91,22 @@ export default function ShareButton() {
       {share.value && (
         <div
           class={`absolute right-0 top-full z-50 mt-2 w-[min(22rem,calc(100vw-2rem))] space-y-2 rounded-lg border-2 p-3 shadow-lg ${
-            share.value.mode === "public-url"
+            share.value.mode !== "local-only"
               ? "bg-green-50 border-green-300"
               : "bg-amber-50 border-amber-300"
           }`}
         >
           <p
             class={`text-xs font-bold ${
-              share.value.mode === "public-url"
+              share.value.mode !== "local-only"
                 ? "text-green-800"
                 : "text-amber-900"
             }`}
           >
             {share.value.mode === "public-url"
-              ? "Public share link:"
+              ? "Portable share link:"
+              : share.value.mode === "server-share"
+              ? "Share link:"
               : "Saved on this device:"}
           </p>
           <div class="flex gap-2">
@@ -113,7 +115,7 @@ export default function ShareButton() {
               value={share.value.url}
               readonly
               class={`min-w-0 flex-1 rounded border-2 bg-white px-2 py-1 font-mono text-xs ${
-                share.value.mode === "public-url"
+                share.value.mode !== "local-only"
                   ? "border-green-300"
                   : "border-amber-300"
               }`}
@@ -122,15 +124,15 @@ export default function ShareButton() {
             <button
               onClick={handleCopyUrl}
               class={`min-h-9 rounded border-2 px-3 py-1 text-xs font-bold text-white ${
-                share.value.mode === "public-url"
+                share.value.mode !== "local-only"
                   ? "bg-green-500 border-green-700 hover:bg-green-600"
                   : "bg-amber-500 border-amber-700 hover:bg-amber-600"
               }`}
-              title={share.value.mode === "public-url"
-                ? "Copy public link"
+              title={share.value.mode !== "local-only"
+                ? "Copy share link"
                 : "Copy this-device link"}
-              aria-label={share.value.mode === "public-url"
-                ? "Copy public link"
+              aria-label={share.value.mode !== "local-only"
+                ? "Copy share link"
                 : "Copy this-device link"}
             >
               📋
@@ -138,13 +140,15 @@ export default function ShareButton() {
           </div>
           <p
             class={`text-xs ${
-              share.value.mode === "public-url"
+              share.value.mode !== "local-only"
                 ? "text-green-700"
                 : "text-amber-800"
             }`}
           >
             {share.value.mode === "public-url"
               ? "✅ Portable link includes the shared data"
+              : share.value.mode === "server-share"
+              ? "✅ Link is stored server-side and expires in 30 days"
               : "⚠️ Too large for a portable URL. This link only works in this browser."}
           </p>
         </div>

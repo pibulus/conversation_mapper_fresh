@@ -134,6 +134,7 @@ Transform the same conversation into multiple formats:
 /core/                  # Framework-agnostic AI logic
   ├── ai/              # AI provider wrappers & prompts
   ├── orchestration/   # Parallel processing flows
+  ├── realtime/        # Share-room protocol and storage adapters
   ├── types/           # TypeScript type definitions
   ├── storage/         # localStorage & share services
   └── export/          # Format transformers
@@ -167,7 +168,7 @@ deno task check      # Run linting and type checking
 - **AI**: OpenRouter primary, Google Gemini fallback
 - **Visualization**: [D3.js](https://d3js.org/) (force-directed graphs)
 - **State**: [Preact Signals](https://preactjs.com/guide/v10/signals/)
-- **Storage**: LocalStorage + IndexedDB
+- **Storage**: LocalStorage, URL shares, optional Supabase share store
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 
 ## 🎯 Use Cases
@@ -182,7 +183,9 @@ deno task check      # Run linting and type checking
 
 - All processing happens through the configured AI provider
 - Conversations stored locally in browser (localStorage)
-- Shareable links use compressed data in URL (no server storage)
+- Small share links use compressed URL data
+- Larger share links use `/api/share` with Supabase when configured, or an
+  in-process memory store during local development
 - No analytics or tracking
 
 ## 📝 License

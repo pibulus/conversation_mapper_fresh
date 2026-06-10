@@ -41,6 +41,9 @@ API_AUTH_TOKEN=...
   orchestration/
     conversation-flow.ts        # Builds ConversationFlowResult
     parallel-analysis.ts        # Topics/actions/status/summary in parallel
+  realtime/
+    shareProtocol.ts            # Sanitized share-room shape and TTL rules
+    shareStore.ts               # Memory/Supabase share-store adapters
   types/                        # Conversation, transcript, node, edge, action item
   storage/                      # Local storage and URL share helpers
   export/                       # Markdown export formats and transforms
@@ -57,7 +60,9 @@ API_AUTH_TOKEN=...
   api/append.ts                 # Append audio to existing conversation
   api/gemini.ts                 # Legacy endpoint name for markdown export
   api/auth.ts                   # API token session
-  shared/[shareId].tsx          # URL-compressed shared conversation
+  api/share/create.ts           # Guarded durable share creation
+  api/share/[shareId].ts        # Public share lookup by ID
+  shared/[shareId].tsx          # Shared conversation view
 
 /islands/                       # Hydrated Preact UI
   HomeIsland.tsx                # Main layout
@@ -106,7 +111,12 @@ the existing conversation.
 - Fresh hydrates only files in `islands/`. Keep presentational UI in
   `components/` unless it needs state/effects/browser APIs.
 - `fresh.gen.ts` is generated. Do not edit it manually.
-- Shared conversations are URL-compressed, not server-stored.
+- Shared conversations use URL-compressed payloads for small conversations and
+  `/api/share` for larger ones. `/api/share` uses Supabase when `SUPABASE_URL` +
+  `SUPABASE_ANON_KEY` are configured, otherwise memory store for local
+  development.
+- Apply `supabase/migrations/20260610000000_conversation_shares.sql` before
+  enabling Supabase-backed shares.
 - `.env` is ignored. Do not commit real provider keys.
 
 ## Current Verification Baseline

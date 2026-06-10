@@ -21,7 +21,7 @@ export default function SharedConversationQuery({ url }: PageProps) {
           <title>Invalid Share Link | Conversation Mapper</title>
         </Head>
 
-        <div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center px-6">
+        <div class="mapper-scene min-h-screen flex items-center justify-center px-6">
           <div class="bg-white rounded-lg border-4 border-red-300 shadow-lg p-8 text-center max-w-md">
             <div class="text-6xl mb-4">🔗</div>
             <h2 class="text-2xl font-bold text-red-600 mb-2">
@@ -52,14 +52,22 @@ export default function SharedConversationQuery({ url }: PageProps) {
         <meta name="description" content="View shared conversation analysis" />
       </Head>
 
-      <div class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+      <div class="mapper-scene min-h-screen">
         {/* Header */}
-        <header class="border-b-4 border-purple-400 bg-white shadow-lg">
-          <div class="max-w-6xl mx-auto px-6 py-4">
+        <header
+          style={{
+            background: "rgba(255, 250, 245, 0.92)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            borderBottom: "2px solid rgba(0, 0, 0, 0.08)",
+            boxShadow: "0 2px 12px rgba(0, 0, 0, 0.04)",
+          }}
+        >
+          <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4">
             <div class="flex items-center justify-between">
-              <div>
-                <h1 class="text-3xl font-bold text-purple-600">
-                  🧠 Conversation Mapper
+              <div class="min-w-0">
+                <h1 class="truncate text-xl sm:text-2xl font-extrabold text-gray-900">
+                  Conversation Mapper
                 </h1>
                 <p class="text-sm text-gray-600 mt-1">
                   Shared conversation view
@@ -67,9 +75,9 @@ export default function SharedConversationQuery({ url }: PageProps) {
               </div>
               <a
                 href="/"
-                class="bg-purple-500 text-white font-bold py-2 px-4 rounded-lg border-2 border-purple-700 hover:bg-purple-600 transition-colors"
+                class="ml-3 inline-flex min-h-11 items-center rounded-lg border-2 border-gray-900 bg-gray-900 px-3 sm:px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-gray-800"
               >
-                ✨ Create Your Own
+                Create Your Own
               </a>
             </div>
           </div>
