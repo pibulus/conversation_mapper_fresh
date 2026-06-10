@@ -47,7 +47,7 @@ Transform the same conversation into multiple formats:
 - **Mesh gradient backgrounds** (animated SVG)
 - **Clean Svelte-inspired aesthetic**
 - **Fully responsive** mobile layout
-- **Dark/light theme** with system detection
+- **Theme-aware styling** with local theme variables
 - **Draggable cards** for customizable layout
 
 ## 🚀 Quick Start
@@ -56,8 +56,8 @@ Transform the same conversation into multiple formats:
 
 - **Deno** (v1.40+):
   [Install Deno](https://deno.land/manual/getting_started/installation)
-- **AI API Key**: [Get API key](https://aistudio.google.com/app/apikey) or
-  [OpenRouter key](https://openrouter.ai/keys)
+- **OpenRouter API Key**: [Get API key](https://openrouter.ai/keys)
+  - Gemini can still be used as a fallback provider.
 
 ### Setup
 
@@ -74,23 +74,21 @@ Transform the same conversation into multiple formats:
 
    Edit `.env` and add your AI API key:
    ```bash
-   AI_PROVIDER=gemini
-   GEMINI_API_KEY=your_api_key_here
+   AI_PROVIDER=openrouter
+   OPENROUTER_API_KEY=your_openrouter_api_key_here
+   OPENROUTER_MODEL=google/gemini-2.5-flash-lite
    API_AUTH_TOKEN=choose_a_secret_value
+
    # Optional: harden server routes & sessions
    ALLOWED_ORIGINS=http://localhost:8003
    API_RATE_LIMIT=60
    API_RATE_WINDOW_MS=60000
    API_SESSION_TTL_MS=14400000
    API_COOKIE_SECURE=false
-   GEMINI_DELETE_RETRIES=3
-   GEMINI_DELETE_RETRY_DELAY_MS=2000
-   # Override the default Gemini model if needed
-   # GEMINI_MODEL=gemini-2.5-flash-lite
-   # Or use OpenRouter
-   # AI_PROVIDER=openrouter
-   # OPENROUTER_API_KEY=your_openrouter_api_key_here
-   # OPENROUTER_MODEL=google/gemini-2.5-flash-lite
+
+   # Optional Gemini fallback
+   # AI_PROVIDER=gemini
+   # GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
 3. **Start the development server**
@@ -167,7 +165,7 @@ deno task check      # Run linting and type checking
 ### Tech Stack
 
 - **Framework**: [Fresh](https://fresh.deno.dev/) (Deno + Preact)
-- **AI**: Google Gemini by default, OpenRouter optional
+- **AI**: OpenRouter primary, Google Gemini fallback
 - **Visualization**: [D3.js](https://d3js.org/) (force-directed graphs)
 - **State**: [Preact Signals](https://preactjs.com/guide/v10/signals/)
 - **Storage**: LocalStorage + IndexedDB
@@ -201,8 +199,8 @@ MIT License - see [LICENSE](./LICENSE) file for details
 Built with:
 
 - [Fresh](https://fresh.deno.dev/) - The next-gen web framework
-- [Google Gemini](https://ai.google.dev/) - Multimodal AI API
-- [OpenRouter](https://openrouter.ai/) - Optional OpenAI-compatible AI gateway
+- [OpenRouter](https://openrouter.ai/) - OpenAI-compatible AI gateway
+- [Google Gemini](https://ai.google.dev/) - Optional multimodal fallback
 - [D3.js](https://d3js.org/) - Data visualization
 
 ---

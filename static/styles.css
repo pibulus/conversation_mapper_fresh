@@ -23,7 +23,7 @@
 
 :root {
   /* ===================================================================
-     THEME SYSTEM - Dynamic colors set by JuicyThemes
+     THEME SYSTEM - Dynamic runtime color variables
      ================================================================ */
   /* Defaults (overridden by theme system) */
   --color-base: linear-gradient(135deg, #ffebd4 0%, #ffd9b8 100%);

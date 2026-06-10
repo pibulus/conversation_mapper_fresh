@@ -1,109 +1,74 @@
-# 🧠 Conversation Mapper Core - The Nervous System
+# Conversation Mapper Core
 
-> Framework-agnostic AI orchestration logic extracted from SvelteKit
+Framework-agnostic AI orchestration for turning conversation text or audio into
+structured data.
 
-## What Is This?
+## Responsibilities
 
-This is the **nervous system** of conversation mapper - the core AI logic that
-makes everything work. It's been extracted into pure TypeScript so it can be
-used in **any framework** (Fresh, SvelteKit, React, Vue, etc.).
+- Build transcripts from audio inputs.
+- Extract action items and assignees.
+- Detect action item status changes from follow-up context.
+- Extract emoji topic nodes and relationship edges.
+- Generate summaries, titles, and markdown exports.
 
-The framework is just bones. The nervous system is where the electricity
-happens.
-
-## Core Features
-
-### ✨ AI Self-Checkoff
-
-The magic feature: AI listens to new audio/text and automatically updates
-existing action item statuses.
-
-_"I just finished that task!"_ → ✓ Automatically marked as completed
-
-### 🕸️ Conversation Graph
-
-Non-chronological topic extraction with emojis, colors, and relationships.
-Prevents speaker interruptions by visualizing all topics so participants can
-circle back later.
-
-### ⚡ Parallel Processing
-
-Topics, action items, and status checks run simultaneously for fast analysis and
-efficient API usage.
-
-### 📤 Flexible Export
-
-Same conversation, many formats: blog posts, technical manuals, haikus, meeting
-summaries, etc.
+Provider-specific SDK details stay behind the `AIService` interface.
 
 ## Structure
 
-```
+```text
 /core/
 ├── ai/
-│   ├── prompts.ts              # All AI prompts as constants
-│   ├── types.ts                # Provider-neutral AI service types
-│   ├── helpers.ts              # Shared response parsing helpers
-│   ├── gemini.ts               # Gemini API wrapper
-│   └── openrouter.ts           # OpenRouter API wrapper
+│   ├── types.ts                # Provider-neutral AIService and audio types
+│   ├── prompts.ts              # Prompt builders
+│   ├── helpers.ts              # Shared JSON/speaker parsing helpers
+│   ├── openrouter.ts           # OpenRouter chat/audio implementation
+│   └── gemini.ts               # Gemini fallback implementation
 ├── types/
-│   ├── action-item.ts          # Action item with AI checkoff
-│   ├── conversation.ts         # Conversation data structure
-│   ├── edge.ts                 # Topic relationship
-│   ├── node.ts                 # Topic node with emoji/color
-│   ├── transcript.ts           # Transcript segment
+│   ├── action-item.ts
+│   ├── conversation.ts
+│   ├── edge.ts
+│   ├── node.ts
+│   ├── transcript.ts
 │   └── index.ts
 ├── orchestration/
-│   ├── conversation-flow.ts    # Main flow: Audio/Text → AI → Data
-│   ├── parallel-analysis.ts    # Parallel AI coordinator
+│   ├── conversation-flow.ts    # Main Audio/Text -> Data flow
+│   ├── parallel-analysis.ts    # Parallel topics/actions/status/summary
 │   └── index.ts
 ├── export/
-│   ├── formats.ts              # Pre-defined export formats
-│   ├── transformer.ts          # Conversation transformer
+│   ├── formats.ts
+│   ├── transformer.ts
 │   └── index.ts
-└── index.ts                     # Main entry point
+└── index.ts                    # Public exports
 ```
 
-## Usage
+## Provider Setup
 
-### 1. Setup AI Service
+OpenRouter is the primary provider:
 
 ```typescript
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { createGeminiService, createOpenRouterService } from "./core";
+import { createOpenRouterService } from "./core";
 
-const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
-const aiService = createGeminiService(model);
-
-const openRouterService = createOpenRouterService({
+const aiService = createOpenRouterService({
   apiKey: openRouterApiKey,
   model: "google/gemini-2.5-flash-lite",
 });
 ```
 
-### 2. Process Audio Input
+Gemini can still be used directly:
 
 ```typescript
-import { processAudio } from "./core";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { createGeminiService } from "./core";
 
-const result = await processAudio(
-  aiService,
-  audioBlob,
-  conversationId,
-  existingActionItems, // Optional - for AI self-checkoff
-);
-
-// Result contains:
-// - conversation (title, transcript)
-// - transcript (text, speakers)
-// - nodes (topic nodes with emojis)
-// - edges (topic relationships)
-// - actionItems (extracted tasks)
-// - statusUpdates (AI checkoff results)
+const genAI = new GoogleGenerativeAI(geminiApiKey);
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+const aiService = createGeminiService(model);
 ```
 
-### 3. Process Text Input
+The Fresh server normally uses `services/ai.ts` to select and cache the service
+from environment variables.
+
+## Processing Text
 
 ```typescript
 import { processText } from "./core";
@@ -112,132 +77,118 @@ const result = await processText(
   aiService,
   text,
   conversationId,
-  speakers, // Optional
-  existingActionItems, // Optional - for AI self-checkoff
+  speakers,
+  existingActionItems,
+  existingNodes,
 );
 ```
 
-### 4. Generate Summary
+## Processing Audio
+
+Server routes should create a provider-specific `AudioPart` first. In this app,
+that is handled by `services/audio.ts`.
 
 ```typescript
-import { generateSummary } from "./core";
+import { processAudio } from "./core";
+import { uploadAudioFile } from "../services/audio.ts";
 
-const summary = await generateSummary(aiService, conversationText);
+const { part: audioPart, fileName } = await uploadAudioFile(file);
+
+try {
+  const result = await processAudio(
+    aiService,
+    audioPart,
+    conversationId,
+    existingActionItems,
+    existingNodes,
+  );
+} finally {
+  await deleteUploadedFile(fileName);
+}
 ```
 
-### 5. Export Conversation
+## Result Shape
+
+`processText()` and `processAudio()` return a `ConversationFlowResult` with:
+
+- `conversation`
+- `transcript`
+- `nodes`
+- `edges`
+- `actionItems`
+- `summary`
+- `statusUpdates`
+
+Topic nodes include `label`, `emoji`, and `color`; edges include source/target
+topic IDs and color.
+
+## Flow
+
+```text
+Text or provider-specific audio part
+    ↓
+Transcription, if audio
+    ↓
+Parallel analysis
+    ├── Topic/Node extraction
+    ├── Action item extraction
+    ├── Existing action status checks
+    └── Summary generation
+    ↓
+Title generation
+    ↓
+ConversationFlowResult
+```
+
+## Export Helpers
 
 ```typescript
-import { EXPORT_FORMATS, transformConversation } from "./core";
+import {
+  EXPORT_FORMATS,
+  transformConversation,
+  transformWithCustomPrompt,
+} from "./core";
 
-// Use predefined format
 const blogPost = await transformConversation(
   aiService,
   "BLOG",
   conversationText,
 );
 
-// Or use custom prompt
-import { transformWithCustomPrompt } from "./core";
-
 const custom = await transformWithCustomPrompt(
   aiService,
-  "Turn this into a pirate shanty",
+  "Turn this into release notes",
   conversationText,
 );
 ```
 
 ## Available Export Formats
 
-- `BLOG` - Engaging blog post
-- `TECHNICAL_MANUAL` - Step-by-step manual
-- `MEETING_SUMMARY` - Professional meeting notes
-- `HAIKU` - 5-7-5 syllable poetry
-- `BULLET_POINTS` - Concise summary
-- `EMAIL` - Professional email
-- `PRESENTATION` - Markdown slides
-- `TWEET_THREAD` - Twitter thread
-- `STORY` - Narrative format
-- `FAQ` - Questions and answers
-- `EXECUTIVE_SUMMARY` - One-page summary
-- `LESSON_PLAN` - Educational format
+- `BLOG`
+- `TECHNICAL_MANUAL`
+- `MEETING_SUMMARY`
+- `HAIKU`
+- `BULLET_POINTS`
+- `EMAIL`
+- `PRESENTATION`
+- `TWEET_THREAD`
+- `STORY`
+- `FAQ`
+- `EXECUTIVE_SUMMARY`
+- `LESSON_PLAN`
 
-## Type Definitions
+## Test Coverage
 
-All types are fully typed with TypeScript:
+Core tests live in `core/tests/` and cover:
 
-```typescript
-import type {
-  ActionItem,
-  AIService,
-  Conversation,
-  ConversationGraph,
-  Edge,
-  Node,
-  Transcript,
-} from "./core";
+- prompt builders
+- Gemini response parsing and failure paths
+- OpenRouter request formatting
+- text/audio orchestration
+- parallel analysis behavior
+
+Run them with:
+
+```bash
+deno task test
 ```
-
-## The Flow
-
-```
-Audio/Text Input
-    ↓
-[1] Transcription (if audio)
-    ↓
-[2] PARALLEL AI ANALYSIS
-    ├── Title Generation
-    ├── Topic/Node Extraction (conversation graph)
-    ├── Action Item Extraction
-    └── AI Self-Checkoff (check existing items)
-    ↓
-[3] Return Structured Data
-    ↓
-[4] Your Framework Handles Storage & UI
-```
-
-## Integration Examples
-
-### Fresh (Deno)
-
-```typescript
-import { processAudio } from "@/core/index.ts";
-// Use in route handlers or islands
-```
-
-### SvelteKit
-
-```typescript
-import { processAudio } from "$lib/core";
-// Use in load functions or server endpoints
-```
-
-### React/Next.js
-
-```typescript
-import { processAudio } from "@/core";
-// Use in API routes or server components
-```
-
-## Why Extract the Nervous System?
-
-The SvelteKit version was a prototype that proved the concept. But the real
-value isn't the framework - it's the AI orchestration, the prompts, the timing,
-the _feel_.
-
-This extraction means:
-
-- ✅ Use in any framework
-- ✅ Test the logic independently
-- ✅ Reuse in other meeting/conversation tools
-- ✅ Create modular building blocks
-- ✅ The nervous system stays intact while we rebuild the body
-
-**Minerals don't care what rock they're in.**
-
-Quartz is quartz in granite or sandstone. This AI orchestration doesn't care if
-it's wrapped in Svelte or Fresh. It just... computes. Analyzes. Responds.
-
----
-
-_The nervous system is the value. The framework is just bones._

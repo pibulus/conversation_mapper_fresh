@@ -143,7 +143,7 @@ export default function HomeIsland() {
               </>
             )
             : (
-              // Default header - app name and theme shuffler
+              // Default header - app name and primary actions
               <>
                 <a
                   href="/"

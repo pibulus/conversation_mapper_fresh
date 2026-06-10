@@ -35,7 +35,7 @@ function buildModel(apiKey: string, modelName: string) {
 }
 
 export function getAIProvider(): AIProvider {
-  const provider = (Deno.env.get("AI_PROVIDER") ?? "gemini").toLowerCase();
+  const provider = (Deno.env.get("AI_PROVIDER") ?? "openrouter").toLowerCase();
 
   if (provider === "gemini" || provider === "openrouter") {
     return provider;

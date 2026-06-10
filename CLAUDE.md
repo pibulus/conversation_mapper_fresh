@@ -2,165 +2,148 @@
 
 ## What This App Is
 
-A Deno Fresh (Preact + Tailwind) web app that turns meeting recordings into
-structured knowledge using Google Gemini AI. Users record/upload audio or paste
-text, and get: transcripts with speaker diarization, auto-extracted action
-items, topic relationship graphs (D3 force-directed), summaries, and export to
-various formats.
+A Deno Fresh app, using Preact and Tailwind, that turns meeting recordings or
+pasted text into structured knowledge:
 
-**Killer feature**: AI Self-Checkoff - user says "I finished that report" in a
-follow-up recording and the AI auto-completes the matching action item.
+- transcripts with speaker detection
+- AI-generated summaries
+- action items with assignees and completion status
+- emoji topic maps with relationship edges
+- markdown exports in multiple formats
 
-Runs on `localhost:8003` via `deno task dev`. Requires `GEMINI_API_KEY` in
-`.env`.
+The main AI provider is OpenRouter. Gemini remains available as a fallback by
+setting `AI_PROVIDER=gemini`.
+
+The killer feature is AI self-checkoff: when a follow-up recording mentions that
+work is done, the app can mark matching action items complete, or move them back
+to pending if the later context says they are not actually done.
+
+Run locally with `deno task dev` or `deno task start` on `localhost:8003`.
+Required local env for the default setup:
+
+```env
+AI_PROVIDER=openrouter
+OPENROUTER_API_KEY=...
+OPENROUTER_MODEL=google/gemini-2.5-flash-lite
+API_AUTH_TOKEN=...
+```
 
 ## Architecture Map
 
-```
-/core/                  # Framework-agnostic AI brain (MOST VALUABLE CODE)
-  ai/gemini.ts          # AIService interface + Gemini wrapper
-  ai/prompts.ts         # All AI prompt templates
-  orchestration/        # Parallel processing (text + audio flows)
-    conversation-flow.ts  # Main orchestrator, returns ConversationFlowResult
-    parallel-analysis.ts  # Promise.all for topics/actions/status/summary
-  types/index.ts        # All TypeScript type definitions
-  storage/              # localStorage + shareService
-  export/               # Format transformers
+```text
+/core/                         # Framework-agnostic AI and data flow
+  ai/
+    types.ts                    # Provider-neutral AIService and audio types
+    prompts.ts                  # Prompt builders
+    helpers.ts                  # Shared JSON/speaker parsing
+    openrouter.ts               # OpenRouter chat/audio implementation
+    gemini.ts                   # Gemini fallback implementation
+  orchestration/
+    conversation-flow.ts        # Builds ConversationFlowResult
+    parallel-analysis.ts        # Topics/actions/status/summary in parallel
+  types/                        # Conversation, transcript, node, edge, action item
+  storage/                      # Local storage and URL share helpers
+  export/                       # Markdown export formats and transforms
 
-/islands/               # 16 interactive Preact islands
-  HomeIsland.tsx        # Main layout - shows Upload or Dashboard
-  UploadIsland.tsx      # Text paste + audio upload + recording trigger
-  DashboardIsland.tsx   # Dashboard cards container
-  AudioRecorder.tsx     # In-conversation audio recording (append flow)
-  MarkdownMakerDrawer.tsx # Export drawer (calls /api/gemini)
-  EmojimapViz.tsx       # Topic graph overlay (wraps ForceDirectedGraph)
-  ConversationList.tsx  # Sidebar conversation history
-  ForceDirectedGraph.tsx, ArcDiagramViz.tsx, CircularNetworkGraph.tsx  # D3 vizzes
-
-/components/            # Shared UI cards
-  ActionItemsCard.tsx   # Action items with drag, sort, inline edit, AI checkoff
-  SummaryCard.tsx, TranscriptCard.tsx, TopicVisualizationsCard.tsx
-
-/signals/
-  conversationStore.ts  # THE global state - single Preact signal (ConversationData)
+/services/                      # Server-side provider/auth/audio helpers
+  ai.ts                         # Provider selection and service caching
+  audio.ts                      # Provider-specific audio payload creation
+  requestGuard.ts               # Auth, origin allow-list, rate limit
+  authSessions.ts               # HttpOnly API auth session
 
 /routes/
-  index.tsx             # Renders HomeIsland
-  api/process.ts        # POST: new conversation (audio or text) -> full analysis
-  api/append.ts         # POST: append audio to existing conversation
-  api/gemini.ts         # POST: markdown generation for export feature
-  shared/[shareId].tsx  # Shareable conversation links (data compressed in URL)
+  index.tsx                     # Main app route
+  api/process.ts                # New audio/text conversation
+  api/append.ts                 # Append audio to existing conversation
+  api/gemini.ts                 # Legacy endpoint name for markdown export
+  api/auth.ts                   # API token session
+  shared/[shareId].tsx          # URL-compressed shared conversation
+
+/islands/                       # Hydrated Preact UI
+  HomeIsland.tsx                # Main layout
+  UploadIsland.tsx              # Text/audio input
+  DashboardIsland.tsx           # Dashboard shell
+  AudioRecorder.tsx             # Append recording flow
+  ForceDirectedGraph.tsx        # D3 graph renderer
+  EmojimapViz.tsx               # Graph overlay wrapper
+  MarkdownMakerDrawer.tsx       # Export UI
+  ConversationList.tsx          # Local conversation history
+
+/components/                    # Shared presentational cards
+/signals/                       # Global Preact signal store
+/utils/                         # Client utilities
+/static/                        # CSS and static assets
 ```
 
-## Data Flow (Critical Path)
+## Data Flow
 
-1. User submits text/audio via `UploadIsland` -> `POST /api/process`
-2. Server creates Gemini model, calls `processText()` or `processAudio()` from
-   `/core/orchestration/conversation-flow.ts`
-3. Orchestrator runs parallel AI analysis (topics + action items + status
-   checks + summary) via `parallel-analysis.ts`
-4. Result (`ConversationFlowResult`) returned to client
-5. Client sets `conversationData.value = result` (the global signal)
-6. All dashboard components reactively render from that signal
-7. Auto-save to localStorage via effect in `conversationStore.ts`
+1. User submits text/audio in `UploadIsland`.
+2. Client calls `POST /api/process`.
+3. The route gets a provider-neutral service from `services/ai.ts`.
+4. Text goes straight to `processText()`.
+5. Audio is converted by `services/audio.ts`:
+   - OpenRouter: inline base64 `input_audio`
+   - Gemini: uploaded file URI or inline fallback
+6. `conversation-flow.ts` calls `parallel-analysis.ts`.
+7. Topic extraction, action item extraction, status checks, and summary run in
+   parallel where possible.
+8. Title generation runs from the transcript/text.
+9. Client stores `ConversationFlowResult` in the global `conversationData`
+   signal and auto-saves to local storage.
 
-**Append flow**: `AudioRecorder` -> `POST /api/append` -> same pipeline but
-merges with existing data
+Append flow is the same pipeline through `POST /api/append`, then it merges the
+new transcript, summary update, topic/action results, and status updates into
+the existing conversation.
 
 ## Key Patterns
 
-- **State**: Single `conversationData` signal in `signals/conversationStore.ts`.
-  All components read from it. Mutations update `.value` directly.
-- **API key security**: Gemini API key is server-side only. Client code in
-  `utils/geminiService.ts` calls `/api/gemini` route. Never import
-  `@google/generative-ai` in islands.
-- **AI Service**: `core/ai/gemini.ts` exports `createGeminiService(model)`
-  returning an `AIService` interface. All AI calls go through this interface.
-  Prompts live in `core/ai/prompts.ts`.
-- **Islands architecture**: Fresh hydrates only `islands/` components.
-  Non-interactive stuff goes in `components/`. Don't put state or effects in
-  `components/`.
+- `AIService` is the boundary. Provider-specific code stays in
+  `core/ai/openrouter.ts`, `core/ai/gemini.ts`, `services/ai.ts`, and
+  `services/audio.ts`.
+- API keys stay server-side. Islands call server routes only.
+- `conversationData` in `signals/conversationStore.ts` is the main app state.
+  Null-check it before nested access.
+- Fresh hydrates only files in `islands/`. Keep presentational UI in
+  `components/` unless it needs state/effects/browser APIs.
+- `fresh.gen.ts` is generated. Do not edit it manually.
+- Shared conversations are URL-compressed, not server-stored.
+- `.env` is ignored. Do not commit real provider keys.
 
-## Known Issues (Priority Order)
+## Current Verification Baseline
 
-### HIGH - Functional
+- `deno task check` passes
+- `deno task test` passes
+- `deno task build` passes
+- OpenRouter text, markdown export, and a generated audio smoke test have worked
+  locally with `google/gemini-2.5-flash-lite`
 
-1. **Inline style chaos**: 406+ hardcoded `px`/`rem` values across components
-   bypass the CSS design token system defined in `static/styles.css`. The tokens
-   exist (`--card-padding`, `--border-radius`, `--tiny-size`, etc.) but aren't
-   used. This makes theming and responsive behavior inconsistent.
-   - **Fix approach**: Systematically replace hardcoded values with CSS custom
-     properties. Start with the most-used components (HomeIsland,
-     ActionItemsCard, DashboardIsland).
+## Open Issues
 
-2. **No tests**: Zero test coverage. The `/core/` directory is pure TypeScript
-   with no framework dependencies - ideal for unit testing. Start here.
-   - **Fix approach**: Add tests for `core/ai/gemini.ts` (mock model, test JSON
-     parsing), `core/orchestration/` (test parallel flows),
-     `core/storage/localStorage.ts`.
-
-### MEDIUM - Code Quality
-
-3. **Stale documentation**: 8 audit markdown files in root
-   (`ACTION_ITEMS_AUDIT.md`, `CONSISTENCY_AUDIT.md`, etc.) reference
-   code/components that no longer exist (e.g., `theme-system/` directory,
-   `JuicyThemes.tsx`). These are from November 2025 audits and are now
-   misleading.
-   - **Fix approach**: Either delete them or consolidate into a single
-     `AUDIT_HISTORY.md` for reference.
-
-4. **README model name**: Says `gemini-2.0-flash-exp` but code uses
-   `gemini-2.5-flash`. Update README.
-
-5. **16 islands may be too many**: Some could be consolidated. `EmojimapViz` is
-   essentially a thin wrapper around `ForceDirectedGraph`.
-   `VisualizationSelector` might fold into `TopicVisualizationsCard`.
-
-### LOW - Nice to Have
-
-6. **`api/joke.ts`**: Leftover route - unclear purpose. Candidate for removal.
-
-7. **Share feature uses URL compression**: Data is encoded in the URL itself (no
-   server storage). This works but has URL length limits. Fine for now but worth
-   noting.
-
-## Gotchas and Landmines
-
-- **Don't add ThemeShuffler back** without creating the actual component. It was
-  removed because the theme system was nuked and rebuilt multiple times. The
-  current "unified design system" in the last commit is the settled approach.
-- **`conversationData.value` can be null**. Always null-check before accessing
-  nested properties. The signal starts null and gets set after processing or
-  localStorage restore.
-- **Audio processing sends raw audio blob to Gemini** for action item extraction
-  (not the transcribed text). This is intentional - Gemini can process audio
-  directly and may catch nuances the transcript misses.
-- **The `@core/` import alias** is defined in `deno.json` as
-  `"@core/": "./core/"`. If imports from core break, check this mapping.
-- **Fresh regenerates `fresh.gen.ts`** automatically during dev. Don't manually
-  edit it. If a new island/route isn't registering, restart the dev server.
-- **localStorage auto-save**: Any mutation to `conversationData.value` triggers
-  a debounced save. The `isViewingShared` flag prevents saving when viewing
-  someone else's shared conversation.
-
-## Style Guidelines for This Codebase
-
-- Commit messages use conventional commits with emoji: `fix: ...`, `feat: ...`,
-  `refactor: ...`
-- Components use inline styles extensively (this is the tech debt, not a pattern
-  to follow)
-- CSS custom properties are defined in `static/styles.css` `:root` - prefer
-  these over hardcoded values
-- Preact signals for state, not useState/useReducer
-- Keep `/core/` framework-agnostic - no Preact imports, no DOM APIs, pure
-  TypeScript only
+1. **Inline style debt**: Many islands/components still use hardcoded `px` and
+   inline style values instead of the token system in `static/styles.css`. Start
+   with `HomeIsland`, `DashboardIsland`, `ActionItemsCard`, and the graph
+   islands.
+2. **Legacy naming**: `/api/gemini` and `utils/geminiService.ts` are now
+   provider-neutral in behavior but still Gemini-named. Rename only when the
+   client call sites and docs can be changed together.
+3. **Action item deduplication**: Append merging still uses normalized string
+   equality. Semantically duplicate tasks can slip through.
+4. **Real-device audio QA**: OpenRouter audio works with generated AIFF and text
+   flows locally, but browser-recorded `audio/webm` should be verified on real
+   desktop and iPhone.
+5. **Theme system clarity**: There are theme variables and local theme restore
+   code, but system dark-mode behavior is not a settled feature.
+6. **Island count**: There are 15 islands. Some graph wrappers or selectors may
+   be foldable later, but do not refactor this until behavior is covered.
 
 ## When Adding Features
 
-1. AI logic goes in `/core/ai/` or `/core/orchestration/`
-2. Interactive UI goes in `/islands/`
-3. Static/presentational UI goes in `/components/`
-4. New API endpoints go in `/routes/api/`
-5. Types go in `/core/types/index.ts`
-6. Update `signals/conversationStore.ts` ConversationData interface if adding
-   new data fields
+1. Provider-agnostic AI contracts go in `core/ai/types.ts`.
+2. Provider-specific implementation goes in `core/ai/openrouter.ts` or
+   `core/ai/gemini.ts`.
+3. Server env/provider wiring goes in `services/ai.ts` and `services/audio.ts`.
+4. Orchestration belongs in `core/orchestration/`.
+5. Interactive UI goes in `islands/`.
+6. Presentational UI goes in `components/`.
+7. Update `signals/conversationStore.ts` when result shape changes.
+8. Add or update focused tests in `core/tests/` for core behavior.
