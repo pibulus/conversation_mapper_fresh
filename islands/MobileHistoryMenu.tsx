@@ -99,7 +99,7 @@ export default function MobileHistoryMenu() {
       {/* Floating Menu Button - Now works on all screens! */}
       <button
         onClick={toggleMenu}
-        class="fixed bottom-6 right-6 flex items-center justify-center z-40 transition-all"
+        class="history-drawer-trigger fixed bottom-6 right-6 flex items-center justify-center z-40 transition-all"
         style={{
           background: "rgba(255, 252, 248, 0.85)",
           backdropFilter: "blur(16px)",
@@ -156,8 +156,8 @@ export default function MobileHistoryMenu() {
 
       {/* Slide-out Drawer */}
       <div
-        class={`fixed inset-y-0 right-0 w-96 max-w-[85vw] transform transition-all duration-300 ease-out z-40 ${
-          isOpen.value ? "translate-x-0" : "translate-x-full"
+        class={`history-drawer fixed inset-y-0 right-0 w-96 max-w-[85vw] z-40 ${
+          isOpen.value ? "is-open" : "is-closed"
         }`}
         style={{
           background: "rgba(255, 252, 248, 0.95)",
@@ -169,6 +169,7 @@ export default function MobileHistoryMenu() {
       >
         {/* Header */}
         <div
+          class="history-drawer__header"
           style={{
             background: "rgba(232, 131, 156, 0.15)",
             borderBottom: "2px solid rgba(232, 131, 156, 0.3)",
@@ -220,6 +221,7 @@ export default function MobileHistoryMenu() {
 
         {/* New Conversation Button */}
         <div
+          class="history-drawer__new"
           style={{
             padding: "1.25rem 1.5rem",
             borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
@@ -284,7 +286,7 @@ export default function MobileHistoryMenu() {
 
         {/* Conversation List */}
         <div
-          class="flex-1 overflow-y-auto space-y-3 h-[calc(100vh-180px)]"
+          class="history-drawer__list flex-1 overflow-y-auto space-y-3 h-[calc(100vh-180px)]"
           style={{ padding: "1.25rem 1.5rem" }}
         >
           {!hasConversations
@@ -328,7 +330,9 @@ export default function MobileHistoryMenu() {
                 return (
                   <div
                     key={conv.id}
-                    class={`history-item${isActive ? " active" : ""}`}
+                    class={`history-item history-drawer__item${
+                      isActive ? " active" : ""
+                    }`}
                   >
                     <div
                       style={{
@@ -447,6 +451,7 @@ export default function MobileHistoryMenu() {
 
         {/* Storage Info */}
         <div
+          class="history-drawer__footer"
           style={{
             padding: "1rem 1.5rem",
             borderTop: "1px solid rgba(0, 0, 0, 0.06)",

@@ -480,7 +480,10 @@ export default function ActionItemsCard(
           </div>
 
           {/* Search bar */}
-          <div style={{ padding: "0.75rem 1rem 0.25rem" }}>
+          <div
+            class="action-items-search"
+            style={{ padding: "0.75rem 1rem 0.25rem" }}
+          >
             <input
               type="text"
               value={searchQuery.value}
@@ -503,10 +506,10 @@ export default function ActionItemsCard(
           <div
             ref={listContainerRef}
             tabIndex={0}
+            class="action-items-scroll max-h-96 overflow-y-auto focus:outline-none"
             style={{
               padding: "0.5rem var(--card-padding) var(--card-padding)",
             }}
-            class="max-h-96 overflow-y-auto focus:outline-none"
           >
             {sortedActionItems.value.length === 0
               ? (
@@ -536,7 +539,11 @@ export default function ActionItemsCard(
                         onDragLeave={(e) => canDrag && handleDragLeave(e)}
                         onDrop={(e) => canDrag && handleDrop(e, item.id)}
                         onClick={() => selectedItemIndex.value = index}
-                        class="relative p-4 rounded-lg bg-white hover:bg-gray-50 transition-all"
+                        class={`action-item-card relative p-4 rounded-lg bg-white hover:bg-gray-50 transition-all${
+                          item.status === "completed" ? " is-completed" : ""
+                        }${isSelected ? " is-selected" : ""}${
+                          isDragOver ? " is-drag-over" : ""
+                        }${isDragging ? " is-dragging" : ""}`}
                         style={{
                           border: `2px solid ${
                             isSelected || isDragOver
@@ -575,7 +582,7 @@ export default function ActionItemsCard(
                               type="checkbox"
                               checked={item.status === "completed"}
                               onChange={() => toggleActionItem(item.id)}
-                              class="cursor-pointer w-5 h-5"
+                              class="action-item-checkbox cursor-pointer w-5 h-5"
                               style={{ accentColor: "var(--color-accent)" }}
                             />
                           </div>
@@ -639,9 +646,9 @@ export default function ActionItemsCard(
                               )
                               : (
                                 <p
-                                  class={`leading-relaxed ${
+                                  class={`action-item-description leading-relaxed${
                                     item.status === "completed"
-                                      ? "line-through opacity-60"
+                                      ? " is-completed"
                                       : ""
                                   }`}
                                   style={{
@@ -662,7 +669,7 @@ export default function ActionItemsCard(
                               )}
 
                             {/* Metadata row - assignee & due date */}
-                            <div class="flex items-center gap-3 flex-wrap">
+                            <div class="action-item-meta flex items-center gap-3 flex-wrap">
                               {/* Assignee selector */}
                               <div class="relative assignee-dropdown-container">
                                 <button
@@ -671,7 +678,7 @@ export default function ActionItemsCard(
                                       activeAssigneeDropdown.value === item.id
                                         ? null
                                         : item.id}
-                                  class="flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
+                                  class="action-item-chip flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
                                   style={{
                                     border: "2px solid var(--color-border)",
                                   }}
@@ -757,7 +764,7 @@ export default function ActionItemsCard(
                                       (input as any).showPicker();
                                     }
                                   }}
-                                  class="flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
+                                  class="action-item-chip flex items-center gap-2 px-3 py-1.5 rounded text-xs hover:bg-gray-100 transition-colors"
                                   style={{
                                     border: "2px solid var(--color-border)",
                                   }}
@@ -783,7 +790,7 @@ export default function ActionItemsCard(
                         {/* Delete button */}
                         <button
                           onClick={() => requestDeleteItem(item.id)}
-                          class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 hover:text-red-600 transition-colors"
+                          class="action-item-delete absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 hover:text-red-600 transition-colors"
                           title="Delete"
                         >
                           <i class="fa fa-times text-xs"></i>

@@ -1336,6 +1336,154 @@ body {
     margin-top: 1rem;
     gap: 0.55rem;
   }
+
+  .dashboard-card {
+    border-radius: 18px;
+  }
+
+  .dashboard-card-header {
+    padding: 0.85rem 0.95rem;
+  }
+
+  .dashboard-card-header h3 {
+    font-size: 0.92rem;
+  }
+
+  .dashboard-card-body {
+    padding: 0.9rem;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .dashboard-skeleton-card {
+    padding: 1rem;
+  }
+
+  .empty-state {
+    padding: 1.35rem 0.75rem;
+  }
+
+  .empty-state-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .history-drawer-trigger {
+    bottom: 0.95rem;
+    right: 0.95rem;
+    padding: 0.85rem 0.95rem;
+    gap: 0.5rem;
+    font-size: 0.92rem;
+  }
+
+  .history-drawer {
+    inset: auto 0 0 0;
+    width: 100%;
+    max-width: none;
+    height: min(82vh, 760px);
+    border-left: none;
+    border-top: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.16);
+    transform: translateY(100%) !important;
+  }
+
+  .history-drawer.is-open {
+    transform: translateY(0) !important;
+  }
+
+  .history-drawer.is-closed {
+    transform: translateY(100%) !important;
+  }
+
+  .history-drawer__header,
+  .history-drawer__new,
+  .history-drawer__footer {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .history-drawer__list {
+    height: auto !important;
+    max-height: calc(82vh - 168px);
+    padding: 1rem !important;
+  }
+
+  .history-drawer__item {
+    padding: 0.85rem;
+    border-radius: 14px;
+  }
+
+  .history-drawer__item h3 {
+    font-size: 0.92rem !important;
+  }
+
+  .history-drawer__item p,
+  .history-drawer__item span {
+    font-size: 0.72rem !important;
+  }
+
+  .history-drawer__item button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .action-items-search {
+    padding: 0.65rem 0.9rem 0.2rem !important;
+  }
+
+  .action-items-scroll {
+    padding: 0.45rem 0.9rem 0.9rem !important;
+  }
+
+  .action-item-card {
+    padding: 0.85rem !important;
+    border-radius: 14px !important;
+  }
+
+  .action-item-card.is-completed {
+    background: linear-gradient(
+      180deg,
+      rgba(173, 232, 219, 0.18) 0%,
+      rgba(255, 255, 255, 0.92) 100%
+    ) !important;
+  }
+
+  .action-item-description {
+    font-size: 0.92rem !important;
+    line-height: 1.45 !important;
+  }
+
+  .action-item-description.is-completed {
+    opacity: 0.6;
+    text-decoration-thickness: 2px;
+  }
+
+  .action-item-meta {
+    gap: 0.45rem !important;
+  }
+
+  .action-item-chip {
+    padding: 0.42rem 0.55rem !important;
+  }
+
+  .action-item-delete {
+    top: 0.4rem !important;
+    right: 0.4rem !important;
+  }
+
+  .action-item-card .grid {
+    gap: 0.55rem;
+  }
+
+  .action-item-card .fa-grip-vertical {
+    font-size: 0.95rem !important;
+  }
+
+  .topic-visualizations-shell,
+  .topic-visualizations-placeholder {
+    min-height: 280px !important;
+  }
 }
 
 /* ===================================================================
@@ -1372,6 +1520,62 @@ body {
   padding: var(--card-padding);
   max-height: 24rem;
   overflow-y: auto;
+}
+
+.action-item-card {
+  position: relative;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.action-item-card.is-completed {
+  background: linear-gradient(
+    180deg,
+    rgba(173, 232, 219, 0.12) 0%,
+    rgba(255, 255, 255, 0.96) 100%
+  );
+}
+
+.action-item-card.is-selected,
+.action-item-card.is-drag-over {
+  transform: translateY(-1px);
+}
+
+.action-item-description.is-completed {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.action-item-chip {
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.action-item-delete {
+  box-shadow: 0 2px 6px rgba(30, 23, 20, 0.08);
+}
+
+.topic-visualizations-shell {
+  min-height: 500px;
+}
+
+.topic-visualizations-placeholder {
+  min-height: 500px;
+}
+
+.history-drawer {
+  transition: transform 300ms ease-out, box-shadow 300ms ease-out;
+  transform: translateX(100%);
+}
+
+.history-drawer.is-open {
+  transform: translateX(0);
+}
+
+.history-drawer.is-closed {
+  transform: translateX(100%);
 }
 
 .dashboard-skeleton-grid {

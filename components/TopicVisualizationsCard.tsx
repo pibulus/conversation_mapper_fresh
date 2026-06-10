@@ -40,11 +40,14 @@ export default function TopicVisualizationsCard() {
         <div class="dashboard-card-header">
           <h3>Topic Visualizations</h3>
         </div>
-        <div style={{ padding: "var(--card-padding)", minHeight: "500px" }}>
+        <div
+          class="topic-visualizations-shell"
+          style={{ padding: "var(--card-padding)", minHeight: "500px" }}
+        >
           {isVisible.value ? <VisualizationSelector /> : (
             // Loading placeholder
             <div
-              class="flex items-center justify-center"
+              class="topic-visualizations-placeholder flex items-center justify-center"
               style={{ minHeight: "500px" }}
             >
               <div
