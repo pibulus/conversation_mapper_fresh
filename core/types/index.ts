@@ -1,6 +1,6 @@
 /**
  * Core Types Index
- * All type definitions for the conversation mapper nervous system
+ * All type definitions for the Project Mapper nervous system
  */
 
 export * from "./action-item.ts";

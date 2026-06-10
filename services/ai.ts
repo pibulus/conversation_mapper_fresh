@@ -87,7 +87,7 @@ export function getOpenRouterService(): AIService {
     DEFAULT_OPENROUTER_BASE_URL;
   const siteUrl = Deno.env.get("OPENROUTER_SITE_URL") ?? undefined;
   const siteName = Deno.env.get("OPENROUTER_SITE_NAME") ??
-    "Conversation Mapper";
+    "ProMapper";
   const configKey = JSON.stringify({
     apiKey,
     model,

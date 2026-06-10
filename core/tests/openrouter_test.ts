@@ -35,7 +35,7 @@ Deno.test("OpenRouter generateMarkdown posts chat completion request", async () 
     apiKey: "test-key",
     model: "google/gemini-2.5-flash-lite",
     siteUrl: "http://localhost:8003",
-    siteName: "Conversation Mapper Test",
+    siteName: "ProMapper Test",
     fetcher: async (input, init) => {
       capturedUrl = String(input);
       capturedBody = JSON.parse(String(init?.body));
@@ -58,7 +58,7 @@ Deno.test("OpenRouter generateMarkdown posts chat completion request", async () 
   assertEquals(capturedHeaders?.get("HTTP-Referer"), "http://localhost:8003");
   assertEquals(
     capturedHeaders?.get("X-OpenRouter-Title"),
-    "Conversation Mapper Test",
+    "ProMapper Test",
   );
 });
 

@@ -1,5 +1,5 @@
 /**
- * Conversation Mapper - Nervous System Core
+ * ProMapper - Nervous System Core
  *
  * Framework-agnostic AI orchestration logic
  * Extract once, use anywhere

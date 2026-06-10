@@ -8,8 +8,10 @@
 import type { ConversationData } from "../types/conversation-data.ts";
 
 // Storage keys
-const CONVERSATIONS_KEY = "conversation_mapper_conversations";
-const ACTIVE_ID_KEY = "conversation_mapper_active_id";
+const CONVERSATIONS_KEY = "project_mapper_conversations";
+const ACTIVE_ID_KEY = "project_mapper_active_id";
+const LEGACY_CONVERSATIONS_KEY = "conversation_mapper_conversations";
+const LEGACY_ACTIVE_ID_KEY = "conversation_mapper_active_id";
 
 // ===================================================================
 // TYPES
@@ -65,7 +67,11 @@ export function getAllConversations(): Record<string, StoredConversation> {
   if (typeof window === "undefined") return {};
 
   try {
-    const data = localStorage.getItem(CONVERSATIONS_KEY);
+    const data = localStorage.getItem(CONVERSATIONS_KEY) ??
+      localStorage.getItem(LEGACY_CONVERSATIONS_KEY);
+    if (data && !localStorage.getItem(CONVERSATIONS_KEY)) {
+      localStorage.setItem(CONVERSATIONS_KEY, data);
+    }
     return data ? JSON.parse(data) : {};
   } catch (error) {
     console.error("Failed to load conversations:", error);
@@ -106,7 +112,12 @@ export function deleteConversation(id: string): void {
  */
 export function getActiveConversationId(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem(ACTIVE_ID_KEY);
+  const activeId = localStorage.getItem(ACTIVE_ID_KEY) ??
+    localStorage.getItem(LEGACY_ACTIVE_ID_KEY);
+  if (activeId && !localStorage.getItem(ACTIVE_ID_KEY)) {
+    localStorage.setItem(ACTIVE_ID_KEY, activeId);
+  }
+  return activeId;
 }
 
 /**
@@ -117,6 +128,8 @@ export function clearAllConversations(): void {
 
   localStorage.removeItem(CONVERSATIONS_KEY);
   localStorage.removeItem(ACTIVE_ID_KEY);
+  localStorage.removeItem(LEGACY_CONVERSATIONS_KEY);
+  localStorage.removeItem(LEGACY_ACTIVE_ID_KEY);
 }
 
 // ===================================================================

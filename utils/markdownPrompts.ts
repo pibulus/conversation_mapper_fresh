@@ -1,7 +1,7 @@
 /**
  * Markdown Maker Preset Prompts
  *
- * Ported from Svelte conversation_mapper version
+ * Ported from Svelte project_mapper version
  * 8 preset templates for converting conversations to different formats
  */
 

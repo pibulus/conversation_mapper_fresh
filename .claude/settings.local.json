@@ -3,7 +3,7 @@
     "allow": [
       "Bash(rg:*)",
       "Bash(find:*)",
-      "Bash(git -C /Users/pabloalvarado/Projects/active/apps/conversation_mapper_fresh log --all --full-history --format=\"%H %s\" -- .env .env.local .env.example)",
+      "Bash(git -C /Users/pabloalvarado/Projects/active/apps/promapper log --all --full-history --format=\"%H %s\" -- .env .env.local .env.example)",
       "Bash(git -C /Users/pabloalvarado/Projects/active/apps/ziplist log --all --full-history --format=\"%H %s\" -- .env .env.local .env.example)",
       "Bash(git -C /Users/pabloalvarado/Projects/active/apps/riffrap log --all --full-history --format=\"%H %s\" -- .env .env.local .env.example)",
       "Bash(git -C /Users/pabloalvarado/Projects/active/apps/button_studio log --all --full-history --format=\"%H %s\" -- .env .env.local .env.example)",

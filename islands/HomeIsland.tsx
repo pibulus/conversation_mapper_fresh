@@ -173,7 +173,7 @@ export default function HomeIsland() {
                     e.currentTarget.style.transform = "translateX(0)";
                   }}
                 >
-                  Conversation Mapper
+                  ProMapper
                 </a>
               </>
             )}

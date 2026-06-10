@@ -1,12 +1,11 @@
-# 🧠 Conversation Mapper
+# 🧠 ProMapper
 
 > Turn messy meeting recordings into organized topic maps, action items, and
 > summaries - automatically.
 
-**Conversation Mapper** uses AI to transform unstructured conversations (audio
-or text) into structured knowledge: transcripts with speaker detection,
-auto-generated action items, topic relationship graphs, and customizable
-exports.
+**ProMapper** uses AI to transform unstructured conversations (audio or text)
+into structured knowledge: transcripts with speaker detection, auto-generated
+action items, topic relationship graphs, and customizable exports.
 
 ## ✨ Key Features
 
@@ -63,8 +62,8 @@ Transform the same conversation into multiple formats:
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd conversation_mapper_fresh
+   git clone https://github.com/pibulus/promapper.git
+   cd promapper
    ```
 
 2. **Set up environment variables**

@@ -18,7 +18,7 @@ export default function SharedConversationQuery({ url }: PageProps) {
     return (
       <>
         <Head>
-          <title>Invalid Share Link | Conversation Mapper</title>
+          <title>Invalid Share Link | ProMapper</title>
         </Head>
 
         <div class="mapper-scene min-h-screen flex items-center justify-center px-6">
@@ -48,8 +48,11 @@ export default function SharedConversationQuery({ url }: PageProps) {
   return (
     <>
       <Head>
-        <title>Shared Conversation | Conversation Mapper</title>
-        <meta name="description" content="View shared conversation analysis" />
+        <title>Shared Project Map | ProMapper</title>
+        <meta
+          name="description"
+          content="View a shared ProMapper project map"
+        />
       </Head>
 
       <div class="mapper-scene min-h-screen">
@@ -67,10 +70,10 @@ export default function SharedConversationQuery({ url }: PageProps) {
             <div class="flex items-center justify-between">
               <div class="min-w-0">
                 <h1 class="truncate text-xl sm:text-2xl font-extrabold text-gray-900">
-                  Conversation Mapper
+                  ProMapper
                 </h1>
                 <p class="text-sm text-gray-600 mt-1">
-                  Shared conversation view
+                  Shared project map
                 </p>
               </div>
               <a

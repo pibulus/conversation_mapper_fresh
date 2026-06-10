@@ -1,9 +1,9 @@
 {
-  "name": "conversation-mapper",
+  "name": "project-mapper",
   "exports": "./main.ts",
   "version": "1.0.0",
   "description": "Turn messy meeting recordings into organized topic maps, action items, and summaries - automatically",
-  "author": "Conversation Mapper Contributors",
+  "author": "ProMapper Contributors",
   "license": "MIT",
   "lock": false,
   "nodeModulesDir": "auto",

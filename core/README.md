@@ -1,4 +1,4 @@
-# Conversation Mapper Core
+# ProMapper Core
 
 Framework-agnostic AI orchestration for turning conversation text or audio into
 structured data.

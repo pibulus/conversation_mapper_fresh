@@ -1,7 +1,7 @@
 /**
  * Parallel Analysis Coordinator
  *
- * The magic that makes conversation mapper fast:
+ * The magic that makes Project Mapper fast:
  * - Topics, action items, and self-checkoff run simultaneously
  * - Efficient API usage
  * - Fast user experience

@@ -2,7 +2,7 @@
  * LoadingIndicator Component
  *
  * Beautiful loading screen with wavy bouncing text and random emoji
- * Ported from Svelte conversation_mapper version
+ * Ported from Svelte project_mapper version
  */
 
 import { useEffect, useState } from "preact/hooks";

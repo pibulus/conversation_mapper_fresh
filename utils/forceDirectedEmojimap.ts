@@ -2,7 +2,7 @@
  * Force-Directed Emojimap Visualization
  *
  * D3-based force simulation for topic graphs with emoji nodes
- * Ported from Svelte conversation_mapper implementation
+ * Ported from Svelte project_mapper implementation
  */
 
 import * as d3 from "d3";

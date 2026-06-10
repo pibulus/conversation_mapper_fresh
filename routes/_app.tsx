@@ -8,26 +8,26 @@ export default function App({ Component }: PageProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
         {/* Primary Meta Tags */}
-        <title>Conversation Mapper - Turn talk into action</title>
+        <title>ProMapper - Project maps from messy conversations</title>
         <meta
           name="title"
-          content="Conversation Mapper - Turn talk into action"
+          content="ProMapper - Project maps from messy conversations"
         />
         <meta
           name="description"
-          content="Drop a conversation. Watch it bloom. Record, transcribe, and map messy talks into clean topics and action items. Private. Simple. Yours."
+          content="Record, paste, or upload messy project conversations. ProMapper turns them into transcripts, summaries, action items, and clickable topic maps."
         />
 
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://conversationmapper.com/" />
+        <meta property="og:url" content="https://promapper.app/" />
         <meta
           property="og:title"
-          content="Conversation Mapper - Turn talk into action"
+          content="ProMapper - Project maps from messy conversations"
         />
         <meta
           property="og:description"
-          content="Drop a conversation. Watch it bloom. Record, transcribe, and map messy talks into clean topics and action items."
+          content="Turn voice notes, meetings, and project chats into transcripts, summaries, action items, and visual topic maps."
         />
         <meta property="og:image" content="/og-image.png" />
 
@@ -35,20 +35,20 @@ export default function App({ Component }: PageProps) {
         <meta property="twitter:card" content="summary_large_image" />
         <meta
           property="twitter:url"
-          content="https://conversationmapper.com/"
+          content="https://promapper.app/"
         />
         <meta
           property="twitter:title"
-          content="Conversation Mapper - Turn talk into action"
+          content="ProMapper - Project maps from messy conversations"
         />
         <meta
           property="twitter:description"
-          content="Drop a conversation. Watch it bloom. Record, transcribe, and map messy talks into clean topics and action items."
+          content="Turn voice notes, meetings, and project chats into transcripts, summaries, action items, and visual topic maps."
         />
         <meta property="twitter:image" content="/og-image.png" />
 
         {/* Favicon */}
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link
           rel="apple-touch-icon"
           sizes="180x180"
@@ -66,7 +66,11 @@ export default function App({ Component }: PageProps) {
           dangerouslySetInnerHTML={{
             __html: `
             try {
-              const stored = localStorage.getItem('conversation-mapper-theme');
+              const stored = localStorage.getItem('project-mapper-theme') ||
+                localStorage.getItem('conversation-mapper-theme');
+              if (stored && !localStorage.getItem('project-mapper-theme')) {
+                localStorage.setItem('project-mapper-theme', stored);
+              }
               if (stored) {
                 const theme = JSON.parse(stored);
                 // Apply all theme variables (OKLCH colors + gradient)

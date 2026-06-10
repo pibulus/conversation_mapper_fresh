@@ -1,7 +1,7 @@
 /**
  * Export Format Prompts
  *
- * Extracted from the actual conversation_mapper markdown prompts
+ * Extracted from the actual project_mapper markdown prompts
  * These are the real formats that exist in the SvelteKit version
  */
 

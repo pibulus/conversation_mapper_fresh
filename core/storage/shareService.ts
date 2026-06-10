@@ -11,7 +11,8 @@
 import type { ConversationData } from "../types/conversation-data.ts";
 
 // Storage key for shared conversations
-const SHARES_KEY = "conversation_mapper_shares";
+const SHARES_KEY = "project_mapper_shares";
+const LEGACY_SHARES_KEY = "conversation_mapper_shares";
 
 // ===================================================================
 // TYPES
@@ -341,7 +342,11 @@ function getAllShares(): Record<string, SharedConversation> {
   if (typeof window === "undefined") return {};
 
   try {
-    const data = localStorage.getItem(SHARES_KEY);
+    const data = localStorage.getItem(SHARES_KEY) ??
+      localStorage.getItem(LEGACY_SHARES_KEY);
+    if (data && !localStorage.getItem(SHARES_KEY)) {
+      localStorage.setItem(SHARES_KEY, data);
+    }
     return data ? JSON.parse(data) : {};
   } catch (error) {
     console.error("Failed to load shares:", error);
