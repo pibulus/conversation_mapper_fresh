@@ -2,7 +2,7 @@ import {
   encodeShareDataForUrl,
   loadUrlSharedConversation,
 } from "../storage/shareService.ts";
-import type { ConversationData } from "../../signals/conversationStore.ts";
+import type { ConversationData } from "../types/conversation-data.ts";
 import { assertEquals, assertExists } from "./_assert.ts";
 
 const sampleConversation: ConversationData = {

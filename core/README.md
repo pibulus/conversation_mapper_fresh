@@ -26,6 +26,7 @@ Provider-specific SDK details stay behind the `AIService` interface.
 ├── types/
 │   ├── action-item.ts
 │   ├── conversation.ts
+│   ├── conversation-data.ts
 │   ├── edge.ts
 │   ├── node.ts
 │   ├── transcript.ts
@@ -38,6 +39,9 @@ Provider-specific SDK details stay behind the `AIService` interface.
 │   ├── formats.ts
 │   ├── transformer.ts
 │   └── index.ts
+├── realtime/
+│   ├── shareProtocol.ts        # Sanitized share-room contract
+│   └── shareStore.ts           # Memory/Supabase share-store adapters
 └── index.ts                    # Public exports
 ```
 

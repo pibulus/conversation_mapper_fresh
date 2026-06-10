@@ -1,11 +1,14 @@
 /**
  * Share Service - Generate Shareable Links
  *
- * Creates public URL payloads for small conversations.
- * Large conversations are saved locally only; those links are not portable.
+ * Browser share helpers.
+ *
+ * Small conversations become portable URL payloads. Larger conversations use
+ * the server share API when available, with localStorage as an explicit
+ * same-browser fallback.
  */
 
-import type { ConversationData } from "../../signals/conversationStore.ts";
+import type { ConversationData } from "../types/conversation-data.ts";
 
 // Storage key for shared conversations
 const SHARES_KEY = "conversation_mapper_shares";
@@ -163,17 +166,10 @@ export function loadUrlSharedConversation(
 }
 
 /**
- * Create a shareable link for a conversation
- * Attempts URL-based sharing first, falls back to localStorage for large data
+ * Create a local share link synchronously.
+ * Attempts URL-based sharing first, then falls back to localStorage.
  */
-export function createShare(
-  data: ConversationData,
-  expiresInDays?: number,
-): string {
-  return createShareLink(data, expiresInDays).shareId;
-}
-
-export function createShareLink(
+function createLocalShareLink(
   data: ConversationData,
   expiresInDays?: number,
 ): ShareCreationResult {
@@ -234,7 +230,7 @@ export async function createBestShareLink(
   expiresInDays?: number,
 ): Promise<ShareCreationResult> {
   if (typeof window === "undefined") {
-    return createShareLink(data, expiresInDays);
+    return createLocalShareLink(data, expiresInDays);
   }
 
   const compressed = encodeShareDataForUrl(data);
@@ -281,7 +277,7 @@ export async function createBestShareLink(
     };
   } catch (error) {
     console.warn("Falling back to local-only share:", error);
-    const localResult = createShareLink(data, expiresInDays);
+    const localResult = createLocalShareLink(data, expiresInDays);
     return {
       ...localResult,
       warning: error instanceof Error
@@ -341,7 +337,7 @@ export function loadSharedConversation(
 /**
  * Get all shared conversations
  */
-export function getAllShares(): Record<string, SharedConversation> {
+function getAllShares(): Record<string, SharedConversation> {
   if (typeof window === "undefined") return {};
 
   try {
@@ -356,103 +352,11 @@ export function getAllShares(): Record<string, SharedConversation> {
 /**
  * Delete a shared conversation
  */
-export function deleteShare(shareId: string): void {
+function deleteShare(shareId: string): void {
   if (typeof window === "undefined") return;
 
   const shares = getAllShares();
   delete shares[shareId];
 
   localStorage.setItem(SHARES_KEY, JSON.stringify(shares));
-}
-
-/**
- * Clean up expired shares
- */
-export function cleanupExpiredShares(): number {
-  if (typeof window === "undefined") return 0;
-
-  const shares = getAllShares();
-  const now = new Date();
-  let cleaned = 0;
-
-  Object.entries(shares).forEach(([shareId, shared]) => {
-    if (shared.expiresAt && new Date(shared.expiresAt) < now) {
-      delete shares[shareId];
-      cleaned++;
-    }
-  });
-
-  if (cleaned > 0) {
-    localStorage.setItem(SHARES_KEY, JSON.stringify(shares));
-  }
-
-  return cleaned;
-}
-
-// ===================================================================
-// SHARE MANAGEMENT
-// ===================================================================
-
-/**
- * Get list of all shares for current user's conversations
- */
-export function getSharesForConversation(
-  conversationId: string,
-): SharedConversation[] {
-  const shares = getAllShares();
-
-  return Object.values(shares).filter(
-    (share) => share.conversation.id === conversationId,
-  );
-}
-
-/**
- * Copy share URL to clipboard
- */
-export async function copyShareUrlToClipboard(
-  shareId: string,
-): Promise<boolean> {
-  if (typeof window === "undefined") return false;
-
-  try {
-    const url = getShareUrl(shareId);
-    await navigator.clipboard.writeText(url);
-    return true;
-  } catch (error) {
-    console.error("Failed to copy to clipboard:", error);
-    return false;
-  }
-}
-
-// ===================================================================
-// STORAGE STATS
-// ===================================================================
-
-/**
- * Get share storage statistics
- */
-export function getShareStats(): {
-  totalShares: number;
-  activeShares: number;
-  expiredShares: number;
-} {
-  const shares = getAllShares();
-  const now = new Date();
-
-  let active = 0;
-  let expired = 0;
-
-  Object.values(shares).forEach((share) => {
-    if (share.expiresAt && new Date(share.expiresAt) < now) {
-      expired++;
-    } else {
-      active++;
-    }
-  });
-
-  return {
-    totalShares: active + expired,
-    activeShares: active,
-    expiredShares: expired,
-  };
 }

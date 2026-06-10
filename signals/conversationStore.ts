@@ -7,44 +7,9 @@
 
 import { effect, signal } from "@preact/signals";
 import { debouncedSave } from "../core/storage/localStorage.ts";
+import type { ConversationData } from "../core/types/conversation-data.ts";
 
-export interface ConversationData {
-  conversation: {
-    id: string;
-    title?: string;
-    source: string;
-    transcript: string;
-    created_at?: string;
-  };
-  transcript: {
-    text: string;
-    speakers: string[];
-  };
-  nodes: Array<{
-    id: string;
-    label: string;
-    emoji: string;
-    color: string;
-  }>;
-  edges: Array<{
-    id?: string;
-    source_topic_id: string;
-    target_topic_id: string;
-    color: string;
-  }>;
-  actionItems: Array<{
-    id: string;
-    conversation_id: string;
-    description: string;
-    assignee: string | null;
-    due_date: string | null;
-    status: "pending" | "completed";
-    created_at: string;
-    updated_at: string;
-  }>;
-  statusUpdates: Array<any>;
-  summary?: string;
-}
+export type { ConversationData };
 
 // Global conversation data signal
 export const conversationData = signal<ConversationData | null>(null);

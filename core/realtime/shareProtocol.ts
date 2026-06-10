@@ -1,4 +1,4 @@
-import type { ConversationData } from "../../signals/conversationStore.ts";
+import type { ConversationData } from "../types/conversation-data.ts";
 
 export const SHARE_ROOM_PREFIX = "cm_";
 

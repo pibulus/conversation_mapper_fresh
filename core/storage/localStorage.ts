@@ -5,7 +5,7 @@
  * No backend needed, works offline
  */
 
-import type { ConversationData } from "../../signals/conversationStore.ts";
+import type { ConversationData } from "../types/conversation-data.ts";
 
 // Storage keys
 const CONVERSATIONS_KEY = "conversation_mapper_conversations";
