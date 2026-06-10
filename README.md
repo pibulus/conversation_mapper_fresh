@@ -126,8 +126,7 @@ Transform the same conversation into multiple formats:
 - **[CLAUDE.md](./CLAUDE.md)** - Development guide for future coding sessions
 - **[core/README.md](./core/README.md)** - Framework-agnostic AI logic
   documentation
-- **[AUDIT_HISTORY.md](./AUDIT_HISTORY.md)** - Consolidated historical audit
-  notes
+- **[GLOSSARY.md](./GLOSSARY.md)** - Terms and file map for the codebase
 
 ## 🏗️ Architecture
 
