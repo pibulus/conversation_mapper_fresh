@@ -271,7 +271,13 @@ export default function ForceDirectedGraph(
   ]);
 
   useEffect(() => {
-    if (!isFullscreen.value) return;
+    if (topics.value.length === 0) return;
+
+    const timeoutId = setTimeout(() => initializeVisualization(), 50);
+
+    if (!isFullscreen.value) {
+      return () => clearTimeout(timeoutId);
+    }
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -280,9 +286,11 @@ export default function ForceDirectedGraph(
     };
 
     document.addEventListener("keydown", handleEscape);
-    setTimeout(() => initializeVisualization(), 50);
 
-    return () => document.removeEventListener("keydown", handleEscape);
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, [isFullscreen.value]);
 
   // ===================================================================
@@ -405,8 +413,9 @@ export default function ForceDirectedGraph(
         <button
           type="button"
           class="topic-node-detail__close"
-          onClick={() =>
-            selectedEdgeId.value = null}
+          onClick={() => {
+            selectedEdgeId.value = null;
+          }}
           aria-label="Close relationship details"
         >
           ×
