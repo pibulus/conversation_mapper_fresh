@@ -68,6 +68,7 @@ interface Config {
   chargeStrength: number;
   collisionRadius: number;
   onMouseOverNode?: (event: any, d: NodeData) => void;
+  onClickNode?: (event: any, d: NodeData) => void;
   onDoubleClickNode?: (event: any, d: NodeData) => void;
   onRightClickNode?: (event: any, d: NodeData) => void;
   onMouseOverEdge?: (event: any, d: EdgeData) => void;
@@ -95,27 +96,14 @@ const defaultConfig: Config = {
   linkDistance: 100,
   chargeStrength: -1500,
   collisionRadius: 50,
-  onMouseOverNode: (_event, d) => {
-    console.log("Mouse over node:", d.id);
-  },
-  onDoubleClickNode: (_event, d) => {
-    console.log("Double clicked node:", d.id);
-  },
-  onRightClickNode: (_event, d) => {
-    console.log("Right clicked node:", d.id);
-  },
-  onMouseOverEdge: (_event, d) => {
-    console.log("Mouse over edge:", d.id);
-  },
-  onDoubleClickEdge: (_event, d) => {
-    console.log("Double clicked edge:", d.id);
-  },
-  onRightClickEdge: (_event, d) => {
-    console.log("Right clicked edge:", d.id);
-  },
-  onBackgroundClick: (event) => {
-    console.log("Background clicked. pointerType: ", event.pointerType);
-  },
+  onMouseOverNode: undefined,
+  onClickNode: undefined,
+  onDoubleClickNode: undefined,
+  onRightClickNode: undefined,
+  onMouseOverEdge: undefined,
+  onDoubleClickEdge: undefined,
+  onRightClickEdge: undefined,
+  onBackgroundClick: undefined,
   onRightClickBackground: (event) => {
     event.preventDefault();
     // Dispatch custom event for external handling
@@ -265,6 +253,10 @@ function createNodeGroup(
     )
     .on("mouseover", (event, d) => {
       if (config.onMouseOverNode) config.onMouseOverNode(event, d);
+    })
+    .on("click", (event, d) => {
+      event.stopPropagation();
+      if (config.onClickNode) config.onClickNode(event, d);
     })
     .on("dblclick", (event, d) => {
       if (config.onDoubleClickNode) config.onDoubleClickNode(event, d);
@@ -501,10 +493,6 @@ export function forceDirectedEmojimap(
 
   // Process edges with error handling
   let currentEdges = mapEdges(edges);
-  console.log(
-    `[Emojimap] Mapped ${currentEdges.length} edges from ${edges.length} raw edges`,
-  );
-
   // Initialize SVG, groups, and zoom behavior
   const svg = createSvg(node, mergedConfig);
   const g = svg.append("g");
@@ -522,8 +510,6 @@ export function forceDirectedEmojimap(
     }
     nodeMap.set(n.id, n);
   });
-
-  console.log(`[Emojimap] Created node map with ${nodeMap.size} nodes`);
 
   // Map edges to nodes
   currentEdges = currentEdges
@@ -548,8 +534,6 @@ export function forceDirectedEmojimap(
       };
     })
     .filter(Boolean) as EdgeData[];
-
-  console.log(`[Emojimap] Final edge count: ${currentEdges.length}`);
 
   // Initialize simulation
   const simulation = d3
@@ -587,14 +571,6 @@ export function forceDirectedEmojimap(
   // Public API
   return {
     update(newParams) {
-      console.log(
-        "[Emojimap] Update called with params:",
-        newParams?.nodes?.length || 0,
-        "nodes",
-        newParams?.edges?.length || 0,
-        "edges",
-      );
-
       if (!newParams) {
         console.warn("[Emojimap] Update called with no parameters");
         return;
@@ -623,13 +599,9 @@ export function forceDirectedEmojimap(
       // Update config
       Object.assign(mergedConfig, newParams.config || {});
 
-      if (!nodes.length || !edges.length) {
+      if (!nodes.length) {
         console.warn(
-          "[Emojimap] Update skipped: nodes or edges empty.",
-          nodes.length,
-          "nodes,",
-          edges.length,
-          "edges",
+          "[Emojimap] Update skipped: no nodes.",
         );
         return;
       }
@@ -650,13 +622,8 @@ export function forceDirectedEmojimap(
         if (n && n.id) newNodeMap.set(n.id, n);
       });
 
-      console.log(`[Emojimap] Update: node map has ${newNodeMap.size} nodes`);
-
       // Map and filter edges
       const mappedEdges = mapEdges(edges);
-      console.log(
-        `[Emojimap] Update: mapped ${mappedEdges.length} edges from ${edges.length} raw edges`,
-      );
 
       currentEdges = mappedEdges
         .map((e) => {
@@ -680,8 +647,6 @@ export function forceDirectedEmojimap(
           };
         })
         .filter(Boolean) as EdgeData[];
-
-      console.log(`[Emojimap] Update: final edge count ${currentEdges.length}`);
 
       // Update simulation
       simulation.nodes(nodes);

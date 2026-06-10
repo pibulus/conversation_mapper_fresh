@@ -19,12 +19,12 @@ export default function VisualizationSelector() {
   const visualizations = [
     {
       id: "circular" as VisualizationType,
-      name: "Circular",
+      name: "Map",
       component: EmojimapViz,
     },
     {
       id: "arc" as VisualizationType,
-      name: "Arc",
+      name: "Threads",
       component: ArcDiagramViz,
     },
     // {

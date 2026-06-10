@@ -32,6 +32,10 @@ export default function ForceDirectedGraph(
   const escapeListenerRef = useRef<((e: KeyboardEvent) => void) | null>(null);
 
   const isFullscreen = useSignal(false);
+  const selectedNodeId = useSignal<string | null>(null);
+  const showAddNode = useSignal(false);
+  const newNodeLabel = useSignal("");
+  const newNodeEmoji = useSignal("");
 
   // Context menu state
   const contextMenuVisible = useSignal(false);
@@ -202,6 +206,12 @@ export default function ForceDirectedGraph(
         collisionRadius: collisionRadius.value,
         linkStrokeWidth: 2,
         linkOpacity: 0.5,
+        onClickNode: (_event: MouseEvent, node: { id: string }) => {
+          selectedNodeId.value = node.id;
+        },
+        onBackgroundClick: () => {
+          selectedNodeId.value = null;
+        },
         onRightClickBackground: (event: MouseEvent) => {
           event.preventDefault();
           contextMenuX.value = event.clientX;
@@ -282,6 +292,29 @@ export default function ForceDirectedGraph(
       console.error("Error exporting as PNG:", error);
       alert("Failed to export PNG. Please try again.");
     }
+  }
+
+  function addManualNode() {
+    const label = newNodeLabel.value.trim();
+    if (!label || !conversationData.value) return;
+
+    const emoji = newNodeEmoji.value.trim() || "✨";
+    const id = `manual_${crypto.randomUUID()}`;
+    const nextNode = {
+      id,
+      label,
+      emoji,
+      color: "#E8839C",
+    };
+
+    conversationData.value = {
+      ...conversationData.value,
+      nodes: [...conversationData.value.nodes, nextNode],
+    };
+    selectedNodeId.value = id;
+    newNodeLabel.value = "";
+    newNodeEmoji.value = "";
+    showAddNode.value = false;
   }
 
   // ===================================================================
@@ -377,13 +410,143 @@ export default function ForceDirectedGraph(
     },
   ];
 
+  const selectedNode = selectedNodeId.value
+    ? topics.value.find((node) => node.id === selectedNodeId.value)
+    : null;
+  const connectedEdges = selectedNode
+    ? relationships.value.filter((edge) =>
+      edge.source_topic_id === selectedNode.id ||
+      edge.target_topic_id === selectedNode.id
+    )
+    : [];
+  const connectedTopics = selectedNode
+    ? connectedEdges
+      .map((edge) =>
+        edge.source_topic_id === selectedNode.id
+          ? edge.target_topic_id
+          : edge.source_topic_id
+      )
+      .map((id) => topics.value.find((node) => node.id === id))
+      .filter(Boolean)
+    : [];
+
   return (
     <div class="relative flex h-full w-full flex-col">
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div class="topic-map-stats" aria-label="Topic map stats">
+          <span>{topics.value.length} topics</span>
+          <span>{relationships.value.length} links</span>
+        </div>
+        <button
+          type="button"
+          class="topic-map-add-button"
+          onClick={() => showAddNode.value = true}
+        >
+          <span aria-hidden="true">＋</span>
+          <span>Add topic</span>
+        </button>
+      </div>
+
       <div
         ref={svgContainerRef}
-        class="mx-auto w-full flex-1 overflow-hidden rounded-lg border border-gray-300 bg-gray-100"
+        class="topic-map-canvas mx-auto w-full flex-1 overflow-hidden rounded-lg border border-gray-300 bg-gray-100"
         style="min-height: 400px; height: 100%;"
       />
+
+      {selectedNode && (
+        <aside class="topic-node-detail" aria-live="polite">
+          <button
+            type="button"
+            class="topic-node-detail__close"
+            onClick={() => selectedNodeId.value = null}
+            aria-label="Close topic details"
+          >
+            ×
+          </button>
+          <div class="topic-node-detail__emoji">
+            {selectedNode.emoji || "✨"}
+          </div>
+          <div>
+            <h4>{selectedNode.label}</h4>
+            <p>
+              {connectedEdges.length === 0
+                ? "Standalone topic. It can still be useful as a marker."
+                : `${connectedEdges.length} connection${
+                  connectedEdges.length === 1 ? "" : "s"
+                } in this conversation.`}
+            </p>
+          </div>
+          {connectedTopics.length > 0 && (
+            <div class="topic-node-detail__links">
+              {connectedTopics.map((topic: any) => (
+                <button
+                  type="button"
+                  key={topic.id}
+                  onClick={() => selectedNodeId.value = topic.id}
+                >
+                  <span>{topic.emoji || "•"}</span>
+                  <span>{topic.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </aside>
+      )}
+
+      {showAddNode.value && (
+        <div class="topic-node-modal-backdrop">
+          <div class="topic-node-modal" role="dialog" aria-modal="true">
+            <div class="topic-node-modal__header">
+              <h4>Add topic</h4>
+              <button
+                type="button"
+                onClick={() => showAddNode.value = false}
+                aria-label="Close add topic"
+              >
+                ×
+              </button>
+            </div>
+            <label>
+              <span>Emoji</span>
+              <input
+                value={newNodeEmoji.value}
+                onInput={(event) =>
+                  newNodeEmoji.value = (event.target as HTMLInputElement).value}
+                placeholder="✨"
+                maxLength={4}
+              />
+            </label>
+            <label>
+              <span>Topic</span>
+              <input
+                value={newNodeLabel.value}
+                onInput={(event) =>
+                  newNodeLabel.value = (event.target as HTMLInputElement).value}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") addManualNode();
+                }}
+                placeholder="New thread"
+                autoFocus
+              />
+            </label>
+            <div class="topic-node-modal__actions">
+              <button
+                type="button"
+                onClick={() => showAddNode.value = false}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={addManualNode}
+                disabled={!newNodeLabel.value.trim()}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Control buttons */}
       <div class="absolute bottom-4 right-4 flex gap-2">
