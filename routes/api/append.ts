@@ -12,6 +12,7 @@
 import { Handlers } from "$fresh/server.ts";
 import { processAudio } from "@core/orchestration/conversation-flow.ts";
 import type { ConversationFlowResult } from "@core/orchestration/conversation-flow.ts";
+import { mergeAppendActionItems } from "@core/orchestration/append-merge.ts";
 import type { ActionItem } from "@core/types/index.ts";
 import { guardRequest } from "@services/requestGuard.ts";
 import { getAIService } from "@services/ai.ts";
@@ -121,57 +122,11 @@ export const handler: Handlers = {
       // These tell us which action items were marked as complete in the new audio
       console.log(`✅ Status updates detected: ${result.statusUpdates.length}`);
 
-      // Update existing action items with completion status
-      const updatedActionItems = result.actionItems.map((item) => {
-        const statusUpdate = result.statusUpdates.find(
-          (update) => update.id === item.id,
-        );
-
-        // Handle bi-directional status updates (completed ↔ pending)
-        if (statusUpdate) {
-          if (statusUpdate.status === "completed") {
-            console.log(
-              `✓ Marking action item as completed: ${item.description}`,
-            );
-            return {
-              ...item,
-              status: "completed" as const,
-              updated_at: new Date().toISOString(),
-              ai_checked: true,
-              checked_reason: statusUpdate.reason,
-            };
-          } else if (statusUpdate.status === "pending") {
-            console.log(
-              `↺ Reverting action item to pending: ${item.description}`,
-            );
-            return {
-              ...item,
-              status: "pending" as const,
-              updated_at: new Date().toISOString(),
-              ai_checked: true,
-              checked_reason: statusUpdate.reason,
-            };
-          }
-        }
-
-        return item;
-      });
-
-      // Merge action items (keep existing + add new ones)
-      // Remove duplicates based on description similarity
-      const mergedActionItems = [...existingActionItems];
-
-      for (const newItem of updatedActionItems) {
-        const isDuplicate = mergedActionItems.some(
-          (existing) =>
-            existing.description.toLowerCase().trim() ===
-              newItem.description.toLowerCase().trim(),
-        );
-
-        if (!isDuplicate) {
-          mergedActionItems.push(newItem);
-        }
-      }
+      const mergedActionItems = mergeAppendActionItems(
+        existingActionItems,
+        result.actionItems,
+        result.statusUpdates,
+      );
 
       console.log(`📊 Final action items: ${mergedActionItems.length} total`);
       console.log(
