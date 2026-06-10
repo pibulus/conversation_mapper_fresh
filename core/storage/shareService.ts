@@ -1,8 +1,8 @@
 /**
  * Share Service - Generate Shareable Links
  *
- * Creates short share IDs and public URLs for conversations
- * Stores shared conversations in localStorage with share metadata
+ * Creates public URL payloads for small conversations.
+ * Large conversations are saved locally only; those links are not portable.
  */
 
 import type { ConversationData } from "../../signals/conversationStore.ts";
@@ -18,6 +18,14 @@ export interface SharedConversation extends ConversationData {
   shareId: string;
   sharedAt: string;
   expiresAt?: string; // Optional expiration
+}
+
+export interface ShareCreationResult {
+  shareId: string;
+  url: string;
+  mode: "public-url" | "local-only";
+  expiresAt?: string;
+  warning?: string;
 }
 
 // ===================================================================
@@ -37,6 +45,56 @@ function generateShareId(): string {
   }
 
   return id;
+}
+
+function createShareableData(data: ConversationData): ConversationData {
+  return {
+    conversation: {
+      id: data.conversation.id,
+      title: data.conversation.title,
+      source: data.conversation.source,
+      transcript: data.conversation.transcript,
+      created_at: data.conversation.created_at,
+    },
+    transcript: data.transcript,
+    nodes: data.nodes ?? [],
+    edges: data.edges ?? [],
+    actionItems: data.actionItems ?? [],
+    statusUpdates: data.statusUpdates ?? [],
+    summary: data.summary,
+  };
+}
+
+function normalizeSharedData(data: any): ConversationData | null {
+  if (!data || typeof data !== "object") return null;
+
+  const transcript = data.transcript && typeof data.transcript === "object"
+    ? {
+      text: String(data.transcript.text ?? data.conversation?.transcript ?? ""),
+      speakers: Array.isArray(data.transcript.speakers)
+        ? data.transcript.speakers
+        : [],
+    }
+    : {
+      text: String(data.transcript ?? data.conversation?.transcript ?? ""),
+      speakers: [],
+    };
+
+  return {
+    conversation: {
+      id: String(data.conversation?.id ?? `shared_${Date.now()}`),
+      title: data.conversation?.title ?? data.title,
+      source: String(data.conversation?.source ?? "shared"),
+      transcript: String(data.conversation?.transcript ?? transcript.text),
+      created_at: data.conversation?.created_at ?? data.timestamp,
+    },
+    transcript,
+    nodes: Array.isArray(data.nodes) ? data.nodes : [],
+    edges: Array.isArray(data.edges) ? data.edges : [],
+    actionItems: Array.isArray(data.actionItems) ? data.actionItems : [],
+    statusUpdates: Array.isArray(data.statusUpdates) ? data.statusUpdates : [],
+    summary: data.summary,
+  };
 }
 
 /**
@@ -85,6 +143,25 @@ export function decompressData(compressed: string): any {
   }
 }
 
+export function encodeShareDataForUrl(data: ConversationData): string {
+  return compressData(createShareableData(data));
+}
+
+export function loadUrlSharedConversation(
+  compressed: string,
+): SharedConversation | null {
+  const data = decompressData(compressed);
+  const normalized = normalizeSharedData(data);
+
+  if (!normalized) return null;
+
+  return {
+    ...normalized,
+    shareId: "url-share",
+    sharedAt: new Date().toISOString(),
+  };
+}
+
 /**
  * Create a shareable link for a conversation
  * Attempts URL-based sharing first, falls back to localStorage for large data
@@ -93,27 +170,42 @@ export function createShare(
   data: ConversationData,
   expiresInDays?: number,
 ): string {
-  if (typeof window === "undefined") return "";
+  return createShareLink(data, expiresInDays).shareId;
+}
 
-  // Create minimal shareable data (exclude large audio blobs)
-  const shareableData = {
-    title: data.conversation.title,
-    summary: data.summary,
-    transcript: data.transcript,
-    actionItems: data.actionItems,
-    timestamp: data.conversation.created_at || new Date().toISOString(),
-  };
+export function createShareLink(
+  data: ConversationData,
+  expiresInDays?: number,
+): ShareCreationResult {
+  if (typeof window === "undefined") {
+    return {
+      shareId: "",
+      url: "",
+      mode: "local-only",
+      warning: "Sharing is only available in the browser.",
+    };
+  }
+
+  const shareableData = createShareableData(data);
+  const expiresAt = expiresInDays
+    ? new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000).toISOString()
+    : undefined;
 
   // Try to compress for URL sharing
-  const compressed = compressData(shareableData);
+  const compressed = encodeShareDataForUrl(shareableData);
 
   // Check if data fits in URL (keep under 2000 chars for compatibility)
   if (compressed && compressed.length < 2000) {
-    // Return compressed data as shareId for URL-based sharing
-    return `url:${compressed}`;
+    const shareId = `url:${compressed}`;
+    return {
+      shareId,
+      url: getShareUrl(shareId),
+      mode: "public-url",
+    };
   }
 
-  // Fallback to localStorage for large data
+  // Fallback to localStorage for large data. This is intentionally marked
+  // local-only because the data does not leave this browser.
   const shareId = getUniqueShareId();
   const shares = getAllShares();
 
@@ -121,15 +213,20 @@ export function createShare(
     ...data,
     shareId,
     sharedAt: new Date().toISOString(),
-    expiresAt: expiresInDays
-      ? new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000).toISOString()
-      : undefined,
+    expiresAt,
   };
 
   shares[shareId] = shared;
   localStorage.setItem(SHARES_KEY, JSON.stringify(shares));
 
-  return shareId;
+  return {
+    shareId,
+    url: getShareUrl(shareId),
+    mode: "local-only",
+    expiresAt,
+    warning:
+      "This conversation is too large for a portable URL, so it was saved on this browser only.",
+  };
 }
 
 /**
@@ -161,19 +258,7 @@ export function loadSharedConversation(
   // Check if it's URL-based data
   if (shareId.startsWith("data:")) {
     const compressed = shareId.slice(5); // Remove "data:" prefix
-    const data = decompressData(compressed);
-
-    if (data) {
-      return {
-        ...data,
-        shareId: "url-share",
-        sharedAt: new Date().toISOString(),
-        conversation: {
-          id: `shared_${Date.now()}`,
-          ...data,
-        },
-      } as SharedConversation;
-    }
+    return loadUrlSharedConversation(compressed);
   }
 
   // Regular localStorage-based share

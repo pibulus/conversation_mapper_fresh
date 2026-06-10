@@ -5,15 +5,45 @@
 
 import { copyToClipboard } from "../utils/toast.ts";
 import { formatTranscriptSafe } from "../utils/sanitize.ts";
+import { useSignal } from "@preact/signals";
 
 interface TranscriptCardProps {
   transcript: {
     text: string;
     speakers?: string[];
   } | null;
+  onRenameSpeaker?: (oldName: string, newName: string) => void;
 }
 
-export default function TranscriptCard({ transcript }: TranscriptCardProps) {
+export default function TranscriptCard(
+  { transcript, onRenameSpeaker }: TranscriptCardProps,
+) {
+  const editingSpeaker = useSignal<string | null>(null);
+  const speakerName = useSignal("");
+
+  function startRename(speaker: string) {
+    editingSpeaker.value = speaker;
+    speakerName.value = speaker;
+  }
+
+  function cancelRename() {
+    editingSpeaker.value = null;
+    speakerName.value = "";
+  }
+
+  function saveRename() {
+    const oldName = editingSpeaker.value;
+    const newName = speakerName.value.trim();
+
+    if (!oldName || !newName || newName === oldName) {
+      cancelRename();
+      return;
+    }
+
+    onRenameSpeaker?.(oldName, newName);
+    cancelRename();
+  }
+
   return (
     <div class="w-full">
       <div class="dashboard-card">
@@ -72,19 +102,81 @@ export default function TranscriptCard({ transcript }: TranscriptCardProps) {
                       Speakers:
                     </div>
                     <div class="flex flex-wrap gap-2">
-                      {transcript.speakers.map((speaker) => (
-                        <span
-                          key={speaker}
-                          class="px-2 py-1 rounded text-xs font-medium"
-                          style={{
-                            background: "var(--color-accent)",
-                            color: "white",
-                            border: "2px solid var(--color-border)",
-                          }}
-                        >
-                          {speaker}
-                        </span>
-                      ))}
+                      {transcript.speakers.map((speaker) =>
+                        editingSpeaker.value === speaker
+                          ? (
+                            <span
+                              key={speaker}
+                              class="inline-flex items-center gap-1 rounded p-1 bg-white"
+                              style={{
+                                border: "2px solid var(--color-border)",
+                              }}
+                            >
+                              <input
+                                value={speakerName.value}
+                                onInput={(e) =>
+                                  speakerName.value =
+                                    (e.target as HTMLInputElement).value}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") saveRename();
+                                  if (e.key === "Escape") cancelRename();
+                                }}
+                                class="w-24 px-2 py-1 rounded text-xs"
+                                style={{
+                                  border: "1px solid var(--color-border)",
+                                  color: "var(--color-text)",
+                                  minHeight: "32px",
+                                }}
+                                aria-label={`Rename ${speaker}`}
+                                autoFocus
+                              />
+                              <button
+                                onClick={saveRename}
+                                class="px-2 rounded text-xs font-bold"
+                                style={{
+                                  minHeight: "32px",
+                                  background: "var(--color-accent)",
+                                  color: "white",
+                                }}
+                                aria-label={`Save ${speaker} name`}
+                                title="Save speaker name"
+                              >
+                                ✓
+                              </button>
+                              <button
+                                onClick={cancelRename}
+                                class="px-2 rounded text-xs font-bold"
+                                style={{
+                                  minHeight: "32px",
+                                  background: "var(--surface-cream-hover)",
+                                  color: "var(--color-text)",
+                                }}
+                                aria-label="Cancel speaker rename"
+                                title="Cancel"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          )
+                          : (
+                            <button
+                              key={speaker}
+                              onClick={() => startRename(speaker)}
+                              class="px-2 py-1 rounded text-xs font-medium"
+                              style={{
+                                background: "var(--color-accent)",
+                                color: "white",
+                                border: "2px solid var(--color-border)",
+                                minHeight: "32px",
+                              }}
+                              title={`Rename ${speaker}`}
+                              aria-label={`Rename ${speaker}`}
+                              disabled={!onRenameSpeaker}
+                            >
+                              {speaker}
+                            </button>
+                          )
+                      )}
                     </div>
                   </div>
                 )}

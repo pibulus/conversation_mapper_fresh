@@ -40,12 +40,47 @@ export default function DashboardIsland() {
     };
   }
 
+  function handleRenameSpeaker(oldName: string, newName: string) {
+    const current = conversationData.value;
+    if (!current || oldName === newName) return;
+
+    const escapedOldName = oldName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const speakerPrefix = new RegExp(`(^|\\n)${escapedOldName}:`, "g");
+    const updatedText = current.transcript.text.replace(
+      speakerPrefix,
+      `$1${newName}:`,
+    );
+
+    const updatedConversationTranscript = current.conversation.transcript
+      .replace(speakerPrefix, `$1${newName}:`);
+
+    const nextSpeakers = current.transcript.speakers.map((speaker) =>
+      speaker === oldName ? newName : speaker
+    );
+
+    conversationData.value = {
+      ...current,
+      conversation: {
+        ...current.conversation,
+        transcript: updatedConversationTranscript,
+      },
+      transcript: {
+        ...current.transcript,
+        text: updatedText,
+        speakers: Array.from(new Set(nextSpeakers)),
+      },
+    };
+  }
+
   return (
     <div>
       {/* Grid Container - Simple CSS Grid */}
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {/* Card 1: Transcript */}
-        <TranscriptCard transcript={transcript} />
+        <TranscriptCard
+          transcript={transcript}
+          onRenameSpeaker={handleRenameSpeaker}
+        />
 
         {/* Card 2: Summary */}
         <SummaryCard
