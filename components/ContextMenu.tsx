@@ -53,6 +53,7 @@ export default function ContextMenu(
         left: `${x}px`,
         top: `${y}px`,
         minWidth: "180px",
+        zIndex: 120,
       }}
       onClick={(e) => e.stopPropagation()}
       onContextMenu={(e) => e.preventDefault()}

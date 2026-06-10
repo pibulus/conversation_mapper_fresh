@@ -24,15 +24,11 @@ export default function ForceDirectedGraph(
 ) {
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const fullscreenContainerRef = useRef<HTMLDivElement | null>(null);
-  const fullscreenPortalRef = useRef<HTMLDivElement | null>(null);
   const emojimapHandleRef = useRef<EmojimapHandle | null>(null);
-
-  // Track event listeners for cleanup
-  const portalClickListenerRef = useRef<((e: MouseEvent) => void) | null>(null);
-  const escapeListenerRef = useRef<((e: KeyboardEvent) => void) | null>(null);
 
   const isFullscreen = useSignal(false);
   const selectedNodeId = useSignal<string | null>(null);
+  const selectedEdgeId = useSignal<string | null>(null);
   const showAddNode = useSignal(false);
   const newNodeLabel = useSignal("");
   const newNodeEmoji = useSignal("");
@@ -51,118 +47,19 @@ export default function ForceDirectedGraph(
   const topics = useComputed(() => conversationData.value?.nodes || []);
   const relationships = useComputed(() => conversationData.value?.edges || []);
 
+  function getRelationshipId(
+    rel: { id?: string; source_topic_id: string; target_topic_id: string },
+    index: number,
+  ) {
+    return rel.id || `${rel.source_topic_id}-${rel.target_topic_id}-${index}`;
+  }
+
   // ===================================================================
   // FULLSCREEN MANAGEMENT
   // ===================================================================
 
   function toggleFullscreen() {
-    if (isFullscreen.value) {
-      // Remove event listeners before removing portal
-      if (fullscreenPortalRef.current && portalClickListenerRef.current) {
-        fullscreenPortalRef.current.removeEventListener(
-          "click",
-          portalClickListenerRef.current,
-        );
-        portalClickListenerRef.current = null;
-      }
-      if (escapeListenerRef.current) {
-        document.removeEventListener("keydown", escapeListenerRef.current);
-        escapeListenerRef.current = null;
-      }
-
-      // Remove fullscreen
-      if (fullscreenPortalRef.current?.parentNode) {
-        fullscreenPortalRef.current.parentNode.removeChild(
-          fullscreenPortalRef.current,
-        );
-      }
-      fullscreenPortalRef.current = null;
-      isFullscreen.value = false;
-
-      // Reinitialize normal view
-      setTimeout(() => initializeVisualization(), 50);
-    } else {
-      // Create fullscreen
-      isFullscreen.value = true;
-      createFullscreenPortal();
-    }
-  }
-
-  function createFullscreenPortal() {
-    // Create portal element
-    const portal = document.createElement("div");
-    portal.className = "fullscreen-network-viz-portal";
-    portal.style.position = "fixed";
-    portal.style.top = "0";
-    portal.style.left = "0";
-    portal.style.width = "100%";
-    portal.style.height = "100%";
-    portal.style.zIndex = "9999";
-    portal.style.display = "flex";
-    portal.style.alignItems = "center";
-    portal.style.justifyContent = "center";
-    portal.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
-
-    // Create modal container
-    const modalContainer = document.createElement("div");
-    modalContainer.className = "bg-white rounded-lg";
-    modalContainer.style.width = "90%";
-    modalContainer.style.height = "85%";
-    modalContainer.style.padding = "1.5rem";
-    modalContainer.style.border = "4px solid var(--color-accent)";
-    modalContainer.style.boxShadow = "var(--shadow-xl)";
-
-    // Create header
-    const header = document.createElement("div");
-    header.className = "flex justify-between items-center mb-4";
-
-    const title = document.createElement("h2");
-    title.className = "text-2xl font-bold";
-    title.textContent = "Topic Network Visualization";
-
-    const closeButton = document.createElement("button");
-    closeButton.className =
-      "text-2xl font-bold hover:text-gray-600 cursor-pointer";
-    closeButton.innerHTML = "✕";
-    closeButton.title = "Close Fullscreen";
-    closeButton.onclick = toggleFullscreen;
-
-    header.appendChild(title);
-    header.appendChild(closeButton);
-
-    // Create container for visualization
-    const vizContainer = document.createElement("div");
-    vizContainer.className = "bg-gray-100 rounded-lg";
-    vizContainer.style.width = "100%";
-    vizContainer.style.height = "calc(100% - 4rem)";
-    fullscreenContainerRef.current = vizContainer;
-
-    // Assemble
-    modalContainer.appendChild(header);
-    modalContainer.appendChild(vizContainer);
-    portal.appendChild(modalContainer);
-
-    // Click outside to close (store listener for cleanup)
-    const clickListener = (e: MouseEvent) => {
-      if (e.target === portal) toggleFullscreen();
-    };
-    portal.addEventListener("click", clickListener);
-    portalClickListenerRef.current = clickListener;
-
-    // Escape key to close (store listener for cleanup)
-    const escListener = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        toggleFullscreen();
-      }
-    };
-    document.addEventListener("keydown", escListener);
-    escapeListenerRef.current = escListener;
-
-    document.body.appendChild(portal);
-    fullscreenPortalRef.current = portal;
-
-    // Initialize visualization in fullscreen container
-    setTimeout(() => initializeVisualization(), 50);
+    isFullscreen.value = !isFullscreen.value;
   }
 
   // ===================================================================
@@ -181,13 +78,14 @@ export default function ForceDirectedGraph(
     }
 
     const rect = container.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height || Math.min(800, window.innerHeight * 0.6);
+    const width = rect.width || container.offsetWidth ||
+      Math.min(900, window.innerWidth - 32);
+    const height = rect.height || container.offsetHeight ||
+      Math.min(800, window.innerHeight * 0.6);
 
     // Map edges to correct format
     const edges = relationships.value.map((rel, index) => ({
-      id: rel.id ||
-        `${rel.source_topic_id}-${rel.target_topic_id}-${index}`,
+      id: getRelationshipId(rel, index),
       source: rel.source_topic_id,
       target: rel.target_topic_id,
       color: rel.color || "#999",
@@ -204,13 +102,19 @@ export default function ForceDirectedGraph(
         linkDistance: linkDistance.value,
         chargeStrength: chargeStrength.value,
         collisionRadius: collisionRadius.value,
-        linkStrokeWidth: 2,
-        linkOpacity: 0.5,
+        linkStrokeWidth: 3,
+        linkOpacity: 0.58,
         onClickNode: (_event: MouseEvent, node: { id: string }) => {
           selectedNodeId.value = node.id;
+          selectedEdgeId.value = null;
+        },
+        onClickEdge: (_event: MouseEvent, edge: { id?: string }) => {
+          selectedEdgeId.value = edge.id || null;
+          selectedNodeId.value = null;
         },
         onBackgroundClick: () => {
           selectedNodeId.value = null;
+          selectedEdgeId.value = null;
         },
         onRightClickBackground: (event: MouseEvent) => {
           event.preventDefault();
@@ -328,15 +232,8 @@ export default function ForceDirectedGraph(
     }
 
     return () => {
-      // Cleanup
       if (emojimapHandleRef.current) {
         emojimapHandleRef.current.destroy();
-      }
-      // Cleanup fullscreen portal
-      if (fullscreenPortalRef.current?.parentNode) {
-        fullscreenPortalRef.current.parentNode.removeChild(
-          fullscreenPortalRef.current,
-        );
       }
     };
   }, []);
@@ -345,8 +242,7 @@ export default function ForceDirectedGraph(
   useEffect(() => {
     if (topics.value.length > 0 && emojimapHandleRef.current) {
       const edges = relationships.value.map((rel, index) => ({
-        id: rel.id ||
-          `${rel.source_topic_id}-${rel.target_topic_id}-${index}`,
+        id: getRelationshipId(rel, index),
         source: rel.source_topic_id,
         target: rel.target_topic_id,
         color: rel.color || "#999",
@@ -359,6 +255,8 @@ export default function ForceDirectedGraph(
           linkDistance: linkDistance.value,
           chargeStrength: chargeStrength.value,
           collisionRadius: collisionRadius.value,
+          selectedNodeId: selectedNodeId.value,
+          selectedEdgeId: selectedEdgeId.value,
         },
       });
     }
@@ -368,7 +266,24 @@ export default function ForceDirectedGraph(
     linkDistance.value,
     chargeStrength.value,
     collisionRadius.value,
+    selectedNodeId.value,
+    selectedEdgeId.value,
   ]);
+
+  useEffect(() => {
+    if (!isFullscreen.value) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        isFullscreen.value = false;
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    setTimeout(() => initializeVisualization(), 50);
+
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isFullscreen.value]);
 
   // ===================================================================
   // RENDER
@@ -429,6 +344,106 @@ export default function ForceDirectedGraph(
       .map((id) => topics.value.find((node) => node.id === id))
       .filter(Boolean)
     : [];
+  const selectedEdge = selectedEdgeId.value
+    ? relationships.value.find((edge, index) =>
+      getRelationshipId(edge, index) === selectedEdgeId.value
+    )
+    : null;
+  const edgeSource = selectedEdge
+    ? topics.value.find((node) => node.id === selectedEdge.source_topic_id)
+    : null;
+  const edgeTarget = selectedEdge
+    ? topics.value.find((node) => node.id === selectedEdge.target_topic_id)
+    : null;
+  function renderNodeDetail() {
+    if (!selectedNode) return null;
+    return (
+      <aside class="topic-node-detail" aria-live="polite">
+        <button
+          type="button"
+          class="topic-node-detail__close"
+          onClick={() => selectedNodeId.value = null}
+          aria-label="Close topic details"
+        >
+          ×
+        </button>
+        <div class="topic-node-detail__emoji">
+          {selectedNode.emoji || "✨"}
+        </div>
+        <div>
+          <h4>{selectedNode.label}</h4>
+          <p>
+            {connectedEdges.length === 0
+              ? "Standalone topic. It can still be useful as a marker."
+              : `${connectedEdges.length} connection${
+                connectedEdges.length === 1 ? "" : "s"
+              } in this conversation.`}
+          </p>
+        </div>
+        {connectedTopics.length > 0 && (
+          <div class="topic-node-detail__links">
+            {connectedTopics.map((topic: any) => (
+              <button
+                type="button"
+                key={topic.id}
+                onClick={() => selectedNodeId.value = topic.id}
+              >
+                <span>{topic.emoji || "•"}</span>
+                <span>{topic.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </aside>
+    );
+  }
+
+  function renderEdgeDetail() {
+    if (!selectedEdge) return null;
+    return (
+      <aside class="topic-node-detail topic-edge-detail" aria-live="polite">
+        <button
+          type="button"
+          class="topic-node-detail__close"
+          onClick={() =>
+            selectedEdgeId.value = null}
+          aria-label="Close relationship details"
+        >
+          ×
+        </button>
+        <div class="topic-node-detail__emoji">
+          ↔
+        </div>
+        <div>
+          <h4>Relationship</h4>
+          <p>
+            {(edgeSource || edgeTarget)
+              ? `${edgeSource?.emoji || "•"} ${
+                edgeSource?.label || "Topic"
+              } connects to ${edgeTarget?.emoji || "•"} ${
+                edgeTarget?.label || "Topic"
+              }.`
+              : "This line links two topics the AI saw as connected in the conversation."}
+          </p>
+        </div>
+        <div class="topic-node-detail__links">
+          {[edgeSource, edgeTarget].filter(Boolean).map((topic: any) => (
+            <button
+              type="button"
+              key={topic.id}
+              onClick={() => {
+                selectedNodeId.value = topic.id;
+                selectedEdgeId.value = null;
+              }}
+            >
+              <span>{topic.emoji || "•"}</span>
+              <span>{topic.label}</span>
+            </button>
+          ))}
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <div class="relative flex h-full w-full flex-col">
@@ -453,45 +468,8 @@ export default function ForceDirectedGraph(
         style="min-height: 400px; height: 100%;"
       />
 
-      {selectedNode && (
-        <aside class="topic-node-detail" aria-live="polite">
-          <button
-            type="button"
-            class="topic-node-detail__close"
-            onClick={() => selectedNodeId.value = null}
-            aria-label="Close topic details"
-          >
-            ×
-          </button>
-          <div class="topic-node-detail__emoji">
-            {selectedNode.emoji || "✨"}
-          </div>
-          <div>
-            <h4>{selectedNode.label}</h4>
-            <p>
-              {connectedEdges.length === 0
-                ? "Standalone topic. It can still be useful as a marker."
-                : `${connectedEdges.length} connection${
-                  connectedEdges.length === 1 ? "" : "s"
-                } in this conversation.`}
-            </p>
-          </div>
-          {connectedTopics.length > 0 && (
-            <div class="topic-node-detail__links">
-              {connectedTopics.map((topic: any) => (
-                <button
-                  type="button"
-                  key={topic.id}
-                  onClick={() => selectedNodeId.value = topic.id}
-                >
-                  <span>{topic.emoji || "•"}</span>
-                  <span>{topic.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </aside>
-      )}
+      {renderNodeDetail()}
+      {renderEdgeDetail()}
 
       {showAddNode.value && (
         <div class="topic-node-modal-backdrop">
@@ -595,6 +573,55 @@ export default function ForceDirectedGraph(
         items={contextMenuItems}
         onClose={() => contextMenuVisible.value = false}
       />
+
+      {isFullscreen.value && (
+        <div class="topic-map-fullscreen" role="dialog" aria-modal="true">
+          <div class="topic-map-fullscreen__panel">
+            <div class="topic-map-fullscreen__header">
+              <div>
+                <h3>Topic Map</h3>
+                <p>Drag nodes, click topics or lines, scroll to zoom.</p>
+              </div>
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                aria-label="Close fullscreen map"
+              >
+                ×
+              </button>
+            </div>
+            <div
+              ref={fullscreenContainerRef}
+              class="topic-map-canvas topic-map-fullscreen__canvas"
+            />
+            <div class="topic-map-fullscreen__controls">
+              <button
+                type="button"
+                onClick={exportAsPng}
+                title="Export as PNG"
+              >
+                📸
+              </button>
+              <button
+                type="button"
+                onClick={resetVisualization}
+                title="Reset node positions"
+              >
+                🔄
+              </button>
+              <button
+                type="button"
+                onClick={fitToView}
+                title="Fit all nodes to view"
+              >
+                📐
+              </button>
+            </div>
+            {renderNodeDetail()}
+            {renderEdgeDetail()}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

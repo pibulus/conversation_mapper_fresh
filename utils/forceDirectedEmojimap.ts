@@ -67,11 +67,14 @@ interface Config {
   linkDistance: number;
   chargeStrength: number;
   collisionRadius: number;
+  selectedNodeId?: string | null;
+  selectedEdgeId?: string | null;
   onMouseOverNode?: (event: any, d: NodeData) => void;
   onClickNode?: (event: any, d: NodeData) => void;
   onDoubleClickNode?: (event: any, d: NodeData) => void;
   onRightClickNode?: (event: any, d: NodeData) => void;
   onMouseOverEdge?: (event: any, d: EdgeData) => void;
+  onClickEdge?: (event: any, d: EdgeData) => void;
   onDoubleClickEdge?: (event: any, d: EdgeData) => void;
   onRightClickEdge?: (event: any, d: EdgeData) => void;
   onBackgroundClick?: (event: any) => void;
@@ -96,11 +99,14 @@ const defaultConfig: Config = {
   linkDistance: 100,
   chargeStrength: -1500,
   collisionRadius: 50,
+  selectedNodeId: null,
+  selectedEdgeId: null,
   onMouseOverNode: undefined,
   onClickNode: undefined,
   onDoubleClickNode: undefined,
   onRightClickNode: undefined,
   onMouseOverEdge: undefined,
+  onClickEdge: undefined,
   onDoubleClickEdge: undefined,
   onRightClickEdge: undefined,
   onBackgroundClick: undefined,
@@ -205,6 +211,22 @@ function mapEdges(edges: EdgeData[] = []): EdgeData[] {
   }).filter(Boolean) as EdgeData[];
 }
 
+function getNodeId(node: string | NodeData | undefined): string {
+  if (!node) return "";
+  return typeof node === "string" ? node : node.id;
+}
+
+function edgeTouchesNode(edge: EdgeData, nodeId: string | null | undefined) {
+  if (!nodeId) return false;
+  return getNodeId(edge.source) === nodeId || getNodeId(edge.target) === nodeId;
+}
+
+function nodeTouchesEdge(node: NodeData, edge: EdgeData | undefined) {
+  if (!edge) return false;
+  return getNodeId(edge.source) === node.id ||
+    getNodeId(edge.target) === node.id;
+}
+
 /**
  * Drag event handlers
  */
@@ -266,6 +288,14 @@ function createNodeGroup(
       if (config.onRightClickNode) config.onRightClickNode(event, d);
     });
 
+  selection
+    .append("circle")
+    .attr("class", "node-halo")
+    .attr("r", 26)
+    .attr("fill", "rgba(255,255,255,0.86)")
+    .attr("stroke", (d) => d.color || config.nodeColor)
+    .attr("stroke-width", 2);
+
   // Add emoji
   selection
     .append("text")
@@ -322,8 +352,25 @@ function updateElements({
           .attr("stroke", (d: any) => d.color || config.linkColor)
           .attr("stroke-width", config.linkStrokeWidth)
           .attr("stroke-opacity", config.linkOpacity)
+          .attr("stroke-linecap", "round")
+          .style("cursor", "pointer")
+          .style("pointer-events", "stroke")
           .on("mouseover", (event, d) => {
+            d3.select(event.currentTarget).classed("is-hovered", true);
             if (config.onMouseOverEdge) config.onMouseOverEdge(event, d);
+          })
+          .on("mouseout", (event) => {
+            d3.select(event.currentTarget).classed("is-hovered", false);
+          })
+          .on("click", (event, d) => {
+            event.stopPropagation();
+            if (config.onClickEdge) config.onClickEdge(event, d);
+          })
+          .on("pointerdown", (event, d) => {
+            if (event.pointerType !== "touch") return;
+            event.preventDefault();
+            event.stopPropagation();
+            if (config.onClickEdge) config.onClickEdge(event, d);
           })
           .on("dblclick", (event, d) => {
             if (config.onDoubleClickEdge) config.onDoubleClickEdge(event, d);
@@ -334,7 +381,29 @@ function updateElements({
           }),
       (update) => update,
       (exit) => exit.remove(),
+    )
+    .classed("is-selected", (d) => d.id === config.selectedEdgeId)
+    .classed("is-connected", (d) => edgeTouchesNode(d, config.selectedNodeId))
+    .attr(
+      "stroke-width",
+      (d) =>
+        d.id === config.selectedEdgeId ||
+          edgeTouchesNode(d, config.selectedNodeId)
+          ? config.linkStrokeWidth + 2
+          : config.linkStrokeWidth,
+    )
+    .attr(
+      "stroke-opacity",
+      (d) =>
+        d.id === config.selectedEdgeId ||
+          edgeTouchesNode(d, config.selectedNodeId)
+          ? Math.min(1, config.linkOpacity + 0.35)
+          : config.linkOpacity,
     );
+
+  const selectedEdge = currentEdges.find((edge) =>
+    edge.id === config.selectedEdgeId
+  );
 
   // Update nodes
   const nodeElements = nodeGroup
@@ -347,7 +416,9 @@ function updateElements({
         ),
       (update) => update,
       (exit) => exit.remove(),
-    );
+    )
+    .classed("is-selected", (d) => d.id === config.selectedNodeId)
+    .classed("is-connected", (d) => nodeTouchesEdge(d, selectedEdge));
 
   return { linkElements, nodeElements };
 }
@@ -412,6 +483,15 @@ function fitAllIcons(
 
   const containerWidth = node.offsetWidth;
   const containerHeight = node.offsetHeight;
+  if (containerWidth < 1 || containerHeight < 1) return;
+
+  if (boxWidth < 1 && boxHeight < 1) {
+    svg
+      .attr("width", containerWidth)
+      .attr("height", containerHeight)
+      .attr("viewBox", `0 0 ${containerWidth} ${containerHeight}`);
+    return;
+  }
 
   const baseScale = Math.min(
     containerWidth / (boxWidth + 2 * padding),
