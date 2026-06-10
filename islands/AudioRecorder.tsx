@@ -481,7 +481,7 @@ export default function AudioRecorder(
       {/* Expanded panel */}
       {isExpanded.value && (
         <div
-          class="absolute top-full right-0 mt-2 rounded-lg shadow-2xl z-50"
+          class="audio-recorder-panel absolute top-full right-0 mt-2 rounded-lg shadow-2xl z-50"
           style={{
             background: "var(--color-secondary)",
             border: `var(--border-width) solid var(--color-border)`,

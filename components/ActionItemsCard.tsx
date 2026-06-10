@@ -62,6 +62,7 @@ export default function ActionItemsCard(
   { actionItems, onUpdateItems }: ActionItemsCardProps,
 ) {
   // State
+  const visibleItems = useSignal<ActionItem[]>(actionItems);
   const sortMode = useSignal<"manual" | "assignee" | "date">("manual");
   const editingItemId = useSignal<string | null>(null);
   const editingDescription = useSignal("");
@@ -99,6 +100,10 @@ export default function ActionItemsCard(
       }
     };
   }, []);
+
+  useEffect(() => {
+    visibleItems.value = actionItems;
+  }, [actionItems]);
 
   // Click outside to close item-level assignee dropdown.
   // Store the timeout so we can cancel it on cleanup and avoid a listener leak.
@@ -173,7 +178,7 @@ export default function ActionItemsCard(
 
   // Filter and sort action items
   const sortedActionItems = useComputed(() => {
-    let filteredItems = [...actionItems];
+    let filteredItems = [...visibleItems.value];
 
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase();
@@ -189,7 +194,7 @@ export default function ActionItemsCard(
     );
     const pending = filteredItems.filter((item) => item.status === "pending");
 
-    const sortGroup = (items: typeof actionItems) => {
+    const sortGroup = (items: ActionItem[]) => {
       if (sortMode.value === "assignee") {
         return [...items].sort((a, b) => {
           if (!a.assignee && !b.assignee) return 0;
@@ -252,8 +257,13 @@ export default function ActionItemsCard(
   // HANDLERS
   // ===================================================================
 
+  function publishItems(items: ActionItem[]) {
+    visibleItems.value = items;
+    onUpdateItems(items);
+  }
+
   function toggleActionItem(itemId: string) {
-    const updatedItems = actionItems.map((item) =>
+    const updatedItems = visibleItems.value.map((item) =>
       item.id === itemId
         ? {
           ...item,
@@ -264,7 +274,7 @@ export default function ActionItemsCard(
         }
         : item
     );
-    onUpdateItems(updatedItems);
+    publishItems(updatedItems);
   }
 
   function startEditing(
@@ -287,7 +297,7 @@ export default function ActionItemsCard(
     if (!editingItemId.value) return;
     if (!editingDescription.value.trim()) return; // don't save empty descriptions
 
-    const updatedItems = actionItems.map((item) =>
+    const updatedItems = visibleItems.value.map((item) =>
       item.id === editingItemId.value
         ? {
           ...item,
@@ -299,7 +309,7 @@ export default function ActionItemsCard(
         : item
     );
 
-    onUpdateItems(updatedItems);
+    publishItems(updatedItems);
     cancelEdit();
   }
 
@@ -311,21 +321,21 @@ export default function ActionItemsCard(
   }
 
   function updateAssignee(itemId: string, assignee: string | null) {
-    const updatedItems = actionItems.map((item) =>
+    const updatedItems = visibleItems.value.map((item) =>
       item.id === itemId
         ? { ...item, assignee, updated_at: new Date().toISOString() }
         : item
     );
-    onUpdateItems(updatedItems);
+    publishItems(updatedItems);
   }
 
   function updateDueDate(itemId: string, due_date: string | null) {
-    const updatedItems = actionItems.map((item) =>
+    const updatedItems = visibleItems.value.map((item) =>
       item.id === itemId
         ? { ...item, due_date, updated_at: new Date().toISOString() }
         : item
     );
-    onUpdateItems(updatedItems);
+    publishItems(updatedItems);
   }
 
   function requestDeleteItem(itemId: string) {
@@ -334,8 +344,10 @@ export default function ActionItemsCard(
 
   function confirmDelete() {
     if (!confirmDeleteItemId.value) return;
-    onUpdateItems(
-      actionItems.filter((item) => item.id !== confirmDeleteItemId.value),
+    publishItems(
+      visibleItems.value.filter((item) =>
+        item.id !== confirmDeleteItemId.value
+      ),
     );
     confirmDeleteItemId.value = null;
   }
@@ -345,7 +357,7 @@ export default function ActionItemsCard(
 
     const newItem: ActionItem = {
       id: crypto.randomUUID(),
-      conversation_id: actionItems[0]?.conversation_id || "",
+      conversation_id: visibleItems.value[0]?.conversation_id || "",
       description: newItemDescription.value.trim(),
       assignee: newItemAssignee.value.trim() || null,
       due_date: newItemDueDate.value || null,
@@ -354,7 +366,7 @@ export default function ActionItemsCard(
       updated_at: new Date().toISOString(),
     };
 
-    onUpdateItems([...actionItems, newItem]);
+    publishItems([...visibleItems.value, newItem]);
     newItemDescription.value = "";
     newItemAssignee.value = "";
     newItemDueDate.value = "";
@@ -414,8 +426,12 @@ export default function ActionItemsCard(
       return;
     }
 
-    const draggedItem = actionItems.find((item) => item.id === draggedId);
-    const dropTargetItem = actionItems.find((item) => item.id === dropTargetId);
+    const draggedItem = visibleItems.value.find((item) =>
+      item.id === draggedId
+    );
+    const dropTargetItem = visibleItems.value.find((item) =>
+      item.id === dropTargetId
+    );
 
     if (!draggedItem || !dropTargetItem) return;
     if (
@@ -423,14 +439,14 @@ export default function ActionItemsCard(
       dropTargetItem.status === "completed"
     ) return;
 
-    const draggedIndex = actionItems.indexOf(draggedItem);
-    const dropTargetIndex = actionItems.indexOf(dropTargetItem);
+    const draggedIndex = visibleItems.value.indexOf(draggedItem);
+    const dropTargetIndex = visibleItems.value.indexOf(dropTargetItem);
 
-    const newItems = [...actionItems];
+    const newItems = [...visibleItems.value];
     newItems.splice(draggedIndex, 1);
     newItems.splice(dropTargetIndex, 0, draggedItem);
 
-    onUpdateItems(newItems);
+    publishItems(newItems);
     draggedItemId.value = null;
     dragOverItemId.value = null;
   }
@@ -578,13 +594,39 @@ export default function ActionItemsCard(
 
                           {/* Checkbox */}
                           <div class="flex items-center pt-1">
-                            <input
-                              type="checkbox"
-                              checked={item.status === "completed"}
-                              onChange={() => toggleActionItem(item.id)}
-                              class="action-item-checkbox cursor-pointer w-5 h-5"
-                              style={{ accentColor: "var(--color-accent)" }}
-                            />
+                            <button
+                              type="button"
+                              onPointerDown={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                toggleActionItem(item.id);
+                              }}
+                              onClick={(event) => event.stopPropagation()}
+                              onKeyDown={(event) => {
+                                if (
+                                  event.key !== "Enter" && event.key !== " "
+                                ) {
+                                  return;
+                                }
+                                event.preventDefault();
+                                event.stopPropagation();
+                                toggleActionItem(item.id);
+                              }}
+                              class={`action-item-checkbox-button${
+                                item.status === "completed" ? " is-checked" : ""
+                              }`}
+                              role="checkbox"
+                              aria-checked={item.status === "completed"}
+                              aria-label={`Mark ${item.description} as ${
+                                item.status === "completed"
+                                  ? "pending"
+                                  : "completed"
+                              }`}
+                            >
+                              {item.status === "completed" && (
+                                <i class="fa fa-check" aria-hidden="true"></i>
+                              )}
+                            </button>
                           </div>
 
                           {/* Content */}
@@ -829,7 +871,9 @@ export default function ActionItemsCard(
                 lineHeight: "var(--line-height)",
               }}
             >
-              {actionItems.find((i) => i.id === confirmDeleteItemId.value)
+              {visibleItems.value.find((i) =>
+                i.id === confirmDeleteItemId.value
+              )
                 ?.description}
             </p>
             <div class="flex gap-2">

@@ -117,7 +117,7 @@ export default function HomeIsland() {
                   {/* Export button */}
                   <button
                     onClick={() => drawerOpen.value = !drawerOpen.value}
-                    class="px-3 py-1.5 rounded-lg transition-all hidden sm:block"
+                    class="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-3 py-2 transition-all"
                     style={{
                       background: "#1A1A1A",
                       color: "white",
@@ -125,6 +125,7 @@ export default function HomeIsland() {
                       fontWeight: "600",
                       border: "none",
                     }}
+                    aria-label="Export conversation"
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = "#2C2C2C";
                       e.currentTarget.style.transform = "scale(1.02)";
@@ -135,7 +136,8 @@ export default function HomeIsland() {
                     }}
                     title="Export"
                   >
-                    Export
+                    <i class="fa fa-file-export" aria-hidden="true"></i>
+                    <span class="hidden sm:inline">Export</span>
                   </button>
 
                   {/* Share button */}

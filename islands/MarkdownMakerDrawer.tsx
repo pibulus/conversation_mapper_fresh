@@ -399,7 +399,7 @@ export default function MarkdownMakerDrawer(
       {/* Drawer with smooth Svelte-style animation */}
       <div
         ref={drawerRef}
-        class={`fixed bottom-0 right-0 top-0 z-50 flex w-96 flex-col overflow-hidden transition-transform duration-[400ms] ${
+        class={`markdown-maker-drawer fixed bottom-0 right-0 top-0 z-50 flex w-96 flex-col overflow-hidden transition-transform duration-[400ms] ${
           isAnimating ? "translate-x-0" : "translate-x-full"
         }`}
         style={{
