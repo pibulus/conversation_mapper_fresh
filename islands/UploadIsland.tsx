@@ -415,6 +415,17 @@ export default function UploadIsland() {
             )
             : (
               <>
+                <div class="mapper-capture-badge-row" aria-hidden="true">
+                  <span class="mapper-capture-badge" data-tone="0">
+                    record
+                  </span>
+                  <span class="mapper-capture-badge" data-tone="1">
+                    paste
+                  </span>
+                  <span class="mapper-capture-badge" data-tone="2">
+                    upload
+                  </span>
+                </div>
                 <textarea
                   ref={textAreaRef}
                   class="mapper-textarea w-full resize-none"

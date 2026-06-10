@@ -42,6 +42,7 @@ export default function HomeIsland() {
   const transcript = conversationData.value?.transcript?.text || "";
 
   const heroLines = ["See what you're", "really saying"];
+  const heroTags = ["topics", "tasks", "summary"];
 
   return (
     <div class="mapper-scene min-h-screen">
@@ -206,7 +207,7 @@ export default function HomeIsland() {
                     <div class="mapper-hero-copy">
                       <div>
                         <div class="mapper-eyebrow">
-                          Welcome to Conversation Mapper
+                          Paste / record / upload
                         </div>
                         <h1 class="mapper-hero-title">
                           {heroLines.map((line, lineIndex) => (
@@ -221,12 +222,21 @@ export default function HomeIsland() {
                         </h1>
                       </div>
                       <p class="mapper-hero-desc">
-                        Build a confident map for every conversation—stable
-                        layout, playful controls, no resizing jump scares when
-                        you switch modes.
+                        Drop in a clip and get the shape underneath it.
                       </p>
+                      <div class="mapper-hero-tags" aria-label="Outputs">
+                        {heroTags.map((tag, index) => (
+                          <span
+                            class="mapper-hero-tag"
+                            key={tag}
+                            data-tone={index}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                       <p class="mapper-hero-caption">
-                        Record / Paste / Upload — same module, same rhythm.
+                        One clip. Three outputs.
                       </p>
                     </div>
                     <div class="mapper-card__panel">

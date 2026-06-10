@@ -31,10 +31,12 @@ Short reference for the main terms and files in this repo.
 - [core/ai/openrouter.ts](./core/ai/openrouter.ts): OpenRouter implementation.
 - [core/ai/gemini.ts](./core/ai/gemini.ts): Gemini fallback implementation.
 - [services/ai.ts](./services/ai.ts): Provider selection and caching.
-- [services/audio.ts](./services/audio.ts): Audio upload / inline part conversion.
+- [services/audio.ts](./services/audio.ts): Audio upload / inline part
+  conversion.
 - [routes/api/process.ts](./routes/api/process.ts): New conversation endpoint.
 - [routes/api/append.ts](./routes/api/append.ts): Append audio endpoint.
-- [routes/api/gemini.ts](./routes/api/gemini.ts): Markdown export endpoint name kept for compatibility.
+- [routes/api/gemini.ts](./routes/api/gemini.ts): Markdown export endpoint name
+  kept for compatibility.
 
 ## UI Layout
 
